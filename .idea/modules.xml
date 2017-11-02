@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/ima/ima.iml" filepath="$PROJECT_DIR$/ima/ima.iml" />
+      <module fileurl="file://$PROJECT_DIR$/playkit-android-ima.iml" filepath="$PROJECT_DIR$/playkit-android-ima.iml" />
+    </modules>
+  </component>
+</project>
