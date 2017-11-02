@@ -136,9 +136,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     protected PlayerDecorator getPlayerDecorator() {
         return new AdEnabledPlayerController(this);
     }
-    ////////PKPlugin
 
-    ///////////END PKPlugin
     @Override
     protected void onLoad(Player player, Object config, final MessageBus messageBus, Context context) {
         this.player = player;
@@ -167,7 +165,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         adConfig = parseConfig(config);
         adUiContainer = player.getView();
-        imaSetup();
     }
 
     private static IMAConfig parseConfig(Object config) {
@@ -235,6 +232,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         isAdDisplayed = false;
         isAllAdsCompleted = false;
         isContentEndedBeforeMidroll = false;
+        imaSetup();
         requestAdsFromIMA(adConfig.getAdTagURL());
     }
 
