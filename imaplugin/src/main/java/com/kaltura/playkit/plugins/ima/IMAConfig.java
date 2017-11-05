@@ -10,7 +10,7 @@
  * ============================================================================
  */
 
-package com.kaltura.playkit.plugin.ima;
+package com.kaltura.playkit.plugins.ima;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
