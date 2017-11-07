@@ -30,8 +30,8 @@ dependencies {
     compile ('com.kaltura:playkit-android:develop-SNAPSHOT')
 
     //Ads libraries.
-    compile 'com.google.ads.interactivemedia.v3:interactivemedia:3.7.2'
-    compile 'com.google.android.gms:play-services-ads:11.0.2'
+    compile 'com.google.ads.interactivemedia.v3:interactivemedia:3.7.4'
+    compile 'com.google.android.gms:play-services-ads:11.6.0'
 
     testCompile 'junit:junit:4.12'
     androidTestCompile 'com.android.support.test:runner:0.5'
