@@ -1,1 +1,3 @@
 include ':imaplugin'
+include ':playkit'
+project(':playkit').projectDir = new File('../playkit-android/playkit')

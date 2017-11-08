@@ -27,7 +27,8 @@ android {
 dependencies {
 
 	// TODO: when playkit without plugins is released, replace this.
-    compile ('com.kaltura:playkit-android:develop-SNAPSHOT')
+    //compile ('com.kaltura:playkit-android:develop-SNAPSHOT')
+    compile project(":playkit");
 
     //Ads libraries.
     compile 'com.google.ads.interactivemedia.v3:interactivemedia:3.7.4'
