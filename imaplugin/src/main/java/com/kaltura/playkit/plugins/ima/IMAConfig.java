@@ -9,7 +9,6 @@
  * https://www.gnu.org/licenses/agpl-3.0.html
  * ============================================================================
  */
-
 package com.kaltura.playkit.plugins.ima;
 
 import com.google.gson.Gson;
@@ -22,9 +21,6 @@ import com.kaltura.playkit.ads.AdTagType;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by gilad.nadav on 17/11/2016.
- */
 
 public class IMAConfig {
 
@@ -38,6 +34,7 @@ public class IMAConfig {
     public static final String ENABLE_BG_PLAYBACK  = "enableBackgroundPlayback";
     public static final String AD_VIDEO_BITRATE    = "videoBitrate";
     public static final String AD_VIDEO_MIME_TYPES      = "videoMimeTypes";
+    //public static final String AD_TAG_TIMES             = "tagsTimes";
     public static final String AD_ATTRIBUTION_UIELEMENT = "adAttribution";
     public static final String AD_COUNTDOWN_UIELEMENT   = "adCountDown";
     public static final String AD_LOAD_TIMEOUT          = "adLoadTimeOut";
@@ -53,6 +50,9 @@ public class IMAConfig {
     private boolean enableDebugMode;
     private int  adLoadTimeOut;
     private List<String> videoMimeTypes;
+    //private Map<Double,String> tagsTimes; // <AdTime,URL_to_execute>
+
+    //View companionView;
 
     public IMAConfig() {
         this.language                 = "en";
@@ -66,6 +66,12 @@ public class IMAConfig {
         this.videoMimeTypes           = new ArrayList<>();
         this.videoMimeTypes.add(PKMediaFormat.mp4.mimeType);
         this.adTagURL = null;         //=> must be set via setter
+
+        //if (tagTimes == null) {
+        //    tagTimes = new HashMap<>();
+        //}
+        //this.tagsTimes = tagTimes;
+        //this.companionView = companionView;
     }
 
     public String getLanguage() {
@@ -173,6 +179,23 @@ public class IMAConfig {
         return enableDebugMode;
     }
 
+    //    public Map<Double, String> getTagsTimes() {
+//        return tagsTimes;
+//    }
+//
+//    public void setTagsTimes(Map<Double, String> tagsTimes) {
+//        this.tagsTimes = tagsTimes;
+//    }
+
+//    public View getCompanionView() {
+//        return companionView;
+//    }
+//
+//    public void setCompanionView(View companionView) {
+//        this.companionView = companionView;
+//    }
+//
+
     public JsonObject toJSONObject() {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty(AD_TAG_LANGUAGE, language);
@@ -194,6 +217,15 @@ public class IMAConfig {
             }
         }
         jsonObject.add(AD_VIDEO_MIME_TYPES, jArray);
+
+//        String tagsTimesJsonString = gson.toJson(tagsTimes);
+//        if (tagsTimesJsonString != null && !tagsTimesJsonString.isEmpty()) {
+//            JsonParser parser = new JsonParser();
+//            JsonObject tagsTimesJsonObject = parser.parse(tagsTimesJsonString).getAsJsonObject();
+//            jsonObject.add(AD_TAG_TIMES, tagsTimesJsonObject);
+//        } else {
+//            jsonObject.add(AD_TAG_TIMES, new JsonObject());
+//        }
 
         return jsonObject;
     }
