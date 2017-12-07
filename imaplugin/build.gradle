@@ -27,20 +27,17 @@ android {
 dependencies {
 
     // TODO: when playkit without plugins is released, replace this.
-    compile 'com.kaltura:playkit-android:develop-SNAPSHOT'
+    implementation'com.kaltura:playkit-android:develop-SNAPSHOT'
     //implementation project(":playkit");
 
     //Ads libraries.
     compile 'com.google.ads.interactivemedia.v3:interactivemedia:3.7.4'
     compile 'com.google.android.gms:play-services-ads:11.6.0'
 
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    testCompile 'junit:junit:4.12'
+    androidTestCompile 'com.android.support.test:runner:1.0.1'
 }
 
 repositories {
-    maven {
-        url 'https://maven.google.com/'
-        name 'Google'
-    }
+   google()
 }
