@@ -15,6 +15,7 @@ package com.kaltura.playkit.plugins.ima;
 import android.content.Context;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.view.ViewGroup;
 
 import com.google.ads.interactivemedia.v3.api.Ad;
@@ -433,6 +434,13 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private void requestAdsFromIMA(String adTagUrl) {
         log.d("Do requestAdsFromIMA adTagUrl = " + adTagUrl);
+
+        if (TextUtils.isEmpty(adTagUrl)) {
+            isAdRequested = true;
+            preparePlayer(false);
+            return;
+        }
+
         resetIMA();
         // Create the ads request.
         final AdsRequest request = sdkFactory.createAdsRequest();
