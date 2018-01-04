@@ -15,6 +15,7 @@ package com.kaltura.playkit.plugins.ima;
 import android.content.Context;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.view.ViewGroup;
 
 import com.google.ads.interactivemedia.v3.api.Ad;
@@ -242,14 +243,22 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (adsManager != null) {
             adsManager.destroy();
         }
-        if (adsLoader != null) {
-            adsLoader.contentComplete();
-        }
+
+        clearAdsLoader();
 
         adConfig = parseConfig(config);
         isAdRequested = false;
         isAdDisplayed = false;
         isAllAdsCompleted = false;
+    }
+
+    private void clearAdsLoader() {
+        if (adsLoader != null) {
+            adsLoader.removeAdErrorListener(this);
+            adsLoader.removeAdsLoadedListener(adsLoadedListener);
+            adsLoadedListener = null;
+            adsLoader = null;
+        }
     }
 
     @Override
@@ -334,12 +343,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     protected void onDestroy() {
         log.d("IMA Start onDestroy");
         resetIMA();
-        if (adsLoader != null) {
-            adsLoader.removeAdErrorListener(this);
-            adsLoader.removeAdsLoadedListener(adsLoadedListener);
-            adsLoadedListener = null;
-            adsLoader = null;
-        }
+        clearAdsLoader();
         sdkFactory = null;
         imaSdkSettings = null;
 
@@ -433,6 +437,14 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private void requestAdsFromIMA(String adTagUrl) {
         log.d("Do requestAdsFromIMA adTagUrl = " + adTagUrl);
+
+        if (TextUtils.isEmpty(adTagUrl)) {
+            log.d("AdTag is empty avoiding ad request");
+            isAdRequested = true;
+            preparePlayer(false);
+            return;
+        }
+
         resetIMA();
         // Create the ads request.
         final AdsRequest request = sdkFactory.createAdsRequest();
@@ -597,7 +609,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
             case LOADED:
                 log.d("LOADED appIsInBackground = " + appIsInBackground);
-
                 // AdEventType.LOADED will be fired when ads are ready to be played.
                 // AdsManager.start() begins ad playback. This method is ignored for VMAP or
                 // ad rules playlists, as the SDK will automatically start executing the
