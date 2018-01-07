@@ -44,17 +44,17 @@ import com.kaltura.playkit.PKPlugin;
 import com.kaltura.playkit.Player;
 import com.kaltura.playkit.PlayerDecorator;
 import com.kaltura.playkit.PlayerEvent;
+import com.kaltura.playkit.ads.AdCuePoints;
 import com.kaltura.playkit.ads.AdEnabledPlayerController;
+import com.kaltura.playkit.ads.AdEvent;
+import com.kaltura.playkit.ads.AdInfo;
 import com.kaltura.playkit.ads.AdTagType;
+import com.kaltura.playkit.ads.AdsProvider;
 import com.kaltura.playkit.ads.PKAdBreakEndedReason;
 import com.kaltura.playkit.ads.PKAdEndedReason;
 import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdProviderListener;
-import com.kaltura.playkit.ads.AdCuePoints;
-import com.kaltura.playkit.ads.AdEvent;
-import com.kaltura.playkit.ads.AdInfo;
-import com.kaltura.playkit.ads.AdsProvider;
 import com.kaltura.playkit.utils.Consts;
 
 import java.util.ArrayList;
@@ -62,8 +62,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import static com.kaltura.playkit.ads.AdEvent.Type.AD_BREAK_STARTED;
 
 public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.interactivemedia.v3.api.AdEvent.AdEventListener, AdErrorEvent.AdErrorListener {
 
@@ -102,6 +100,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private boolean appIsInBackground;
     private boolean adManagerInitDuringBackground;
     private boolean appInBackgroundDuringAdLoad;
+    private AdEvent.Type adPluginState = AdEvent.Type.UNKNOWN;
 
     ////////////////////
     private MessageBus messageBus;
@@ -236,6 +235,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         isAdDisplayed = false;
         isAllAdsCompleted = false;
         isContentEndedBeforeMidroll = false;
+        adPluginState = AdEvent.Type.UNKNOWN;
         imaSetup();
         requestAdsFromIMA(adConfig.getAdTagURL());
     }
@@ -359,6 +359,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         isAdError = false;
         isAdRequested = false;
         isAdDisplayed = false;
+        adPluginState = AdEvent.Type.UNKNOWN;
 
         cancelAdDisplayedCheckTimer();
         cancelAdManagerTimer();
@@ -499,6 +500,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         // Request the ad. After the ad is loaded, onAdsManagerLoaded() will be called.
         messageBus.post(new AdEvent.AdRequestedEvent(adTagUrl));
+        adPluginState = AdEvent.Type.AD_REQUESTED;
         adsLoader.requestAds(request);
         adManagerTimer.start();
     }
@@ -534,6 +536,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     @Override
     public PKAdInfo getAdInfo() {
         return adInfo;
+    }
+
+    @Override
+    public AdEvent.Type getAdPluginState() {
+        return adPluginState;
     }
 
     @Override
@@ -637,6 +644,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         switch (lastEventReceived) {
 
             case LOADED:
+                adPluginState = AdEvent.Type.AD_LOADED;
                 log.d("LOADED appIsInBackground = " + appIsInBackground);
                 // AdEventType.LOADED will be fired when ads are ready to be played.
                 // AdsManager.start() begins ad playback. This method is ignored for VMAP or
@@ -667,6 +675,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 }
                 break;
             case CONTENT_PAUSE_REQUESTED:
+                adPluginState = AdEvent.Type.AD_BREAK_STARTED;
                 // AdEventType.CONTENT_PAUSE_REQUESTED is fired immediately before a video
                 // ad is played.
                 log.d("AD_CONTENT_PAUSE_REQUESTED");
@@ -687,6 +696,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 initAdDisplayedCheckTimer();
                 break;
             case CONTENT_RESUME_REQUESTED:
+                adPluginState = AdEvent.Type.ADS_PLAYBACK_ENDED;
                 // AdEventType.CONTENT_RESUME_REQUESTED is fired when the ad is completed
                 // and you should start playing your content.
                 log.d("AD REQUEST AD_CONTENT_RESUME_REQUESTED");
@@ -717,6 +727,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 adPlaybackCancelled = false;
                 break;
             case ALL_ADS_COMPLETED:
+                adPluginState = AdEvent.Type.ALL_ADS_COMPLETED;
                 log.d("AD_ALL_ADS_COMPLETED");
                 isAllAdsCompleted = true;
                 isAdDisplayed = false;
@@ -729,6 +740,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
                 break;
             case STARTED:
+                adPluginState = AdEvent.Type.AD_STARTED;
                 log.d("AD STARTED");
                 isAdDisplayed = true;
                 isAdIsPaused = false;
@@ -756,11 +768,13 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 }
                 break;
             case PAUSED:
+                adPluginState = AdEvent.Type.AD_PAUSED;
                 log.d("AD PAUSED");
                 isAdIsPaused = true;
                 messageBus.post(new AdEvent(AdEvent.Type.AD_PAUSED));
                 break;
             case RESUMED:
+                adPluginState = AdEvent.Type.AD_RESUMED;
                 log.d("AD RESUMED");
                 if (player != null && player.getView() != null) {
                     player.getView().hideVideoSurface();
@@ -769,6 +783,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 messageBus.post(new AdEvent(AdEvent.Type.AD_RESUMED));
                 break;
             case COMPLETED:
+                adPluginState = AdEvent.Type.AD_ENDED;
                 log.d("AD COMPLETED");
                 messageBus.post(new AdEvent.AdEndedEvent(PKAdEndedReason.COMPLETED));
                 cancelAdDisplayedCheckTimer();
@@ -815,6 +830,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             //messageBus.post(new AdEvent.(AD_BREAK_STARTED));
             //break;
             case AD_BREAK_ENDED:
+                adPluginState = AdEvent.Type.AD_BREAK_ENDED;
                 messageBus.post(new AdEvent(AdEvent.Type.AD_BREAK_ENDED));
                 break;
             case CUEPOINTS_CHANGED:
