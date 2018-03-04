@@ -51,6 +51,7 @@ import com.kaltura.playkit.ads.AdCuePoints;
 import com.kaltura.playkit.ads.AdEnabledPlayerController;
 import com.kaltura.playkit.ads.AdEvent;
 import com.kaltura.playkit.ads.AdInfo;
+import com.kaltura.playkit.ads.AdPositionType;
 import com.kaltura.playkit.ads.AdTagType;
 import com.kaltura.playkit.ads.AdsProvider;
 import com.kaltura.playkit.ads.PKAdErrorType;
@@ -682,9 +683,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 } else if (player != null) {
                     shutterView.setVisibility(View.GONE);
                     long duration = player.getDuration();
+                    log.d("Content prepared.. Play called.");
                     if (duration < 0 || player.getCurrentPosition() <= duration) {
-                        log.d("Content prepared.. Play called.");
-                        player.play();
+                        if (adInfo == null || (adInfo != null && adInfo.getAdPositionType() != AdPositionType.POST_ROLL)) {
+                            player.play();
+                        }
                     }
                 }
                 adPlaybackCancelled = false;
