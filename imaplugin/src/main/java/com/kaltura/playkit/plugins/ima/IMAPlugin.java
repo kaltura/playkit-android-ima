@@ -66,7 +66,6 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-
 /**
  * Created by gilad.nadav on 17/11/2016.
  */
@@ -124,7 +123,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     public static final Factory factory = new Factory() {
         @Override
         public String getName() {
-            return "IMA";
+            return "ima";
         }
 
         @Override
@@ -246,8 +245,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         isAdDisplayed = false;
         isAllAdsCompleted = false;
         isContentEndedBeforeMidroll = false;
+
+        adConfig = parseConfig(PKPlugin.replaceKeysInPluginConfig(mediaConfig.getMediaEntry(), adConfig.toJson()));
         imaSetup();
-        requestAdsFromIMA(adConfig.getAdTagURL());
+        requestAdsFromIMA(adConfig.getAdTagUrl());
     }
 
     @Override
@@ -476,7 +477,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 return new VideoProgressUpdate(currentPosition, duration);
             }
         });
-        adManagerTimer = new CountDownTimer(adConfig.getAdLoadTimeOut() * Consts.MILLISECONDS_MULTIPLIER, IMAConfig.DEFAULT_AD_LOAD_COUNT_DOWN_TICK) {
+
+        adManagerTimer = new CountDownTimer(adConfig.getAdLoadTimeOut(), IMAConfig.DEFAULT_AD_LOAD_COUNT_DOWN_TICK) {
             @Override
             public void onTick(long millisUntilFinished) {
                 log.d("adManagerTimer.onTick, adsManager=" + adsManager);
@@ -629,8 +631,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     adsManager.pause();
                 } else {
                     adInfo = createAdInfo(adEvent.getAd());
-                    log.d("podInfo.getAdPosition() = " + adInfo.getAdIndexInPod());
-                    log.d("getTotalAds() = " + adInfo.getTotalAdsInPod());
+                    //log.d("XXX getAdIndexInPod() = " + adInfo.getAdIndexInPod());
+                    //log.d("XXX getTotalAds()     = " + adInfo.getTotalAdsInPod());
+                    //log.d("XXX getPodIndex       = " + adInfo.getPodIndex());
+                    //log.d("XXX getPodCount       = " + adInfo.getPodCount());
 
                     if (adPlaybackCancelled) {
                         log.d("discarding ad break");
@@ -865,7 +869,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 if (adsManager != null && adsManager.getAdProgress() != null) {
                     float currentTime = adsManager.getAdProgress().getCurrentTime();
                     if (currentTime > 0) {
-                        log.d("AD Displayed delay check : ad posiiton " + currentTime);
+                        log.d("AD Displayed delay check : ad positon " + currentTime);
                         isAdDisplayed = true;
                         messageBus.post(new AdEvent(AdEvent.Type.AD_PROGRESS));
                         cancelAdDisplayedCheckTimer();

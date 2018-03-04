@@ -1,10 +1,10 @@
 /*
  * ============================================================================
  * Copyright (C) 2017 Kaltura Inc.
- * 
+ *
  * Licensed under the AGPLv3 license, unless a different license for a
  * particular library is specified in the applicable library path.
- * 
+ *
  * You may obtain a copy of the License at
  * https://www.gnu.org/licenses/agpl-3.0.html
  * ============================================================================
@@ -12,12 +12,16 @@
 
 package com.kaltura.playkit.plugins.ima;
 
+import android.text.TextUtils;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.kaltura.playkit.PKMediaFormat;
 import com.kaltura.playkit.ads.AdTagType;
+import com.kaltura.playkit.utils.Consts;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +37,8 @@ public class IMAConfig {
     public static final int DEFAULT_AD_LOAD_COUNT_DOWN_TICK = 250;
 
     public static final String AD_TAG_LANGUAGE     = "language";
-    public static final String AD_TAG_TYPE = "adTagType";
-    public static final String AD_TAG_URL          = "adTagURL";
-    public static final String ENABLE_BG_PLAYBACK  = "enableBackgroundPlayback";
+    public static final String AD_TAG_TYPE         = "adTagType";
+    public static final String AD_TAG_URL          = "adTagUrl";
     public static final String AD_VIDEO_BITRATE    = "videoBitrate";
     public static final String AD_VIDEO_MIME_TYPES      = "videoMimeTypes";
     public static final String AD_ATTRIBUTION_UIELEMENT = "adAttribution";
@@ -44,20 +47,18 @@ public class IMAConfig {
     public static final String AD_ENABLE_DEBUG_MODE     = "enableDebugMode";
 
     private String language;
-    private String adTagURL;
+    private String adTagUrl;
     private AdTagType adTagType;
-    private boolean enableBackgroundPlayback;
     private int videoBitrate; // in KB
     private boolean adAttribution;
     private boolean adCountDown;
     private boolean enableDebugMode;
-    private int  adLoadTimeOut;
+    private long  adLoadTimeOut; //load time out in sec.
     private List<String> videoMimeTypes;
 
     public IMAConfig() {
         this.language                 = "en";
         this.adTagType = AdTagType.VAST;
-        this.enableBackgroundPlayback = false;
         this.videoBitrate             = -1;
         this.adAttribution            = true;
         this.adCountDown              = true;
@@ -65,7 +66,7 @@ public class IMAConfig {
         this.enableDebugMode          = false;
         this.videoMimeTypes           = new ArrayList<>();
         this.videoMimeTypes.add(PKMediaFormat.mp4.mimeType);
-        this.adTagURL = null;         //=> must be set via setter
+        this.adTagUrl = null;         //=> must be set via setter
     }
 
     public String getLanguage() {
@@ -80,16 +81,6 @@ public class IMAConfig {
 
     public IMAConfig setAdTagType(AdTagType adTagType) {
         this.adTagType = adTagType;
-        return this;
-    }
-
-    public boolean getEnableBackgroundPlayback() {
-        return enableBackgroundPlayback;
-    }
-
-    // default is false
-    public IMAConfig setEnableBackgroundPlayback(boolean enableBackgroundPlayback) {
-        this.enableBackgroundPlayback = enableBackgroundPlayback;
         return this;
     }
 
@@ -118,13 +109,13 @@ public class IMAConfig {
         return this;
     }
 
-    public String getAdTagURL() {
-        return adTagURL;
+    public String getAdTagUrl() {
+        return adTagUrl;
     }
 
     // set the adTag URL to be used
-    public IMAConfig setAdTagURL(String adTagURL) {
-        this.adTagURL = adTagURL;
+    public IMAConfig setAdTagUrl(String adTagUrl) {
+        this.adTagUrl = adTagUrl;
         return this;
     }
 
@@ -155,8 +146,12 @@ public class IMAConfig {
         return this;
     }
 
-    public int getAdLoadTimeOut() {
-        return adLoadTimeOut;
+    //load time out in sec + converting to milis.
+    public long getAdLoadTimeOut() {
+        if (adLoadTimeOut > Consts.MILLISECONDS_MULTIPLIER) {
+            return adLoadTimeOut;
+        }
+        return adLoadTimeOut * Consts.MILLISECONDS_MULTIPLIER;
     }
 
     public IMAConfig setAdLoadTimeOut(int adLoadTimeOut) {
@@ -173,12 +168,11 @@ public class IMAConfig {
         return enableDebugMode;
     }
 
-    public JsonObject toJSONObject() {
+    public JsonObject toJson() {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty(AD_TAG_LANGUAGE, language);
         jsonObject.addProperty(AD_TAG_TYPE, adTagType.name());
-        jsonObject.addProperty(AD_TAG_URL, adTagURL);
-        jsonObject.addProperty(ENABLE_BG_PLAYBACK, enableBackgroundPlayback);
+        jsonObject.addProperty(AD_TAG_URL, adTagUrl);
         jsonObject.addProperty(AD_VIDEO_BITRATE, videoBitrate);
         jsonObject.addProperty(AD_ATTRIBUTION_UIELEMENT, adAttribution);
         jsonObject.addProperty(AD_COUNTDOWN_UIELEMENT, adCountDown);
@@ -194,7 +188,6 @@ public class IMAConfig {
             }
         }
         jsonObject.add(AD_VIDEO_MIME_TYPES, jArray);
-
         return jsonObject;
     }
 }
