@@ -681,11 +681,13 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                         preparePlayer(true);
                     }
                 } else if (player != null) {
+                    log.d("Content prepared..");
                     shutterView.setVisibility(View.GONE);
                     long duration = player.getDuration();
-                    log.d("Content prepared.. Play called.");
+
                     if (duration < 0 || player.getCurrentPosition() <= duration) {
                         if (adInfo == null || (adInfo != null && adInfo.getAdPositionType() != AdPositionType.POST_ROLL)) {
+                            log.d("Content prepared.. Play called.");
                             player.play();
                         }
                     }
