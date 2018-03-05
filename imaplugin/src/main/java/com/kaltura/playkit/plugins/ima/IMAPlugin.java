@@ -100,8 +100,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     // Whether an ad is displayed.
     private boolean isAdDisplayed;
     private boolean isAdIsPaused;
-    private boolean isAdRequested = false;
-    private boolean isInitWaiting = false;
+    private boolean isAdRequested;
+    private boolean isInitWaiting;
+    private boolean isAutoPlay;
+
     private boolean appIsInBackground;
     private boolean adManagerInitDuringBackground;
     private boolean appInBackgroundDuringAdLoad;
@@ -241,6 +243,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         log.d("Start onUpdateMedia");
         this.mediaConfig = mediaConfig;
         isContentPrepared = false;
+        isAutoPlay = false;
         isAdRequested = false;
         isAdDisplayed = false;
         isAllAdsCompleted = false;
@@ -433,6 +436,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     @Override
     public void start() {
         log.d("Start adsManager.init");
+        isAutoPlay = true; // start will be called only on first time media is played programmatically
         isAdRequested = true;
         if (adsManager != null) {
             log.d("IMA adsManager.init called");
@@ -1027,7 +1031,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
 
         sendError(errorType, errorMessage, adException);
-        preparePlayer(true);
+        preparePlayer(isAutoPlay);
+
     }
 
     private void resetFlagsOnError() {
