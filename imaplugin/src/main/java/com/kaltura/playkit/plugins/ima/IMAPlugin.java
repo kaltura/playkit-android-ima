@@ -548,7 +548,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public boolean isAdDisplayed() {
-        //log.d("isAdDisplayed: " + mIsAdDisplayed);
+        log.d("isAdDisplayed: " + isAdDisplayed);
         return isAdDisplayed;
     }
 
@@ -754,10 +754,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             case COMPLETED:
                 log.d("AD COMPLETED");
-                if (adInfo.getAdIndexInPod() < adInfo.getTotalAdsInPod()) {
-                    shutterView.bringToFront();
-                    shutterView.setVisibility(View.VISIBLE);
-                }
+                displayShutterView();
                 messageBus.post(new AdEvent(AdEvent.Type.COMPLETED));
                 cancelAdDisplayedCheckTimer();
                 break;
@@ -774,7 +771,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
                 messageBus.post(new AdEvent.AdSkippedEvent(adInfo));
                 cancelAdDisplayedCheckTimer();
-                preparePlayer(true);
+                if (!displayShutterView()) {
+                    preparePlayer(true);
+                }
                 break;
             case CLICKED:
                 isAdIsPaused = true;
@@ -842,6 +841,20 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
     }
 
+    /**
+     * Check whether shutter view should be displayed
+     * @return boolean according to the ad index in pod
+     */
+    private boolean displayShutterView() {
+        if(adInfo.getAdIndexInPod() < adInfo.getTotalAdsInPod()) {
+            shutterView.bringToFront();
+            shutterView.setVisibility(View.VISIBLE);
+            return true;
+        }
+        return false;
+    }
+
+
     private void preparePlayer(boolean doPlay) {
         log.d("IMA prepare");
         if (pkAdProviderListener != null && !appIsInBackground) {
@@ -852,7 +865,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 messageBus.listen(new PKEvent.Listener() {
                     @Override
                     public void onEvent(PKEvent event) {
-                        if (player != null && player.getView() != null) {
+                        if (player != null && player.getView() != null && !isAdDisplayed()) {
                             shutterView.setVisibility(View.GONE);
                             player.play();
                         }
