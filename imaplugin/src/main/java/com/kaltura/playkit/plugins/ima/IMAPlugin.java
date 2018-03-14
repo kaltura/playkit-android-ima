@@ -778,9 +778,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
                 messageBus.post(new AdEvent.AdSkippedEvent(adInfo));
                 cancelAdDisplayedCheckTimer();
-                if (!displayShutterView()) {
-                    preparePlayer(true);
-                }
                 break;
             case CLICKED:
                 isAdIsPaused = true;
@@ -847,20 +844,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
         }
     }
-
-    /**
-     * Check whether shutter view should be displayed
-     * @return boolean according to the ad index in pod
-     */
-    private boolean displayShutterView() {
-        if(adInfo.getAdIndexInPod() < adInfo.getTotalAdsInPod()) {
-            shutterView.bringToFront();
-            shutterView.setVisibility(View.VISIBLE);
-            return true;
-        }
-        return false;
-    }
-
 
     private void preparePlayer(boolean doPlay) {
         log.d("IMA prepare");
