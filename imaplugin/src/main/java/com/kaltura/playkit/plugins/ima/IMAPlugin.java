@@ -246,7 +246,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         isAdDisplayed = false;
         isAllAdsCompleted = false;
         isContentEndedBeforeMidroll = false;
-
+        if (adsManager != null) {
+            adsManager.destroy();
+        }
+        clearAdsLoader();
         adConfig = parseConfig(PKPlugin.replaceKeysInPluginConfig(mediaConfig.getMediaEntry(), adConfig.toJson()));
         imaSetup();
         requestAdsFromIMA(adConfig.getAdTagUrl());
@@ -255,16 +258,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     @Override
     protected void onUpdateConfig(Object config) {
         log.d("Start onUpdateConfig");
-        if (adsManager != null) {
-            adsManager.destroy();
-        }
 
-        clearAdsLoader();
 
         adConfig = parseConfig(config);
-        isAdRequested = false;
-        isAdDisplayed = false;
-        isAllAdsCompleted = false;
     }
 
     private void clearAdsLoader() {
