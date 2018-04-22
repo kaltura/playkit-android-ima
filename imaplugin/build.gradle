@@ -28,7 +28,7 @@ dependencies {
     //implementation project(":playkit");
 
     //Ads libraries.
-    implementation 'com.google.ads.interactivemedia.v3:interactivemedia:3.8.2'
+    implementation 'com.google.ads.interactivemedia.v3:interactivemedia:3.8.5'
     implementation 'com.google.android.gms:play-services-ads:15.0.0'
 
     testImplementation 'junit:junit:4.12'
