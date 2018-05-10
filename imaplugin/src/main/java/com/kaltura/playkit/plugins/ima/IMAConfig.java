@@ -28,7 +28,7 @@ import java.util.List;
 
 public class IMAConfig {
 
-    public static final int DEFAULT_AD_LOAD_TIMEOUT = 5;
+    public static final int DEFAULT_AD_LOAD_TIMEOUT = 8;
     public static final int DEFAULT_CUE_POINTS_CHANGED_DELAY = 2000;
     public static final int DEFAULT_AD_LOAD_COUNT_DOWN_TICK = 250;
 
@@ -38,9 +38,11 @@ public class IMAConfig {
     public static final String ENABLE_BG_PLAYBACK  = "enableBackgroundPlayback";
     public static final String AD_VIDEO_BITRATE    = "videoBitrate";
     public static final String AD_VIDEO_MIME_TYPES      = "videoMimeTypes";
+    //public static final String AD_TAG_TIMES             = "tagsTimes";
     public static final String AD_ATTRIBUTION_UIELEMENT = "adAttribution";
     public static final String AD_COUNTDOWN_UIELEMENT   = "adCountDown";
     public static final String AD_LOAD_TIMEOUT          = "adLoadTimeOut";
+    public static final String AD_MAX_REDIRECTS         = "adMaxRedirects";
     public static final String AD_ENABLE_DEBUG_MODE     = "enableDebugMode";
 
     private String language;
@@ -51,8 +53,12 @@ public class IMAConfig {
     private boolean adAttribution;
     private boolean adCountDown;
     private boolean enableDebugMode;
-    private int  adLoadTimeOut;
+    private int adLoadTimeOut; // in sec
+    private int maxRedirects;
     private List<String> videoMimeTypes;
+    //private Map<Double,String> tagsTimes; // <AdTime,URL_to_execute>
+
+    //View companionView;
 
     public IMAConfig() {
         this.language                 = "en";
@@ -66,6 +72,12 @@ public class IMAConfig {
         this.videoMimeTypes           = new ArrayList<>();
         this.videoMimeTypes.add(PKMediaFormat.mp4.mimeType);
         this.adTagURL = null;         //=> must be set via setter
+
+        //if (tagTimes == null) {
+        //    tagTimes = new HashMap<>();
+        //}
+        //this.tagsTimes = tagTimes;
+        //this.companionView = companionView;
     }
 
     public String getLanguage() {
@@ -73,12 +85,12 @@ public class IMAConfig {
     }
 
     // Language - default is en.
-    public IMAConfig setLanguage(String language) {
+    public com.kaltura.playkit.plugins.ads.ima.IMAConfig setLanguage(String language) {
         this.language = language;
         return this;
     }
 
-    public IMAConfig setAdTagType(AdTagType adTagType) {
+    public com.kaltura.playkit.plugins.ads.ima.IMAConfig setAdTagType(AdTagType adTagType) {
         this.adTagType = adTagType;
         return this;
     }
@@ -88,7 +100,7 @@ public class IMAConfig {
     }
 
     // default is false
-    public IMAConfig setEnableBackgroundPlayback(boolean enableBackgroundPlayback) {
+    public com.kaltura.playkit.plugins.ads.ima.IMAConfig setEnableBackgroundPlayback(boolean enableBackgroundPlayback) {
         this.enableBackgroundPlayback = enableBackgroundPlayback;
         return this;
     }
@@ -100,7 +112,7 @@ public class IMAConfig {
     // Maximum recommended bitrate. The value is in kbit/s.
     // The IMA SDK will pick media with bitrate below the specified max, or the closest bitrate if there is no media with lower bitrate found.
     // Default value, -1, means the bitrate will be selected by the IMA SDK.
-    public IMAConfig setVideoBitrate(int videoBitrate) {
+    public com.kaltura.playkit.plugins.ads.ima.IMAConfig setVideoBitrate(int videoBitrate) {
         this.videoBitrate = videoBitrate;
         return this;
     }
@@ -109,11 +121,15 @@ public class IMAConfig {
         return videoMimeTypes;
     }
 
+    public int getMaxRedirects() {
+        return maxRedirects;
+    }
+
     // select the MIME TYPE that IMA will play instead of letting it select it by itself
     // default selected MIME TYPE by plugin is MP4
     // if null or empty list is set then it will be selected automatically
     // if MIME TYPE is sent it will try playing one of the given MIME TYPE in the list i.e "video/mp4", "video/webm", "video/3gpp"
-    public IMAConfig setVideoMimeTypes(List<String> videoMimeTypes) {
+    public com.kaltura.playkit.plugins.ads.ima.IMAConfig setVideoMimeTypes(List<String> videoMimeTypes) {
         this.videoMimeTypes = videoMimeTypes;
         return this;
     }
@@ -123,7 +139,7 @@ public class IMAConfig {
     }
 
     // set the adTag URL to be used
-    public IMAConfig setAdTagURL(String adTagURL) {
+    public com.kaltura.playkit.plugins.ads.ima.IMAConfig setAdTagURL(String adTagURL) {
         this.adTagURL = adTagURL;
         return this;
     }
@@ -139,7 +155,7 @@ public class IMAConfig {
 
     //ad attribution true is required for a countdown timer to be displayed
     // default is true
-    public IMAConfig setAdAttribution(boolean adAttribution) {
+    public com.kaltura.playkit.plugins.ads.ima.IMAConfig setAdAttribution(boolean adAttribution) {
         this.adAttribution = adAttribution;
         return this;
     }
@@ -150,7 +166,7 @@ public class IMAConfig {
 
     // set if ad countdown will be shown or not.
     // default is true
-    public IMAConfig setAdCountDown(boolean adCountDown) {
+    public com.kaltura.playkit.plugins.ads.ima.IMAConfig setAdCountDown(boolean adCountDown) {
         this.adCountDown = adCountDown;
         return this;
     }
@@ -159,12 +175,17 @@ public class IMAConfig {
         return adLoadTimeOut;
     }
 
-    public IMAConfig setAdLoadTimeOut(int adLoadTimeOut) {
+    public com.kaltura.playkit.plugins.ads.ima.IMAConfig setAdLoadTimeOut(int adLoadTimeOut) {
         this.adLoadTimeOut = adLoadTimeOut;
         return this;
     }
 
-    public IMAConfig enableDebugMode(boolean enableDebugMode) {
+    public com.kaltura.playkit.plugins.ads.ima.IMAConfig setMaxRedirects(int maxRedirects) {
+        this.maxRedirects = maxRedirects;
+        return this;
+    }
+
+    public com.kaltura.playkit.plugins.ads.ima.IMAConfig enableDebugMode(boolean enableDebugMode) {
         this.enableDebugMode = enableDebugMode;
         return this;
     }
@@ -172,6 +193,23 @@ public class IMAConfig {
     public boolean isDebugMode() {
         return enableDebugMode;
     }
+
+    //    public Map<Double, String> getTagsTimes() {
+//        return tagsTimes;
+//    }
+//
+//    public void setTagsTimes(Map<Double, String> tagsTimes) {
+//        this.tagsTimes = tagsTimes;
+//    }
+
+//    public View getCompanionView() {
+//        return companionView;
+//    }
+//
+//    public void setCompanionView(View companionView) {
+//        this.companionView = companionView;
+//    }
+//
 
     public JsonObject toJSONObject() {
         JsonObject jsonObject = new JsonObject();
@@ -184,6 +222,8 @@ public class IMAConfig {
         jsonObject.addProperty(AD_COUNTDOWN_UIELEMENT, adCountDown);
         jsonObject.addProperty(AD_LOAD_TIMEOUT, adLoadTimeOut);
         jsonObject.addProperty(AD_ENABLE_DEBUG_MODE, enableDebugMode);
+        jsonObject.addProperty(AD_MAX_REDIRECTS, maxRedirects);
+
 
         Gson gson = new Gson();
         JsonArray jArray = new JsonArray();
@@ -194,6 +234,15 @@ public class IMAConfig {
             }
         }
         jsonObject.add(AD_VIDEO_MIME_TYPES, jArray);
+
+//        String tagsTimesJsonString = gson.toJson(tagsTimes);
+//        if (tagsTimesJsonString != null && !tagsTimesJsonString.isEmpty()) {
+//            JsonParser parser = new JsonParser();
+//            JsonObject tagsTimesJsonObject = parser.parse(tagsTimesJsonString).getAsJsonObject();
+//            jsonObject.add(AD_TAG_TIMES, tagsTimesJsonObject);
+//        } else {
+//            jsonObject.add(AD_TAG_TIMES, new JsonObject());
+//        }
 
         return jsonObject;
     }
