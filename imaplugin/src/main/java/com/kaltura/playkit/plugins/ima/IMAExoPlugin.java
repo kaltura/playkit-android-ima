@@ -43,6 +43,7 @@ import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdProviderListener;
 ;
+import com.kaltura.playkit.plugin.ima.BuildConfig;
 import com.kaltura.playkit.utils.Consts;
 
 import java.util.ArrayList;

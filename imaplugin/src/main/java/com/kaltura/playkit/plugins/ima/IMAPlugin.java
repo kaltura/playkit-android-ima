@@ -56,6 +56,7 @@ import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdProviderListener;
 
+import com.kaltura.playkit.plugin.ima.BuildConfig;
 import com.kaltura.playkit.utils.Consts;
 
 import java.util.ArrayList;
@@ -128,7 +129,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         @Override
         public String getVersion() {
-            return null;
+            return BuildConfig.VERSION_NAME;
+
         }
 
         @Override
