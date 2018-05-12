@@ -139,7 +139,8 @@ public class IMAExoPlugin extends PKPlugin implements AdsProvider, com.google.ad
 
         @Override
         public String getVersion() {
-            return null;
+            return BuildConfig.VERSION_NAME;
+
         }
 
         @Override
