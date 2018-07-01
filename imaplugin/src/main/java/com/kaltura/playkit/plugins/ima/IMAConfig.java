@@ -28,7 +28,7 @@ import java.util.List;
 
 public class IMAConfig {
 
-    public static final int DEFAULT_AD_LOAD_TIMEOUT = 5;
+    public static final int DEFAULT_AD_LOAD_TIMEOUT = 8;
     public static final int DEFAULT_CUE_POINTS_CHANGED_DELAY = 2000;
     public static final int DEFAULT_AD_LOAD_COUNT_DOWN_TICK = 250;
 
@@ -38,10 +38,13 @@ public class IMAConfig {
     public static final String ENABLE_BG_PLAYBACK  = "enableBackgroundPlayback";
     public static final String AD_VIDEO_BITRATE    = "videoBitrate";
     public static final String AD_VIDEO_MIME_TYPES      = "videoMimeTypes";
+    //public static final String AD_TAG_TIMES             = "tagsTimes";
     public static final String AD_ATTRIBUTION_UIELEMENT = "adAttribution";
     public static final String AD_COUNTDOWN_UIELEMENT   = "adCountDown";
     public static final String AD_LOAD_TIMEOUT          = "adLoadTimeOut";
+    public static final String AD_MAX_REDIRECTS         = "adMaxRedirects";
     public static final String AD_ENABLE_DEBUG_MODE     = "enableDebugMode";
+    public static final String AD_OMID_ENABLED          = "isOMIDExperimentalEnabled";
 
     private String language;
     private String adTagURL;
@@ -51,8 +54,13 @@ public class IMAConfig {
     private boolean adAttribution;
     private boolean adCountDown;
     private boolean enableDebugMode;
-    private int  adLoadTimeOut;
+    private int adLoadTimeOut; // in sec
+    private int maxRedirects;
+    private boolean isOMIDExperimentalEnabled;
     private List<String> videoMimeTypes;
+    //private Map<Double,String> tagsTimes; // <AdTime,URL_to_execute>
+
+    //View companionView;
 
     public IMAConfig() {
         this.language                 = "en";
@@ -66,6 +74,13 @@ public class IMAConfig {
         this.videoMimeTypes           = new ArrayList<>();
         this.videoMimeTypes.add(PKMediaFormat.mp4.mimeType);
         this.adTagURL = null;         //=> must be set via setter
+        this.isOMIDExperimentalEnabled = false;
+
+        //if (tagTimes == null) {
+        //    tagTimes = new HashMap<>();
+        //}
+        //this.tagsTimes = tagTimes;
+        //this.companionView = companionView;
     }
 
     public String getLanguage() {
@@ -107,6 +122,10 @@ public class IMAConfig {
 
     public List<String> getVideoMimeTypes() {
         return videoMimeTypes;
+    }
+
+    public int getMaxRedirects() {
+        return maxRedirects;
     }
 
     // select the MIME TYPE that IMA will play instead of letting it select it by itself
@@ -164,6 +183,11 @@ public class IMAConfig {
         return this;
     }
 
+    public IMAConfig setMaxRedirects(int maxRedirects) {
+        this.maxRedirects = maxRedirects;
+        return this;
+    }
+
     public IMAConfig enableDebugMode(boolean enableDebugMode) {
         this.enableDebugMode = enableDebugMode;
         return this;
@@ -172,6 +196,32 @@ public class IMAConfig {
     public boolean isDebugMode() {
         return enableDebugMode;
     }
+
+    public IMAConfig setEnableOMIDExperimental(boolean enableOMIDExperimental) {
+        this.isOMIDExperimentalEnabled = enableOMIDExperimental;
+        return this;
+    }
+
+    public boolean isOMIDExperimentalEnabled() {
+        return isOMIDExperimentalEnabled;
+    }
+
+    //    public Map<Double, String> getTagsTimes() {
+//        return tagsTimes;
+//    }
+//
+//    public void setTagsTimes(Map<Double, String> tagsTimes) {
+//        this.tagsTimes = tagsTimes;
+//    }
+
+//    public View getCompanionView() {
+//        return companionView;
+//    }
+//
+//    public void setCompanionView(View companionView) {
+//        this.companionView = companionView;
+//    }
+//
 
     public JsonObject toJSONObject() {
         JsonObject jsonObject = new JsonObject();
@@ -184,6 +234,9 @@ public class IMAConfig {
         jsonObject.addProperty(AD_COUNTDOWN_UIELEMENT, adCountDown);
         jsonObject.addProperty(AD_LOAD_TIMEOUT, adLoadTimeOut);
         jsonObject.addProperty(AD_ENABLE_DEBUG_MODE, enableDebugMode);
+        jsonObject.addProperty(AD_MAX_REDIRECTS, maxRedirects);
+        jsonObject.addProperty(AD_OMID_ENABLED, isOMIDExperimentalEnabled);
+
 
         Gson gson = new Gson();
         JsonArray jArray = new JsonArray();
@@ -195,8 +248,15 @@ public class IMAConfig {
         }
         jsonObject.add(AD_VIDEO_MIME_TYPES, jArray);
 
+//        String tagsTimesJsonString = gson.toJson(tagsTimes);
+//        if (tagsTimesJsonString != null && !tagsTimesJsonString.isEmpty()) {
+//            JsonParser parser = new JsonParser();
+//            JsonObject tagsTimesJsonObject = parser.parse(tagsTimesJsonString).getAsJsonObject();
+//            jsonObject.add(AD_TAG_TIMES, tagsTimesJsonObject);
+//        } else {
+//            jsonObject.add(AD_TAG_TIMES, new JsonObject());
+//        }
+
         return jsonObject;
     }
 }
-
-
