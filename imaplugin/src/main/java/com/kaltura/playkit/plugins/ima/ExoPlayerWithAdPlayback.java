@@ -466,6 +466,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
     /**
      * Seeks the content video.
+     * @param time The position to seek in milisec
      */
     public void seek(int time) {
         if (mIsAdDisplayed) {
@@ -478,6 +479,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
     /**
      * Returns current content video play time.
+     * @return the getCurrentContentTime
      */
     public long getCurrentContentTime() {
         if (mIsAdDisplayed) {
@@ -517,6 +519,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
     /**
      * Returns an implementation of the SDK's VideoAdPlayer interface.
+     * @return the videoAdPlayer
      */
     public VideoAdPlayer getVideoAdPlayer() {
         return mVideoAdPlayer;
@@ -524,6 +527,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
     /**
      * Returns if an ad is displayed.
+     * @return the isAdDisplayed
      */
     public boolean getIsAdDisplayed() {
         return mIsAdDisplayed;
