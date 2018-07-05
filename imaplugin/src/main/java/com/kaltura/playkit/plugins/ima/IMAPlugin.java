@@ -191,11 +191,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     if (adInfo != null) {
                         log.d("Event: ENDED adInfo.getAdIndexInPod() = " + adInfo.getAdIndexInPod() + " -  adInfo.getTotalAdsInPod() = " + adInfo.getTotalAdsInPod());
                     }
-                    boolean isLastMidrollPlayed = !adCuePoints.hasMidRoll() || (adCuePoints.getAdCuePoints().size() >= 2 && adCuePoints.hasPostRoll() && adInfo != null && adInfo.getAdPodTimeOffset() == adCuePoints.getAdCuePoints().get(adCuePoints.getAdCuePoints().size() - 2));
-                    log.d("contentCompleted isLastMidrollPlayed = " + isLastMidrollPlayed);
+                    boolean isLastMidRollPlayed = (adInfo == null) || !adCuePoints.hasMidRoll() || (adCuePoints.getAdCuePoints().size() >= 2 && adCuePoints.hasPostRoll() && adInfo != null && adInfo.getAdPodTimeOffset() == adCuePoints.getAdCuePoints().get(adCuePoints.getAdCuePoints().size() - 2));
+                    boolean isLastMidRollInValid = (adCuePoints.getAdCuePoints().size() >= 2 && adCuePoints.hasPostRoll() && adInfo != null && adCuePoints.getAdCuePoints().get(adCuePoints.getAdCuePoints().size() - 2) > player.getDuration());
+                    log.d("contentCompleted isLastMidRollPlayed = " + isLastMidRollPlayed + " isLastMidRollInValid = " + isLastMidRollInValid);
 
-                    if (!isAdDisplayed && (!adCuePoints.hasPostRoll() || isAllAdsCompleted || isLastMidrollPlayed)) {
-                        log.d("contentCompleted on ended");
+                    if (!isAdDisplayed && (!adCuePoints.hasPostRoll() || isAllAdsCompleted || isLastMidRollPlayed || isLastMidRollInValid)) {                        log.d("contentCompleted on ended");
                         contentCompleted();
                     } else {
                         log.d("contentCompleted delayed");
@@ -389,7 +389,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 } else {
                     preparePlayer(true);
                 }
-                return;
             }
         } else {
             log.d("onApplicationResumed Default..... lastAdEventReceived = " + lastAdEventReceived);
