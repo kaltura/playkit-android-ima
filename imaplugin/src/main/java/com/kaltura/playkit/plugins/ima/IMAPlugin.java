@@ -369,7 +369,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 clearAdLoadingInBackground();
                 adsManager.start();
             } else {
-                if (player.getSettings() instanceof PlayerSettings && ((PlayerSettings) player.getSettings()).isAdAutoPlayOnResume()) {
+                if (isAdShouldAutoPlayOnResume()) {
                     log.d("onApplicationResumed resume ad playback");
                     clearAdLoadingInBackground();
                     adsManager.resume();
@@ -405,6 +405,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             onUpdateMedia(mediaConfig);
             start();
         }
+    }
+
+    private boolean isAdShouldAutoPlayOnResume() {
+        return player.getSettings() instanceof PlayerSettings && ((PlayerSettings) player.getSettings()).isAdAutoPlayOnResume();
     }
 
     private void clearAdLoadingInBackground() {
