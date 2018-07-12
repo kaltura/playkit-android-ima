@@ -817,14 +817,22 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private void displayAd() {
         log.d("displayAd");
-        videoPlayerWithAdPlayback.getExoPlayerView().setVisibility(View.VISIBLE);
-        player.getView().hideVideoSurface();
+        if (videoPlayerWithAdPlayback != null && videoPlayerWithAdPlayback.getExoPlayerView() != null) {
+            videoPlayerWithAdPlayback.getExoPlayerView().setVisibility(View.VISIBLE);
+        }
+        if (player != null &&  player.getView() != null) {
+            player.getView().hideVideoSurface();
+        }
     }
 
     private void displayContent() {
         log.d("displayContent");
-        videoPlayerWithAdPlayback.getExoPlayerView().setVisibility(View.GONE);
-        player.getView().showVideoSurface();
+        if (videoPlayerWithAdPlayback != null && videoPlayerWithAdPlayback.getExoPlayerView() != null) {
+            videoPlayerWithAdPlayback.getExoPlayerView().setVisibility(View.GONE);
+        }
+        if (player != null &&  player.getView() != null) {
+            player.getView().showVideoSurface();
+        }
     }
 
     private void preparePlayer(boolean doPlay) {
