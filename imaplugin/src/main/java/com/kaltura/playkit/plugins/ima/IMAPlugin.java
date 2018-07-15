@@ -229,7 +229,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     protected void onUpdateMedia(PKMediaConfig mediaConfig) {
         log.d("Start onUpdateMedia");
         this.mediaConfig = mediaConfig;
-        log.d("mediaConfig start pos  = " + mediaConfig.getStartPosition());
+        log.d("mediaConfig start pos = " + mediaConfig.getStartPosition());
         isContentPrepared = false;
         isAutoPlay = false;
         isAdRequested = false;
@@ -817,14 +817,22 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private void displayAd() {
         log.d("displayAd");
-        videoPlayerWithAdPlayback.getExoPlayerView().setVisibility(View.VISIBLE);
-        player.getView().hideVideoSurface();
+        if (videoPlayerWithAdPlayback != null && videoPlayerWithAdPlayback.getExoPlayerView() != null) {
+            videoPlayerWithAdPlayback.getExoPlayerView().setVisibility(View.VISIBLE);
+        }
+        if (player != null &&  player.getView() != null) {
+            player.getView().hideVideoSurface();
+        }
     }
 
     private void displayContent() {
         log.d("displayContent");
-        videoPlayerWithAdPlayback.getExoPlayerView().setVisibility(View.GONE);
-        player.getView().showVideoSurface();
+        if (videoPlayerWithAdPlayback != null && videoPlayerWithAdPlayback.getExoPlayerView() != null) {
+            videoPlayerWithAdPlayback.getExoPlayerView().setVisibility(View.GONE);
+        }
+        if (player != null && player.getView() != null) {
+            player.getView().showVideoSurface();
+        }
     }
 
     private void preparePlayer(boolean doPlay) {
