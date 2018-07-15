@@ -91,7 +91,6 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     private boolean isAdFirstPlay;
 
     private String lastKnownAdURL;
-
     private long lastKnownAdPosition;
 
     private final List<VideoAdPlayer.VideoAdPlayerCallback> mAdCallbacks =
