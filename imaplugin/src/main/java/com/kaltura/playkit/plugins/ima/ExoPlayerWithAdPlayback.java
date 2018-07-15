@@ -91,7 +91,6 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     private boolean isAdFirstPlay;
 
     private String lastKnownAdURL;
-
     private long lastKnownAdPosition;
 
     private final List<VideoAdPlayer.VideoAdPlayerCallback> mAdCallbacks =
@@ -492,7 +491,6 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
         MediaSource mediaSource =  buildMediaSource(currentAdUri, null, mainHandler, eventLogger);
         mVideoPlayer.getPlayer().stop();
-        isAdFirstPlay = false;
         player.prepare(mediaSource);
         mVideoPlayer.getPlayer().setPlayWhenReady(adShouldAutoPlay);
     }
