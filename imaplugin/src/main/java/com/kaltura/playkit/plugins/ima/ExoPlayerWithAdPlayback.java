@@ -90,8 +90,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     private String lastKnownAdURL;
     private long lastKnownAdPosition;
 
-    private final List<VideoAdPlayer.VideoAdPlayerCallback> mAdCallbacks =
-            new ArrayList<VideoAdPlayer.VideoAdPlayerCallback>(1);
+    private final List<VideoAdPlayer.VideoAdPlayerCallback> mAdCallbacks = new ArrayList<>();
 
     private ExoPlayerWithAdPlayback.OnAdPlayBackListener onAdPlayBackListener;
 
@@ -144,14 +143,15 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         lastKnownAdPosition = 0;
         mVideoPlayer = new PlayerView(getContext());
         mVideoPlayer.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        mVideoPlayer.setId(Integer.valueOf(123456789));
+        int id = 123456789;
+        mVideoPlayer.setId(id);
         mVideoPlayer.setUseController(false);
         if (player == null) {
 
             mediaDataSourceFactory = buildDataSourceFactory(true);
 
             renderersFactory = new DefaultRenderersFactory(mContext,
-                    null, DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
+                    DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
 
             TrackSelection.Factory adaptiveTrackSelectionFactory =
                     new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
@@ -171,7 +171,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                     for (VideoAdPlayer.VideoAdPlayerCallback callback : mAdCallbacks) {
                         log.d("playAd->onResume");
                         callback.onResume();
-                        if (!isAdPlayerPlaying()) {
+                        if (isAdPlayerPlaying()) {
                             play();
                         }
                         return;
@@ -213,7 +213,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             @Override
             public void pauseAd() {
                 log.d("pauseAd");
-                if (!isAdPlayerPlaying()) {
+                if (isAdPlayerPlaying()) {
                     return;
                 }
                 for (VideoAdPlayer.VideoAdPlayerCallback callback : mAdCallbacks) {
@@ -262,7 +262,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     }
 
     private boolean isAdPlayerPlaying() {
-        return player != null && player.getPlayWhenReady() && isPlayerReady == true;
+        return player == null || !player.getPlayWhenReady() || !isPlayerReady;
     }
 
     @Override
