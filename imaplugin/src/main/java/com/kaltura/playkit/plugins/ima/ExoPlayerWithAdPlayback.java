@@ -2,7 +2,6 @@ package com.kaltura.playkit.plugins.ima;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -58,7 +57,6 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
     private DefaultTrackSelector trackSelector;
     private EventLogger eventLogger;
-    private android.os.Handler mainHandler = new Handler();
     private DefaultRenderersFactory renderersFactory;
     private SimpleExoPlayer player;
     private PlayerState lastPlayerState;
