@@ -6,17 +6,8 @@ jdk:
 android:
   components:
   - tools
-  - platform-tools
-  - extra-android-m2repository
-  - extra-google-m2repository
-cache:
-  directories:
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
-before_cache:
-  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 before_script:
-  - yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses
+  - ./gradlew dtglib:build dtgqueue:build
 script:
   - ./gradlew imaplugin:build
 after_failure:
