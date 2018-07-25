@@ -163,6 +163,11 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         // Define VideoAdPlayer connector.
         mVideoAdPlayer = new VideoAdPlayer() {
             @Override
+            public int getVolume() {
+                return 1;
+            }
+
+            @Override
             public void playAd() {
                 log.d("playAd mIsAdDisplayed = " + mIsAdDisplayed);
                 if (mIsAdDisplayed && isPlayerReady) {

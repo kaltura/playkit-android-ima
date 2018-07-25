@@ -1,0 +1,214 @@
+/*
+ * ============================================================================
+ * Copyright (C) 2017 Kaltura Inc.
+ * 
+ * Licensed under the AGPLv3 license, unless a different license for a
+ * particular library is specified in the applicable library path.
+ * 
+ * You may obtain a copy of the License at
+ * https://www.gnu.org/licenses/agpl-3.0.html
+ * ============================================================================
+ */
+
+package com.kaltura.playkit.plugins.imadai;
+
+import com.google.ads.interactivemedia.v3.api.StreamRequest;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.kaltura.playkit.PKMediaFormat;
+import com.kaltura.playkit.ads.AdTagType;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by gilad.nadav on 17/11/2016.
+ */
+
+public class IMAConfig {
+
+    public static final int DEFAULT_AD_LOAD_TIMEOUT = 8;
+    public static final int DEFAULT_CUE_POINTS_CHANGED_DELAY = 2000;
+    public static final int DEFAULT_AD_LOAD_COUNT_DOWN_TICK = 250;
+
+    public static final String AD_TAG_LANGUAGE     = "language";
+    //public static final String AD_VIDEO_BITRATE    = "videoBitrate";
+    public static final String AD_ATTRIBUTION_UIELEMENT = "adAttribution";
+    public static final String AD_COUNTDOWN_UIELEMENT   = "adCountDown";
+    public static final String AD_LOAD_TIMEOUT          = "adLoadTimeOut";
+    public static final String AD_MAX_REDIRECTS         = "adMaxRedirects";
+    public static final String AD_ENABLE_DEBUG_MODE     = "enableDebugMode";
+    public static final String AD_OMID_ENABLED          = "isOMIDExperimentalEnabled";
+
+
+    private String assetTitle;
+    private String assetKey;
+    private String apiKey;
+    private String contentSourceId;
+    private String videoId;
+    private StreamRequest.StreamFormat streamFormat;
+    private String licenseUrl;
+
+    private String language;
+    //private int videoBitrate; // in KB
+    private boolean adAttribution;
+    private boolean adCountDown;
+    private boolean enableDebugMode;
+    private int adLoadTimeOut; // in sec
+    private int maxRedirects;
+    private boolean isOMIDExperimentalEnabled;
+    // Map adTagParameters = new HashMap();
+    private boolean disablePersonalizedAds; // adTagParameters.put("npa", 1);
+    private boolean enableAgeRestriction; // adTagParameters.put("tfua", 1);
+    // request.setAdTagParameters(adTagParameters);
+
+
+    public IMAConfig(String assetTitle,
+                     String assetKey, // null for VOD
+                     String contentSourceId, // null for Live
+                     String apiKey, // seems to be always null in demos
+                     String videoId, // null for Live
+                     StreamRequest.StreamFormat streamFormat,
+                     String licenseUrl) {
+        this.assetTitle = assetTitle;
+        this.assetKey = assetKey;
+        this.assetKey = assetKey;
+        this.apiKey = apiKey;
+        this.contentSourceId = contentSourceId;
+        this.videoId = videoId;
+        this.streamFormat = streamFormat;
+        this.licenseUrl = licenseUrl;
+
+        this.language                  = "en";
+        //this.videoBitrate              = -1;
+        this.adAttribution             = true;
+        this.adCountDown               = true;
+        this.adLoadTimeOut             = DEFAULT_AD_LOAD_TIMEOUT;
+        this.enableDebugMode           = false;
+        this.isOMIDExperimentalEnabled = false;
+    }
+
+    public String getAssetTitle() {
+        return assetTitle;
+    }
+
+    public String getAssetKey() {
+        return assetKey;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public String getContentSourceId() {
+        return contentSourceId;
+    }
+
+    public String getVideoId() {
+        return videoId;
+    }
+
+    public StreamRequest.StreamFormat getStreamFormat() {
+        return streamFormat;
+    }
+
+    public String getLicenseUrl() {
+        return licenseUrl;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    // Language - default is en.
+    public IMAConfig setLanguage(String language) {
+        this.language = language;
+        return this;
+    }
+
+//    public int getVideoBitrate() {
+//        return videoBitrate;
+//    }
+
+    // Maximum recommended bitrate. The value is in kbit/s.
+    // The IMA SDK will pick media with bitrate below the specified max, or the closest bitrate if there is no media with lower bitrate found.
+    // Default value, -1, means the bitrate will be selected by the IMA SDK.
+//    public IMAConfig setVideoBitrate(int videoBitrate) {
+//        this.videoBitrate = videoBitrate;
+//        return this;
+//    }
+
+    public int getMaxRedirects() {
+        return maxRedirects;
+    }
+
+    public boolean getAdAttribution() {
+        return adAttribution;
+    }
+
+    //ad attribution true is required for a countdown timer to be displayed
+    // default is true
+    public IMAConfig setAdAttribution(boolean adAttribution) {
+        this.adAttribution = adAttribution;
+        return this;
+    }
+
+    public boolean getAdCountDown() {
+        return adCountDown;
+    }
+
+    // set if ad countdown will be shown or not.
+    // default is true
+    public IMAConfig setAdCountDown(boolean adCountDown) {
+        this.adCountDown = adCountDown;
+        return this;
+    }
+
+    public int getAdLoadTimeOut() {
+        return adLoadTimeOut;
+    }
+
+    public IMAConfig setAdLoadTimeOut(int adLoadTimeOut) {
+        this.adLoadTimeOut = adLoadTimeOut;
+        return this;
+    }
+
+    public IMAConfig setMaxRedirects(int maxRedirects) {
+        this.maxRedirects = maxRedirects;
+        return this;
+    }
+
+    public IMAConfig enableDebugMode(boolean enableDebugMode) {
+        this.enableDebugMode = enableDebugMode;
+        return this;
+    }
+
+    public boolean isDebugMode() {
+        return enableDebugMode;
+    }
+
+    public IMAConfig setEnableOMIDExperimental(boolean enableOMIDExperimental) {
+        this.isOMIDExperimentalEnabled = enableOMIDExperimental;
+        return this;
+    }
+
+    public boolean isOMIDExperimentalEnabled() {
+        return isOMIDExperimentalEnabled;
+    }
+
+    public JsonObject toJSONObject() {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty(AD_TAG_LANGUAGE, language);
+        //jsonObject.addProperty(AD_VIDEO_BITRATE, videoBitrate);
+        jsonObject.addProperty(AD_ATTRIBUTION_UIELEMENT, adAttribution);
+        jsonObject.addProperty(AD_COUNTDOWN_UIELEMENT, adCountDown);
+        jsonObject.addProperty(AD_LOAD_TIMEOUT, adLoadTimeOut);
+        jsonObject.addProperty(AD_ENABLE_DEBUG_MODE, enableDebugMode);
+        jsonObject.addProperty(AD_MAX_REDIRECTS, maxRedirects);
+        jsonObject.addProperty(AD_OMID_ENABLED, isOMIDExperimentalEnabled);
+
+        return jsonObject;
+    }
+}

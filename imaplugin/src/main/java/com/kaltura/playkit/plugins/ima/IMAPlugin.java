@@ -253,7 +253,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         imaSetup();
         log.d("adtag = " + adConfig.getAdTagURL());
 
-        requestAdsFromIMA(adConfig.getAdTagURL());
+        requestAdsFromIMA("");
     }
 
     @Override
@@ -672,6 +672,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
     }
 
+    @Override
+    public void seekTo(long position) {
+        return;
+    }
+
     private void sendCuePointsUpdate() {
         List<Long> cuePoints = getAdCuePoints();
         StringBuilder cuePointBuilder = new StringBuilder();
@@ -1080,6 +1085,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 }
 
                 sendError(PKAdErrorType.QUIET_LOG_ERROR, error, null);
+                break;
             default:
                 break;
         }
