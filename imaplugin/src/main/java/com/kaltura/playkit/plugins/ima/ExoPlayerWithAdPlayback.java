@@ -167,7 +167,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 if (player != null) {
                     return (int) (player.getVolume() * 100);
                 }
-                return 1;
+                return 0;
             }
 
             @Override
