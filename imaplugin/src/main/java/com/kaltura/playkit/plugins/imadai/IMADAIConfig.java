@@ -13,21 +13,13 @@
 package com.kaltura.playkit.plugins.imadai;
 
 import com.google.ads.interactivemedia.v3.api.StreamRequest;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import com.kaltura.playkit.PKMediaFormat;
-import com.kaltura.playkit.ads.AdTagType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by gilad.nadav on 17/11/2016.
  */
 
-public class IMAConfig {
+public class IMADAIConfig {
 
     public static final int DEFAULT_AD_LOAD_TIMEOUT = 8;
     public static final int DEFAULT_CUE_POINTS_CHANGED_DELAY = 2000;
@@ -65,13 +57,13 @@ public class IMAConfig {
     // request.setAdTagParameters(adTagParameters);
 
 
-    public IMAConfig(String assetTitle,
-                     String assetKey, // null for VOD
-                     String contentSourceId, // null for Live
-                     String apiKey, // seems to be always null in demos
-                     String videoId, // null for Live
-                     StreamRequest.StreamFormat streamFormat,
-                     String licenseUrl) {
+    public IMADAIConfig(String assetTitle,
+                        String assetKey, // null for VOD
+                        String contentSourceId, // null for Live
+                        String apiKey, // seems to be always null in demos
+                        String videoId, // null for Live
+                        StreamRequest.StreamFormat streamFormat,
+                        String licenseUrl) {
         this.assetTitle = assetTitle;
         this.assetKey = assetKey;
         this.assetKey = assetKey;
@@ -123,7 +115,7 @@ public class IMAConfig {
     }
 
     // Language - default is en.
-    public IMAConfig setLanguage(String language) {
+    public IMADAIConfig setLanguage(String language) {
         this.language = language;
         return this;
     }
@@ -135,7 +127,7 @@ public class IMAConfig {
     // Maximum recommended bitrate. The value is in kbit/s.
     // The IMA SDK will pick media with bitrate below the specified max, or the closest bitrate if there is no media with lower bitrate found.
     // Default value, -1, means the bitrate will be selected by the IMA SDK.
-//    public IMAConfig setVideoBitrate(int videoBitrate) {
+//    public IMADAIConfig setVideoBitrate(int videoBitrate) {
 //        this.videoBitrate = videoBitrate;
 //        return this;
 //    }
@@ -150,7 +142,7 @@ public class IMAConfig {
 
     //ad attribution true is required for a countdown timer to be displayed
     // default is true
-    public IMAConfig setAdAttribution(boolean adAttribution) {
+    public IMADAIConfig setAdAttribution(boolean adAttribution) {
         this.adAttribution = adAttribution;
         return this;
     }
@@ -161,7 +153,7 @@ public class IMAConfig {
 
     // set if ad countdown will be shown or not.
     // default is true
-    public IMAConfig setAdCountDown(boolean adCountDown) {
+    public IMADAIConfig setAdCountDown(boolean adCountDown) {
         this.adCountDown = adCountDown;
         return this;
     }
@@ -170,17 +162,17 @@ public class IMAConfig {
         return adLoadTimeOut;
     }
 
-    public IMAConfig setAdLoadTimeOut(int adLoadTimeOut) {
+    public IMADAIConfig setAdLoadTimeOut(int adLoadTimeOut) {
         this.adLoadTimeOut = adLoadTimeOut;
         return this;
     }
 
-    public IMAConfig setMaxRedirects(int maxRedirects) {
+    public IMADAIConfig setMaxRedirects(int maxRedirects) {
         this.maxRedirects = maxRedirects;
         return this;
     }
 
-    public IMAConfig enableDebugMode(boolean enableDebugMode) {
+    public IMADAIConfig enableDebugMode(boolean enableDebugMode) {
         this.enableDebugMode = enableDebugMode;
         return this;
     }
@@ -189,7 +181,7 @@ public class IMAConfig {
         return enableDebugMode;
     }
 
-    public IMAConfig setEnableOMIDExperimental(boolean enableOMIDExperimental) {
+    public IMADAIConfig setEnableOMIDExperimental(boolean enableOMIDExperimental) {
         this.isOMIDExperimentalEnabled = enableOMIDExperimental;
         return this;
     }

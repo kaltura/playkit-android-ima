@@ -1,7 +1,6 @@
 package com.kaltura.playkit.plugins.imadai;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.ViewGroup;
 
 import com.google.ads.interactivemedia.v3.api.AdError;
@@ -18,8 +17,6 @@ import com.google.ads.interactivemedia.v3.api.StreamManager;
 import com.google.ads.interactivemedia.v3.api.StreamRequest;
 import com.google.ads.interactivemedia.v3.api.player.VideoProgressUpdate;
 import com.google.ads.interactivemedia.v3.api.player.VideoStreamPlayer;
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.text.Cue;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.kaltura.playkit.MessageBus;
@@ -27,9 +24,7 @@ import com.kaltura.playkit.PKError;
 import com.kaltura.playkit.PKEvent;
 import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PKMediaConfig;
-import com.kaltura.playkit.PKMediaEntry;
 import com.kaltura.playkit.PKMediaFormat;
-import com.kaltura.playkit.PKMediaSource;
 import com.kaltura.playkit.PKPlugin;
 import com.kaltura.playkit.Player;
 import com.kaltura.playkit.PlayerDecorator;
@@ -41,7 +36,6 @@ import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdProviderListener;
 import com.kaltura.playkit.player.PlayerSettings;
 import com.kaltura.playkit.plugin.ima.BuildConfig;
-import com.kaltura.playkit.plugins.ads.AdCuePoints;
 import com.kaltura.playkit.plugins.ads.AdInfo;
 import com.kaltura.playkit.plugins.ads.AdsProvider;
 import com.kaltura.playkit.utils.Consts;
@@ -49,14 +43,14 @@ import com.kaltura.playkit.utils.Consts;
 import java.util.HashMap;
 import java.util.List;
 
-public class IMAPlugin extends PKPlugin implements AdEvent.AdEventListener, AdErrorEvent.AdErrorListener, AdsProvider {
+public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, AdErrorEvent.AdErrorListener, AdsProvider {
     private static final PKLog log = PKLog.get("IMAPluginDAI");
 
     private Player player;
     private Context context;
     private MessageBus messageBus;
     private AdInfo adInfo;
-    private IMAConfig adConfig;
+    private IMADAIConfig adConfig;
     private PKMediaConfig mediaConfig;
     //////////////////////
 
@@ -102,7 +96,7 @@ public class IMAPlugin extends PKPlugin implements AdEvent.AdEventListener, AdEr
 
         @Override
         public PKPlugin newInstance() {
-            return new com.kaltura.playkit.plugins.imadai.IMAPlugin();
+            return new IMADAIPlugin();
         }
 
         @Override
@@ -190,7 +184,7 @@ public class IMAPlugin extends PKPlugin implements AdEvent.AdEventListener, AdEr
         if (adsLoader == null) {
             adsLoader = sdkFactory.createAdsLoader(context, imaSdkSettings);
             // Add listeners for when ads are loaded and for errors.
-            adsLoader.addAdErrorListener(IMAPlugin.this);
+            adsLoader.addAdErrorListener(IMADAIPlugin.this);
             adsLoader.addAdsLoadedListener(getAdsLoadedListener());
         }
     }
@@ -219,8 +213,8 @@ public class IMAPlugin extends PKPlugin implements AdEvent.AdEventListener, AdEr
                 log.d("AdsManager loaded");
                 isAdRequested = true;
                 streamManager = adsManagerLoadedEvent.getStreamManager();
-                streamManager.addAdErrorListener(IMAPlugin.this);
-                streamManager.addAdEventListener(IMAPlugin.this);
+                streamManager.addAdErrorListener(IMADAIPlugin.this);
+                streamManager.addAdEventListener(IMADAIPlugin.this);
                 streamManager.init();
             }
         };
@@ -691,12 +685,12 @@ public class IMAPlugin extends PKPlugin implements AdEvent.AdEventListener, AdEr
         player.seekTo(Math.round(position + (totalPlayedAdsDuration * Consts.MILLISECONDS_MULTIPLIER)));
     }
 
-    private static IMAConfig parseConfig(Object config) {
-        if (config instanceof IMAConfig) {
-            return ((IMAConfig) config);
+    private static IMADAIConfig parseConfig(Object config) {
+        if (config instanceof IMADAIConfig) {
+            return ((IMADAIConfig) config);
 
         } else if (config instanceof JsonObject) {
-            return new Gson().fromJson(((JsonObject) config), IMAConfig.class);
+            return new Gson().fromJson(((JsonObject) config), IMADAIConfig.class);
         }
         return null;
     }
