@@ -20,11 +20,14 @@ import com.google.ads.interactivemedia.v3.api.player.VideoStreamPlayer;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.kaltura.playkit.MessageBus;
+import com.kaltura.playkit.PKDrmParams;
 import com.kaltura.playkit.PKError;
 import com.kaltura.playkit.PKEvent;
 import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PKMediaConfig;
+import com.kaltura.playkit.PKMediaEntry;
 import com.kaltura.playkit.PKMediaFormat;
+import com.kaltura.playkit.PKMediaSource;
 import com.kaltura.playkit.PKPlugin;
 import com.kaltura.playkit.Player;
 import com.kaltura.playkit.PlayerDecorator;
@@ -40,6 +43,7 @@ import com.kaltura.playkit.plugins.ads.AdInfo;
 import com.kaltura.playkit.plugins.ads.AdsProvider;
 import com.kaltura.playkit.utils.Consts;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -161,6 +165,11 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
     @Override
     protected void onUpdateMedia(PKMediaConfig mediaConfig) {
         log.d("Start onUpdateMedia");
+        if (mediaConfig != null && mediaConfig.getMediaEntry() != null &&
+                mediaConfig.getMediaEntry().hasSources() &&
+                mediaConfig.getMediaEntry().getSources().get(0).getUrl().contains("dai.google.com")) {
+            return;
+        }
         isAutoPlay = false;
         isContentPrepared = false;
         isAdRequested = false;
@@ -280,10 +289,28 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
             public void loadUrl(String url, List<HashMap<String, String>> subtitles) {
                 log.d("loadUrl = " + url);
 
-                mediaConfig.getMediaEntry().getSources().get(0).setUrl(url).setMediaFormat(PKMediaFormat.hls).setDrmData(null);
+//                PKMediaSource mediaSource = new PKMediaSource();
+//                mediaSource.setId("adId");
+//                mediaSource.setUrl(url);
+//                mediaSource.setMediaFormat(PKMediaFormat.valueOfUrl(url));
+//
+//                if (adConfig.getLicenseUrl() !=null) {
+//                    List<PKDrmParams> drmData = new ArrayList();
+//                    PKDrmParams pkDrmParams = new PKDrmParams(adConfig.getLicenseUrl(), PKDrmParams.Scheme.WidevineCENC);
+//                    drmData.add(pkDrmParams);
+//                    mediaSource.setDrmData(drmData);
+//                }
 
-                player.prepare(mediaConfig);
-                player.play();
+                messageBus.post(new com.kaltura.playkit.plugins.ads.AdEvent.AdDAISourceSelected(createMediaConfig(url)));
+
+
+
+//                mediaConfig.getMediaEntry().getSources().get(0).setUrl(url).setMediaFormat(PKMediaFormat.hls).setDrmData(null);
+
+//                player.prepare(mediaConfig);
+//                player.play();
+
+
 //                mVideoPlayer.setStreamUrl(url);
 //                mVideoPlayer.play();
 //
@@ -719,5 +746,47 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
                 }, PlayerEvent.Type.DURATION_CHANGE);
             }
         }
+    }
+
+    private PKMediaConfig createMediaConfig(String url) {
+        PKMediaConfig mediaConfig = new PKMediaConfig();
+        PKMediaEntry mediaEntry = createMediaEntry(url);
+        mediaConfig.setMediaEntry(mediaEntry);
+        return mediaConfig;
+    }
+
+    private PKMediaEntry createMediaEntry(String url) {
+
+        PKMediaEntry mediaEntry = new PKMediaEntry();
+        mediaEntry.setId("adId");
+        if (adConfig.getVideoId() == null) {
+            mediaEntry.setMediaType(PKMediaEntry.MediaEntryType.Live);
+        } else {
+            mediaEntry.setMediaType(PKMediaEntry.MediaEntryType.Vod);
+        }
+
+        List<PKMediaSource> mediaSources = createMediaSources(url);
+        mediaEntry.setSources(mediaSources);
+
+        return mediaEntry;
+    }
+
+    private List<PKMediaSource> createMediaSources(String url) {
+
+        List<PKMediaSource> mediaSources = new ArrayList<>();
+        PKMediaSource mediaSource = new PKMediaSource();
+        mediaSource.setId("adId");
+        mediaSource.setUrl(url);
+        mediaSource.setMediaFormat(PKMediaFormat.valueOfUrl(url));
+
+        if (adConfig.getLicenseUrl() !=null) {
+            List<PKDrmParams> drmData = new ArrayList();
+            PKDrmParams pkDrmParams = new PKDrmParams(adConfig.getLicenseUrl(), PKDrmParams.Scheme.WidevineCENC);
+            drmData.add(pkDrmParams);
+            mediaSource.setDrmData(drmData);
+        }
+
+        mediaSources.add(mediaSource);
+        return mediaSources;
     }
 }
