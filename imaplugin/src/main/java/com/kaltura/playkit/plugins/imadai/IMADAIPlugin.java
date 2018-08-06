@@ -137,7 +137,12 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
             public void onEvent(PKEvent event) {
                 log.d("XXX Received:PlayerEvent:" + event.eventType().name());
                 if (event.eventType() == PlayerEvent.Type.ENDED) {
-
+                    long currentPosSec = player.getCurrentPosition() / Consts.MILLISECONDS_MULTIPLIER;
+                    CuePoint prevCuePoint = streamManager.getPreviousCuePointForStreamTime(currentPosSec);
+                    if (prevCuePoint.getEndTime() == currentPosSec) {
+                        player.seekTo(((long) (prevCuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER) - Consts.MILLISECONDS_MULTIPLIER));
+                        player.pause();
+                    }
                 } else if (event.eventType() == PlayerEvent.Type.PLAYING) {
 
                 } else if (event.eventType() == PlayerEvent.Type.SEEKING) {
@@ -424,10 +429,10 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
             case AD_BREAK_ENDED: //Fired when an ad break ends.
                 log.d("AD AD_BREAK_ENDED");
                 isAdDisplayed = false;
-                if (pkAdProviderListener != null && !appIsInBackground) {
-                    log.d("preparePlayer and play");
-                    preparePlayer(true);
-                }
+//                if (pkAdProviderListener != null && !appIsInBackground) {
+//                    log.d("preparePlayer and play");
+//                    preparePlayer(true);
+//                }
                 break;
             case CUEPOINTS_CHANGED: //Dispatched for on-demand streams when the cuepoints change.
                 log.d("AD CUEPOINTS_CHANGED");
@@ -644,6 +649,8 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
         if (playerDuration < 0) {
             return 0;
         }
+        //log.e("XXX PlayerDURATION real = : " + player.getDuration() / Consts.MILLISECONDS_MULTIPLIER);
+        //log.e("XXX PlayerDURATION fake " + playerDuration / Consts.MILLISECONDS_MULTIPLIER);
         return  playerDuration;
     }
 
@@ -673,6 +680,8 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
         if (playerPosition < 0) {
             return 0;
         }
+        //log.e("XXX PlayerPOS real = : " + player.getCurrentPosition() / Consts.MILLISECONDS_MULTIPLIER);
+        //log.e("XXX PlayerPOS fake " + playerPosition / Consts.MILLISECONDS_MULTIPLIER);
         return playerPosition;
     }
 
