@@ -38,6 +38,8 @@ import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdProviderListener;
 import com.kaltura.playkit.player.PlayerSettings;
+import com.kaltura.playkit.player.metadata.PKMetadata;
+import com.kaltura.playkit.player.metadata.PKTextInformationFrame;
 import com.kaltura.playkit.plugin.ima.BuildConfig;
 import com.kaltura.playkit.plugins.ads.AdInfo;
 import com.kaltura.playkit.plugins.ads.AdsProvider;
@@ -118,6 +120,7 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
     protected void onLoad(final Player player, Object config, MessageBus messageBus, Context context) {
         log.d("onLoad");
         this.player = player;
+        mPlayerCallbacks = new ArrayList<>();
         if (player == null) {
             log.e("Error, player instance is null.");
             return;
@@ -162,9 +165,24 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
 //                        }
 //                    }
 //                    player.seekTo(Math.round(timeToSeek));
+                } else if (event.eventType() == PlayerEvent.Type.METADATA_AVAILABLE) {
+                    PlayerEvent.MetadataAvailable metadataAvailableEvent = (PlayerEvent.MetadataAvailable) event;
+                    for (VideoStreamPlayer.VideoStreamPlayerCallback callback : mPlayerCallbacks) {
+                        for (PKMetadata pkMetadata : metadataAvailableEvent.metadataList){
+                            if (pkMetadata instanceof PKTextInformationFrame) {
+                                PKTextInformationFrame textFrame = (PKTextInformationFrame) pkMetadata;
+                                if ("TXXX".equals(textFrame.id)) {
+                                    log.d("Received user text: " + textFrame.value);
+                                    if (mPlayerCallbacks != null) {
+                                        callback.onUserTextReceived(textFrame.value);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
-        }, PlayerEvent.Type.ENDED, PlayerEvent.Type.PLAYING, PlayerEvent.Type.SEEKING);
+        }, PlayerEvent.Type.ENDED, PlayerEvent.Type.PLAYING, PlayerEvent.Type.SEEKING, PlayerEvent.Type.METADATA_AVAILABLE);
     }
 
     @Override
@@ -334,12 +352,12 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
 
             @Override
             public void addCallback(VideoStreamPlayerCallback videoStreamPlayerCallback) {
-                //mPlayerCallbacks.add(videoStreamPlayerCallback);
+                mPlayerCallbacks.add(videoStreamPlayerCallback);
             }
 
             @Override
             public void removeCallback(VideoStreamPlayerCallback videoStreamPlayerCallback) {
-                //mPlayerCallbacks.remove(videoStreamPlayerCallback);
+                mPlayerCallbacks.remove(videoStreamPlayerCallback);
             }
 
             @Override
@@ -649,8 +667,8 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
         if (playerDuration < 0) {
             return 0;
         }
-        //log.e("XXX PlayerDURATION real = : " + player.getDuration() / Consts.MILLISECONDS_MULTIPLIER);
-        //log.e("XXX PlayerDURATION fake " + playerDuration / Consts.MILLISECONDS_MULTIPLIER);
+        log.e("XXX PlayerDURATION real = : " + player.getDuration() / Consts.MILLISECONDS_MULTIPLIER);
+        log.e("XXX PlayerDURATION fake " + playerDuration / Consts.MILLISECONDS_MULTIPLIER);
         return  playerDuration;
     }
 
@@ -680,8 +698,8 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
         if (playerPosition < 0) {
             return 0;
         }
-        //log.e("XXX PlayerPOS real = : " + player.getCurrentPosition() / Consts.MILLISECONDS_MULTIPLIER);
-        //log.e("XXX PlayerPOS fake " + playerPosition / Consts.MILLISECONDS_MULTIPLIER);
+        log.e("XXX PlayerPOS real = : " + player.getCurrentPosition() / Consts.MILLISECONDS_MULTIPLIER);
+        log.e("XXX PlayerPOS fake " + playerPosition / Consts.MILLISECONDS_MULTIPLIER);
         return playerPosition;
     }
 
