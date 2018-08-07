@@ -414,7 +414,7 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
     @Override
     protected void onApplicationResumed() {
         appIsInBackground = false;
-        if (isAdShouldAutoPlayOnResume()) {
+        if (isAdShouldAutoPlayOnResume() && isAdDisplayed) {
             player.play();
         }
     }
@@ -505,6 +505,7 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
     public void onAdError(AdErrorEvent adErrorEvent) {
         log.e("Event: onAdError" + adErrorEvent.getError().getErrorCode());
         isAdError = true;
+        //isAdRequested = true;
         //resetFlagsOnError();
 
         AdError adException = adErrorEvent.getError();
@@ -579,7 +580,7 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
 
         sendError(errorType, errorMessage, adException);
         //displayContent();
-        preparePlayer(isAutoPlay);
+        preparePlayer(true);
     }
 
     private void sendError(Enum errorType, String message, Throwable exception) {
