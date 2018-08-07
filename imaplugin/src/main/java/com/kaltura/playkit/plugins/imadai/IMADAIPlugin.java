@@ -648,7 +648,8 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
     @Override
     public long getDuration() {
         if (streamManager != null && streamManager.getAdProgressInfo() != null && isAdDisplayed) {
-            return (long) Math.ceil(streamManager.getAdProgressInfo().getDuration());
+            log.e("XXX11111111 PlayerDURATION real = : " + (long) Math.floor(streamManager.getAdProgressInfo().getDuration()));
+            return (long) Math.floor(streamManager.getAdProgressInfo().getDuration());
         }
         return getFakePlayerDuration();
 
@@ -675,6 +676,7 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
     @Override
     public long getCurrentPosition() {
         if (streamManager != null && streamManager.getAdProgressInfo() != null && isAdDisplayed) {
+            log.e("XXX22222222 PlayerPOS real = : " + (long) Math.floor(streamManager.getAdProgressInfo().getCurrentTime()));
             return (long) Math.ceil(streamManager.getAdProgressInfo().getCurrentTime());
         }
         return getFakePlayerPosition();
@@ -685,9 +687,10 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
         if (playerPosition < 0) {
             return 0;
         }
+        long playerPositionSec = (long) Math.floor(playerPosition / Consts.MILLISECONDS_MULTIPLIER);
         if (cuePoints != null) {
             for (CuePoint cuePoint : cuePoints) {
-                if (cuePoint.isPlayed()) {
+                if (cuePoint.isPlayed() && cuePoint.getEndTime() <= playerPositionSec) {
                     playerPosition -= Consts.MILLISECONDS_MULTIPLIER * (cuePoint.getEndTime() - cuePoint.getStartTime());
                 }
             }
