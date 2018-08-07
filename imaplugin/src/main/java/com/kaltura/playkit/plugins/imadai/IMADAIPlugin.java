@@ -377,7 +377,7 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
 //                mVideoPlayer.enableControls(true);
                 if (mSnapBackTime > 0) {
                     log.d("onAdBreakEnded seeking " + mSnapBackTime);
-                    player.seekTo(Math.round(mSnapBackTime * Consts.MILLISECONDS_MULTIPLIER));
+                    player.seekTo((long) Math.floor(mSnapBackTime * Consts.MILLISECONDS_MULTIPLIER));
                 }
                 mSnapBackTime = 0;
             }
@@ -678,7 +678,7 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
     public long getCurrentPosition() {
         if (streamManager != null && streamManager.getAdProgressInfo() != null && isAdDisplayed) {
             log.e("XXX22222222 PlayerPOS real = : " + (long) Math.floor(streamManager.getAdProgressInfo().getCurrentTime()));
-            return (long) Math.ceil(streamManager.getAdProgressInfo().getCurrentTime());
+            return (long) Math.floor(streamManager.getAdProgressInfo().getCurrentTime());
         }
         return getFakePlayerPosition();
     }
@@ -735,12 +735,12 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
         if (streamManager != null) {
             CuePoint candidateCuePoint = streamManager.getPreviousCuePointForStreamTime(position / Consts.MILLISECONDS_MULTIPLIER);
             if (candidateCuePoint != null && !candidateCuePoint.isPlayed()) {
-                player.seekTo(Math.round(candidateCuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER));
+                player.seekTo((long) Math.floor(candidateCuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER));
                 mSnapBackTime = (position + totalPlayedAdsDuration * Consts.MILLISECONDS_MULTIPLIER) / Consts.MILLISECONDS_MULTIPLIER;
                 return;
             }
         }
-        player.seekTo(Math.round(position + (totalPlayedAdsDuration * Consts.MILLISECONDS_MULTIPLIER)));
+        player.seekTo((long) Math.floor(position + (totalPlayedAdsDuration * Consts.MILLISECONDS_MULTIPLIER)));
     }
 
     private static IMADAIConfig parseConfig(Object config) {
