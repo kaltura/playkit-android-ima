@@ -17,6 +17,7 @@ import com.google.ads.interactivemedia.v3.api.StreamManager;
 import com.google.ads.interactivemedia.v3.api.StreamRequest;
 import com.google.ads.interactivemedia.v3.api.player.VideoProgressUpdate;
 import com.google.ads.interactivemedia.v3.api.player.VideoStreamPlayer;
+import com.google.android.exoplayer2.C;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.kaltura.playkit.MessageBus;
@@ -48,6 +49,7 @@ import com.kaltura.playkit.utils.Consts;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, AdErrorEvent.AdErrorListener, AdsProvider {
     private static final PKLog log = PKLog.get("IMAPluginDAI");
@@ -78,7 +80,9 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
     private StreamDisplayContainer displayContainer;
     private List<VideoStreamPlayer.VideoStreamPlayerCallback> mPlayerCallbacks;
     private List<CuePoint> cuePoints;
-
+    private PlayerEvent.Type lastPlaybackPlayerState;
+    private com.kaltura.playkit.plugins.ads.AdEvent.Type lastAdEventReceived;
+    private Map<AdEvent.AdEventType, com.kaltura.playkit.plugins.ads.AdEvent.Type> adEventsMap;
     private Context mContext;
     private ViewGroup mAdUiContainer;
 
@@ -125,7 +129,7 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
             log.e("Error, player instance is null.");
             return;
         }
-
+        adEventsMap = buildAdsEventMap();
         adConfig = parseConfig(config);
         if (adConfig == null) {
             log.e("Error, adConfig instance is null.");
@@ -142,9 +146,11 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
                 if (event.eventType() == PlayerEvent.Type.ENDED) {
                     long currentPosSec = player.getCurrentPosition() / Consts.MILLISECONDS_MULTIPLIER;
                     CuePoint prevCuePoint = streamManager.getPreviousCuePointForStreamTime(currentPosSec);
-                    if (prevCuePoint.getEndTime() == currentPosSec) {
-                        player.seekTo(((long) (prevCuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER) - Consts.MILLISECONDS_MULTIPLIER));
-                        player.pause();
+                    if (player.getCurrentPosition() >= player.getDuration() && prevCuePoint  != null && currentPosSec >= prevCuePoint.getEndTime()) {
+                        if (cuePoints != null && cuePoints.size() > 0 && Math.floor(cuePoints.get(cuePoints.size() - 1).getEndTime()) == Math.floor(player.getDuration() / Consts.MILLISECONDS_MULTIPLIER)) {
+                            player.seekTo((long) (cuePoints.get(cuePoints.size() - 1).getStartTime() * Consts.MILLISECONDS_MULTIPLIER));
+                            player.pause();
+                        }
                     }
                 } else if (event.eventType() == PlayerEvent.Type.PLAYING) {
 
@@ -310,39 +316,8 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
         return new VideoStreamPlayer() {
             @Override
             public void loadUrl(String url, List<HashMap<String, String>> subtitles) {
-                log.d("loadUrl = " + url);
-
-//                PKMediaSource mediaSource = new PKMediaSource();
-//                mediaSource.setId("adId");
-//                mediaSource.setUrl(url);
-//                mediaSource.setMediaFormat(PKMediaFormat.valueOfUrl(url));
-//
-//                if (adConfig.getLicenseUrl() !=null) {
-//                    List<PKDrmParams> drmData = new ArrayList();
-//                    PKDrmParams pkDrmParams = new PKDrmParams(adConfig.getLicenseUrl(), PKDrmParams.Scheme.WidevineCENC);
-//                    drmData.add(pkDrmParams);
-//                    mediaSource.setDrmData(drmData);
-//                }
-
+                log.d("XXX loadUrl = " + url + " lastAdEventReceived = " + lastAdEventReceived);
                 messageBus.post(new com.kaltura.playkit.plugins.ads.AdEvent.AdDAISourceSelected(createMediaConfig(url)));
-
-
-
-//                mediaConfig.getMediaEntry().getSources().get(0).setUrl(url).setMediaFormat(PKMediaFormat.hls).setDrmData(null);
-
-//                player.prepare(mediaConfig);
-//                player.play();
-
-
-//                mVideoPlayer.setStreamUrl(url);
-//                mVideoPlayer.play();
-//
-//                // Bookmarking
-//                if (mBookMarkContentTime > 0) {
-//                    double streamTime =
-//                            mStreamManager.getStreamTimeForContentTime(mBookMarkContentTime);
-//                    mVideoPlayer.seekTo((long) (streamTime * 1000.0)); // s to ms.
-//                }
             }
 
             @Override
@@ -362,22 +337,20 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
 
             @Override
             public void onAdBreakStarted() {
-                log.d(" Started");
-                // Disable player controls.
-//                mVideoPlayer.setCanSeek(false);
-//                mVideoPlayer.enableControls(false);
-
+                log.d(" onAdBreakStarted");
             }
 
             @Override
             public void onAdBreakEnded() {
-                log.d("Ad Break Ended");
-                // Re-enable player controls.
-//                mVideoPlayer.setCanSeek(true);
-//                mVideoPlayer.enableControls(true);
+                log.d("onAdBreakEnded");
+
                 if (mSnapBackTime > 0) {
-                    log.d("onAdBreakEnded seeking " + mSnapBackTime);
-                    player.seekTo((long) Math.floor(mSnapBackTime * Consts.MILLISECONDS_MULTIPLIER));
+                    long snapBackTimeMili = (long) mSnapBackTime * Consts.MILLISECONDS_MULTIPLIER;
+                    log.d("XXX onAdBreakEnded seekTo: " + snapBackTimeMili);
+                    player.seekTo(snapBackTimeMili);
+                    if (snapBackTimeMili != player.getDuration()) {
+                        player.play();
+                    }
                 }
                 mSnapBackTime = 0;
             }
@@ -431,6 +404,12 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
             return;
         }
 
+        if(adEventsMap == null){
+            log.e("ERROR, adEventsMap == null");
+            return;
+        }
+
+        lastAdEventReceived = adEventsMap.get(adEvent.getType());
         if (adEvent.getAdData() != null) {
             log.i("XXX EventData: " + adEvent.getAdData().toString());
         }
@@ -443,6 +422,7 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
                 break;
             case AD_BREAK_STARTED: //Fired when an ad break starts.
                 log.d("AD AD_BREAK_STARTED");
+                isAdDisplayed = true;
                 break;
             case AD_BREAK_ENDED: //Fired when an ad break ends.
                 log.d("AD AD_BREAK_ENDED");
@@ -460,7 +440,6 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
                         log.d(String.format("XXX Cue: %s\n", cue.getStartTime() + " " + cue.getEndTime() + " " + cue.isPlayed()));
                     }
                 }
-                isAdDisplayed = true;
                 break;
             case AD_PROGRESS: //Fired when there is an update to an ad's progress.
                 break;
@@ -648,9 +627,16 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
 
     @Override
     public long getDuration() {
-        if (streamManager != null && streamManager.getAdProgressInfo() != null && isAdDisplayed) {
-            log.e("XXX11111111 PlayerDURATION real = : " + (long) Math.floor(streamManager.getAdProgressInfo().getDuration()));
-            return (long) Math.floor(streamManager.getAdProgressInfo().getDuration());
+        if (isAdDisplayed) {
+            if (streamManager != null && streamManager.getAdProgressInfo() != null) {
+                long adDuration = Math.max(0, (long) Math.floor(streamManager.getAdProgressInfo().getDuration()));
+                if (adDuration > player.getDuration()) {
+                    adDuration = player.getDuration();
+                }
+                return adDuration;
+            } else {
+                return 0;
+            }
         }
         return getFakePlayerDuration();
 
@@ -658,9 +644,16 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
 
     private long getFakePlayerDuration() {
         long playerDuration = player.getDuration();
-        if (playerDuration < 0) {
+        if (playerDuration < 0 || playerDuration == C.TIME_UNSET) {
             return 0;
         }
+
+        if (streamManager != null) {
+            long val = (long) streamManager.getContentTimeForStreamTime(Math.floor(playerDuration / Consts.MILLISECONDS_MULTIPLIER)) * Consts.MILLISECONDS_MULTIPLIER;
+            //log.e("XXX Val Duration = " + val);
+            return  val;
+        }
+
         if (cuePoints != null) {
             for (CuePoint cuePoint : cuePoints) {
                 playerDuration -= Consts.MILLISECONDS_MULTIPLIER * (cuePoint.getEndTime() - cuePoint.getStartTime());
@@ -669,26 +662,37 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
         if (playerDuration < 0) {
             return 0;
         }
-        log.e("XXX PlayerDURATION real = : " + player.getDuration() / Consts.MILLISECONDS_MULTIPLIER);
-        log.e("XXX PlayerDURATION fake " + playerDuration / Consts.MILLISECONDS_MULTIPLIER);
         return  playerDuration;
     }
 
     @Override
     public long getCurrentPosition() {
-        if (streamManager != null && streamManager.getAdProgressInfo() != null && isAdDisplayed) {
-            log.e("XXX22222222 PlayerPOS real = : " + (long) Math.floor(streamManager.getAdProgressInfo().getCurrentTime()));
-            return (long) Math.floor(streamManager.getAdProgressInfo().getCurrentTime());
+        if (isAdDisplayed) {
+            if (streamManager != null && streamManager.getAdProgressInfo() != null) {
+                long adPosition = Math.max(0, (long) Math.round(streamManager.getAdProgressInfo().getCurrentTime()));
+                if (adPosition > player.getCurrentPosition()) {
+                    adPosition = 0;
+                }
+                return adPosition;
+            } else {
+                return 0;
+            }
         }
         return getFakePlayerPosition();
     }
 
     private long getFakePlayerPosition() {
         long playerPosition = player.getCurrentPosition();
-        if (playerPosition < 0) {
+        if (playerPosition < 0 || playerPosition == C.TIME_UNSET) {
             return 0;
         }
-        long playerPositionSec = (long) Math.floor(playerPosition / Consts.MILLISECONDS_MULTIPLIER);
+        if (streamManager != null) {
+            long val = (long) (streamManager.getContentTimeForStreamTime(Math.floor(playerPosition / Consts.MILLISECONDS_MULTIPLIER))) * Consts.MILLISECONDS_MULTIPLIER;
+            //log.e("XXX Val Position = " + val);
+            return val;
+        }
+
+        long playerPositionSec = (long) Math.round(playerPosition / Consts.MILLISECONDS_MULTIPLIER);
         if (cuePoints != null) {
             for (CuePoint cuePoint : cuePoints) {
                 if (cuePoint.isPlayed() && cuePoint.getEndTime() <= playerPositionSec) {
@@ -702,8 +706,6 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
         if (playerPosition < 0) {
             return 0;
         }
-        log.e("XXX PlayerPOS real = : " + player.getCurrentPosition() / Consts.MILLISECONDS_MULTIPLIER);
-        log.e("XXX PlayerPOS fake " + playerPosition / Consts.MILLISECONDS_MULTIPLIER);
         return playerPosition;
     }
 
@@ -724,6 +726,54 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
 
     @Override
     public void seekTo(long position) {
+        log.d("XXX SEEKTO " + position);
+
+        long newPositionToSeek = -1;
+        if (streamManager != null) {
+            if (cuePoints != null) {
+                CuePoint candidateCuePoint = streamManager.getPreviousCuePointForStreamTime(streamManager.getStreamTimeForContentTime(Math.floor(position / Consts.MILLISECONDS_MULTIPLIER)));
+                if (candidateCuePoint != null && !candidateCuePoint.isPlayed()) {
+                    newPositionToSeek = (long) Math.floor(candidateCuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER);
+                    log.d("XXX SEEKTO NEWPOS1 = " + newPositionToSeek);
+                    player.seekTo(newPositionToSeek);
+                    mSnapBackTime = streamManager.getStreamTimeForContentTime(Math.floor(position / Consts.MILLISECONDS_MULTIPLIER));
+                    return;
+                } else {
+                        newPositionToSeek = position;//(long) (streamManager.getContentTimeForStreamTime(Math.floor(position / Consts.MILLISECONDS_MULTIPLIER)) * Consts.MILLISECONDS_MULTIPLIER);;
+                        if (isPositionInBetweenCuePoint(position)) {
+                            newPositionToSeek = getCuePointEndTime(position);
+                        }
+                        log.d("XXX SEEKTO NEWPOS2 = " + newPositionToSeek);
+                        player.seekTo((long) streamManager.getStreamTimeForContentTime(Math.floor(newPositionToSeek / Consts.MILLISECONDS_MULTIPLIER)) * Consts.MILLISECONDS_MULTIPLIER);
+                        mSnapBackTime = 0;
+                        return;
+                }
+            }
+            newPositionToSeek = position;//(long) (streamManager.getContentTimeForStreamTime(position / Consts.MILLISECONDS_MULTIPLIER) * Consts.MILLISECONDS_MULTIPLIER);
+            log.d("XXX SEEKTO NEWPOS3 = " + newPositionToSeek);
+            player.seekTo(newPositionToSeek);
+            mSnapBackTime = 0;
+            return;
+        }
+        log.d("XXX streamManager = null SEEKTO " + position);
+        double totalPlayedAdsDuration = 0;
+        if (cuePoints != null) {
+            for (CuePoint cuePoint : cuePoints) {
+                if (cuePoint.getEndTime() * Consts.MILLISECONDS_MULTIPLIER < position || (cuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER == position && cuePoint.isPlayed())) {
+                    totalPlayedAdsDuration += (cuePoint.getEndTime() - cuePoint.getStartTime());
+                }
+            }
+        }
+        long pos = (long) Math.floor(position + (totalPlayedAdsDuration * Consts.MILLISECONDS_MULTIPLIER));
+        if (isPositionInBetweenCuePoint(pos)) {
+            long newPos = getCuePointEndTime(pos);
+            pos = newPos > 0 ? newPos : pos;
+        }
+        log.d("XXX SEEKTO NEWPOS4 = " + pos);
+        player.seekTo(pos);
+    }
+
+    public void seekToOrig(long position) {
         double totalPlayedAdsDuration = 0;
         if (cuePoints != null) {
             for (CuePoint cuePoint : cuePoints) {
@@ -738,9 +788,57 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
                 player.seekTo((long) Math.floor(candidateCuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER));
                 mSnapBackTime = (position + totalPlayedAdsDuration * Consts.MILLISECONDS_MULTIPLIER) / Consts.MILLISECONDS_MULTIPLIER;
                 return;
+            } else {
+                if (candidateCuePoint != null && Math.floor(position / Consts.MILLISECONDS_MULTIPLIER) >= candidateCuePoint.getStartTime() &&  Math.floor(position / Consts.MILLISECONDS_MULTIPLIER) <= candidateCuePoint.getEndTime()) {
+                    long newPos = -1;
+                    if (isPositionInBetweenCuePoint(position)) {
+                        newPos = getCuePointEndTime(position);
+                    }
+                    player.seekTo(newPos > 0 ? newPos : (long) Math.floor(Consts.MILLISECONDS_MULTIPLIER * (totalPlayedAdsDuration + (streamManager.getContentTimeForStreamTime(position / Consts.MILLISECONDS_MULTIPLIER)))));
+                    mSnapBackTime = 0;//(position + totalPlayedAdsDuration * Consts.MILLISECONDS_MULTIPLIER) / Consts.MILLISECONDS_MULTIPLIER;
+                    return;
+                }
             }
         }
-        player.seekTo((long) Math.floor(position + (totalPlayedAdsDuration * Consts.MILLISECONDS_MULTIPLIER)));
+
+        if (cuePoints != null && cuePoints.size() > 0) { //skip postroll if was played already
+            if (position == getFakePlayerDuration() && cuePoints.get(cuePoints.size()-1).isPlayed() && Math.floor(cuePoints.get(cuePoints.size()-1).getEndTime()) == Math.floor(player.getDuration() / Consts.MILLISECONDS_MULTIPLIER)) {
+                //player.seekTo((long) (cuePoints.get(cuePoints.size()-1).getStartTime() * Consts.MILLISECONDS_MULTIPLIER - 1));
+                player.seekTo((long) (cuePoints.get(cuePoints.size()-1).getStartTime() * Consts.MILLISECONDS_MULTIPLIER));
+                player.pause();
+                return;
+            }
+        }
+
+        long pos = (long) Math.floor(position + (totalPlayedAdsDuration * Consts.MILLISECONDS_MULTIPLIER));
+        if (isPositionInBetweenCuePoint(pos)) {
+            long newPos = getCuePointEndTime(pos);
+            pos = newPos > 0 ? newPos : pos;
+        }
+        player.seekTo(pos);
+    }
+
+    private boolean isPositionInBetweenCuePoint(long position) {
+
+        if (cuePoints != null) {
+            for (CuePoint cuePoint : cuePoints) {
+                if (cuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER >= position && cuePoint.getEndTime() * Consts.MILLISECONDS_MULTIPLIER <= position) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private long getCuePointEndTime(long position) {
+        if (cuePoints != null) {
+            for (CuePoint cuePoint : cuePoints) {
+                if (cuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER >= position && position <= cuePoint.getEndTime() * Consts.MILLISECONDS_MULTIPLIER) {
+                    return (long) (cuePoint.getEndTime() * Consts.MILLISECONDS_MULTIPLIER);
+                }
+            }
+        }
+        return -1;
     }
 
     private static IMADAIConfig parseConfig(Object config) {
@@ -780,10 +878,14 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
     }
 
     private PKMediaConfig createMediaConfig(String url) {
-        PKMediaConfig mediaConfig = new PKMediaConfig();
-        PKMediaEntry mediaEntry = createMediaEntry(url);
-        mediaConfig.setMediaEntry(mediaEntry);
-        return mediaConfig;
+        long daiStartPosition = (mediaConfig != null) ? mediaConfig.getStartPosition() : 0;
+        if (streamManager != null) {
+            daiStartPosition = (long) streamManager.getStreamTimeForContentTime(daiStartPosition);
+        }
+        PKMediaConfig adMediaConfig = new PKMediaConfig().setStartPosition(daiStartPosition);
+        PKMediaEntry adMediaEntry = createMediaEntry(url);
+        adMediaConfig.setMediaEntry(adMediaEntry);
+        return adMediaConfig;
     }
 
     private PKMediaEntry createMediaEntry(String url) {
@@ -819,5 +921,26 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
 
         mediaSources.add(mediaSource);
         return mediaSources;
+    }
+
+    private Map<com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType, com.kaltura.playkit.plugins.ads.AdEvent.Type> buildAdsEventMap() {
+        adEventsMap = new HashMap<>();
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.CLICKED, com.kaltura.playkit.plugins.ads.AdEvent.Type.CLICKED);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.COMPLETED, com.kaltura.playkit.plugins.ads.AdEvent.Type.COMPLETED);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.CUEPOINTS_CHANGED, com.kaltura.playkit.plugins.ads.AdEvent.Type.CUEPOINTS_CHANGED);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.FIRST_QUARTILE, com.kaltura.playkit.plugins.ads.AdEvent.Type.FIRST_QUARTILE);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.MIDPOINT, com.kaltura.playkit.plugins.ads.AdEvent.Type.MIDPOINT);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.THIRD_QUARTILE, com.kaltura.playkit.plugins.ads.AdEvent.Type.THIRD_QUARTILE);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.PAUSED, com.kaltura.playkit.plugins.ads.AdEvent.Type.PAUSED);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.RESUMED, com.kaltura.playkit.plugins.ads.AdEvent.Type.RESUMED);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.STARTED, com.kaltura.playkit.plugins.ads.AdEvent.Type.STARTED);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.SKIPPED, com.kaltura.playkit.plugins.ads.AdEvent.Type.SKIPPED);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_PROGRESS, com.kaltura.playkit.plugins.ads.AdEvent.Type.AD_PROGRESS);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_STARTED, com.kaltura.playkit.plugins.ads.AdEvent.Type.AD_BREAK_STARTED);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_ENDED, com.kaltura.playkit.plugins.ads.AdEvent.Type.AD_BREAK_ENDED);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_READY, com.kaltura.playkit.plugins.ads.AdEvent.Type.AD_BREAK_READY);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.TAPPED, com.kaltura.playkit.plugins.ads.AdEvent.Type.TAPPED);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.ICON_TAPPED, com.kaltura.playkit.plugins.ads.AdEvent.Type.ICON_TAPPED);
+        return adEventsMap;
     }
 }
