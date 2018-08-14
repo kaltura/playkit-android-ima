@@ -878,11 +878,14 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
     }
 
     private PKMediaConfig createMediaConfig(String url) {
-        long daiStartPosition = (mediaConfig != null) ? mediaConfig.getStartPosition() : 0;
-        if (streamManager != null) {
+
+        PKMediaConfig adMediaConfig = new PKMediaConfig();//.setStartPosition(daiStartPosition);
+        long daiStartPosition = (mediaConfig != null && mediaConfig.getStartPosition() > 0) ? mediaConfig.getStartPosition() : 0;
+        if (streamManager != null && daiStartPosition > 0) {
             daiStartPosition = (long) streamManager.getStreamTimeForContentTime(daiStartPosition);
+            adMediaConfig.setStartPosition(daiStartPosition);
         }
-        PKMediaConfig adMediaConfig = new PKMediaConfig().setStartPosition(daiStartPosition);
+
         PKMediaEntry adMediaEntry = createMediaEntry(url);
         adMediaConfig.setMediaEntry(adMediaEntry);
         return adMediaConfig;
