@@ -199,8 +199,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         isAdIsPaused  = false;
         this.mediaConfig = mediaConfig;
         imaSetup();
+        messageBus.post(new AdEvent.AdRequestedEvent(adConfig.getAssetTitle()));
         adsLoader.requestStream(buildStreamRequest());
-
     }
 
     ////////Ads Plugin
@@ -233,13 +233,11 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     }
 
     private AdsLoader.AdsLoadedListener getAdsLoadedListener() {
-        if (adsLoadedListener != null) {
-            return adsLoadedListener;
-        }
+
         adsLoadedListener = new AdsLoader.AdsLoadedListener() {
             @Override
             public void onAdsManagerLoaded(AdsManagerLoadedEvent adsManagerLoadedEvent) {
-                log.d("AdsManager loaded");
+                log.d("onAdsManager loaded");
                 isAdRequested = true;
                 if (streamManager != null) {
                     streamManager.removeAdErrorListener(IMADAIPlugin.this);
