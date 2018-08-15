@@ -383,14 +383,12 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 break;
             case CUEPOINTS_CHANGED: //Dispatched for on-demand streams when the cuepoints change.
                 cuePoints = streamManager.getCuePoints();
-                if (cuePoints != null) {
+                if (cuePoints != null && getFakePlayerDuration() > 0) {
                     for (CuePoint cue : cuePoints) {
                         log.d(String.format("XXX Cue: %s\n", cue.getStartTime() + " " + cue.getEndTime() + " " + cue.isPlayed()));
                     }
-                    if (getFakePlayerDuration() > 0) {
-                        log.d("AD CUEPOINTS_CHANGED");
-                        sendCuePointsUpdate();
-                    }
+                    log.d("AD CUEPOINTS_CHANGED");
+                    sendCuePointsUpdate();
                 }
                 break;
             case AD_PROGRESS: //Fired when there is an update to an ad's progress.
