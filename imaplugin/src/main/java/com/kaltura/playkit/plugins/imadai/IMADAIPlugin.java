@@ -145,11 +145,13 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
                 log.d("XXX Received:PlayerEvent:" + event.eventType().name());
                 if (event.eventType() == PlayerEvent.Type.ENDED) {
                     long currentPosSec = player.getCurrentPosition() / Consts.MILLISECONDS_MULTIPLIER;
-                    CuePoint prevCuePoint = streamManager.getPreviousCuePointForStreamTime(currentPosSec);
-                    if (player.getCurrentPosition() >= player.getDuration() && prevCuePoint  != null && currentPosSec >= prevCuePoint.getEndTime()) {
-                        if (cuePoints != null && cuePoints.size() > 0 && Math.floor(cuePoints.get(cuePoints.size() - 1).getEndTime()) == Math.floor(player.getDuration() / Consts.MILLISECONDS_MULTIPLIER)) {
-                            player.seekTo((long) (cuePoints.get(cuePoints.size() - 1).getStartTime() * Consts.MILLISECONDS_MULTIPLIER));
-                            player.pause();
+                    if (streamManager != null) {
+                        CuePoint prevCuePoint = streamManager.getPreviousCuePointForStreamTime(currentPosSec);
+                        if (player.getCurrentPosition() >= player.getDuration() && prevCuePoint != null && currentPosSec >= prevCuePoint.getEndTime()) {
+                            if (cuePoints != null && cuePoints.size() > 0 && Math.floor(cuePoints.get(cuePoints.size() - 1).getEndTime()) == Math.floor(player.getDuration() / Consts.MILLISECONDS_MULTIPLIER)) {
+                                player.seekTo((long) (cuePoints.get(cuePoints.size() - 1).getStartTime() * Consts.MILLISECONDS_MULTIPLIER));
+                                player.pause();
+                            }
                         }
                     }
                 } else if (event.eventType() == PlayerEvent.Type.PLAYING) {
@@ -260,40 +262,8 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
     }
 
     private StreamRequest buildStreamRequest() {
-//
+
         VideoStreamPlayer videoStreamPlayer = createVideoStreamPlayer();
-//
-//        // Set the license URL.
-//        mVideoPlayer.setLicenseUrl(videoListItem.getLicenseUrl());
-//        mVideoPlayer.setSampleVideoPlayerCallback(
-//                new SampleVideoPlayer.SampleVideoPlayerCallback() {
-//                    @Override
-//                    public void onUserTextReceived(String userText) {
-//                        for (VideoStreamPlayer.VideoStreamPlayerCallback callback : mPlayerCallbacks) {
-//                            callback.onUserTextReceived(userText);
-//                        }
-//                    }
-//                    @Override
-//                    public void onSeek(int windowIndex, long positionMs) {
-//                        double timeToSeek = positionMs;
-//                        if (mStreamManager != null) {
-//                            CuePoint cuePoint = mStreamManager.getPreviousCuePointForStreamTime(positionMs / 1000);
-//                            double bookMarkStreamTime =
-//                                    mStreamManager.getStreamTimeForContentTime(mBookMarkContentTime);
-//                            if (cuePoint != null && !cuePoint.isPlayed() && cuePoint.getEndTime() > bookMarkStreamTime) {
-//                                mSnapBackTime = timeToSeek / 1000.0; // Update snap back time.
-//                                // Missed cue point, so snap back to the beginning of cue point.
-//                                timeToSeek = cuePoint.getStartTime() * 1000;
-//                                Log.i("IMA", "SnapBack to " + timeToSeek);
-//                                mVideoPlayer.seekTo(windowIndex, Math.round(timeToSeek));
-//                                mVideoPlayer.setCanSeek(false);
-//
-//                                return;
-//                            }
-//                        }
-//                        mVideoPlayer.seekTo(windowIndex, Math.round(timeToSeek));
-//                    }
-//                });
         displayContainer.setVideoStreamPlayer(videoStreamPlayer);
         displayContainer.setAdContainer(mAdUiContainer);
 
@@ -410,9 +380,6 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
         }
 
         lastAdEventReceived = adEventsMap.get(adEvent.getType());
-        if (adEvent.getAdData() != null) {
-            log.i("XXX EventData: " + adEvent.getAdData().toString());
-        }
         if (adEvent.getType() != AdEvent.AdEventType.AD_PROGRESS) {
             log.d("XXX Event: " + adEvent.getType());
         }
@@ -427,10 +394,6 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
             case AD_BREAK_ENDED: //Fired when an ad break ends.
                 log.d("AD AD_BREAK_ENDED");
                 isAdDisplayed = false;
-//                if (pkAdProviderListener != null && !appIsInBackground) {
-//                    log.d("preparePlayer and play");
-//                    preparePlayer(true);
-//                }
                 break;
             case CUEPOINTS_CHANGED: //Dispatched for on-demand streams when the cuepoints change.
                 log.d("AD CUEPOINTS_CHANGED");
@@ -558,7 +521,6 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
         }
 
         sendError(errorType, errorMessage, adException);
-        //displayContent();
         preparePlayer(true);
     }
 
@@ -650,7 +612,7 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
 
         if (streamManager != null) {
             long val = (long) streamManager.getContentTimeForStreamTime(Math.floor(playerDuration / Consts.MILLISECONDS_MULTIPLIER)) * Consts.MILLISECONDS_MULTIPLIER;
-            //log.e("XXX Val Duration = " + val);
+            //log.d("XXX Duration = " + val);
             return  val;
         }
 
@@ -688,7 +650,7 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
         }
         if (streamManager != null) {
             long val = (long) (streamManager.getContentTimeForStreamTime(Math.floor(playerPosition / Consts.MILLISECONDS_MULTIPLIER))) * Consts.MILLISECONDS_MULTIPLIER;
-            //log.e("XXX Val Position = " + val);
+            //log.d("XXX Position = " + val);
             return val;
         }
 
@@ -739,83 +701,39 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
                     mSnapBackTime = streamManager.getStreamTimeForContentTime(Math.floor(position / Consts.MILLISECONDS_MULTIPLIER));
                     return;
                 } else {
-                        newPositionToSeek = position;//(long) (streamManager.getContentTimeForStreamTime(Math.floor(position / Consts.MILLISECONDS_MULTIPLIER)) * Consts.MILLISECONDS_MULTIPLIER);;
-                        if (isPositionInBetweenCuePoint(position)) {
-                            newPositionToSeek = getCuePointEndTime(position);
-                        }
-                        log.d("XXX SEEKTO NEWPOS2 = " + newPositionToSeek);
-                        player.seekTo((long) streamManager.getStreamTimeForContentTime(Math.floor(newPositionToSeek / Consts.MILLISECONDS_MULTIPLIER)) * Consts.MILLISECONDS_MULTIPLIER);
-                        mSnapBackTime = 0;
-                        return;
+                    newPositionToSeek = position;
+                    if (isPositionInBetweenCuePoint(position)) {
+                        newPositionToSeek = getCuePointEndTime(position);
+                    }
+                    newPositionToSeek = (long) streamManager.getStreamTimeForContentTime(Math.floor(newPositionToSeek / Consts.MILLISECONDS_MULTIPLIER)) * Consts.MILLISECONDS_MULTIPLIER;
+                    log.d("XXX SEEKTO NEWPOS2 = " + newPositionToSeek);
+                    player.seekTo(newPositionToSeek);
+                    mSnapBackTime = 0;
+                    return;
                 }
             }
-            newPositionToSeek = position;//(long) (streamManager.getContentTimeForStreamTime(position / Consts.MILLISECONDS_MULTIPLIER) * Consts.MILLISECONDS_MULTIPLIER);
+            newPositionToSeek = position;
             log.d("XXX SEEKTO NEWPOS3 = " + newPositionToSeek);
             player.seekTo(newPositionToSeek);
             mSnapBackTime = 0;
             return;
         }
         log.d("XXX streamManager = null SEEKTO " + position);
-        double totalPlayedAdsDuration = 0;
-        if (cuePoints != null) {
-            for (CuePoint cuePoint : cuePoints) {
-                if (cuePoint.getEndTime() * Consts.MILLISECONDS_MULTIPLIER < position || (cuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER == position && cuePoint.isPlayed())) {
-                    totalPlayedAdsDuration += (cuePoint.getEndTime() - cuePoint.getStartTime());
-                }
-            }
-        }
-        long pos = (long) Math.floor(position + (totalPlayedAdsDuration * Consts.MILLISECONDS_MULTIPLIER));
-        if (isPositionInBetweenCuePoint(pos)) {
-            long newPos = getCuePointEndTime(pos);
-            pos = newPos > 0 ? newPos : pos;
-        }
-        log.d("XXX SEEKTO NEWPOS4 = " + pos);
-        player.seekTo(pos);
-    }
-
-    public void seekToOrig(long position) {
-        double totalPlayedAdsDuration = 0;
-        if (cuePoints != null) {
-            for (CuePoint cuePoint : cuePoints) {
-                if (cuePoint.getEndTime() * Consts.MILLISECONDS_MULTIPLIER < position || (cuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER == position && cuePoint.isPlayed())) {
-                    totalPlayedAdsDuration += (cuePoint.getEndTime() - cuePoint.getStartTime());
-                }
-            }
-        }
-        if (streamManager != null) {
-            CuePoint candidateCuePoint = streamManager.getPreviousCuePointForStreamTime(position / Consts.MILLISECONDS_MULTIPLIER);
-            if (candidateCuePoint != null && !candidateCuePoint.isPlayed()) {
-                player.seekTo((long) Math.floor(candidateCuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER));
-                mSnapBackTime = (position + totalPlayedAdsDuration * Consts.MILLISECONDS_MULTIPLIER) / Consts.MILLISECONDS_MULTIPLIER;
-                return;
-            } else {
-                if (candidateCuePoint != null && Math.floor(position / Consts.MILLISECONDS_MULTIPLIER) >= candidateCuePoint.getStartTime() &&  Math.floor(position / Consts.MILLISECONDS_MULTIPLIER) <= candidateCuePoint.getEndTime()) {
-                    long newPos = -1;
-                    if (isPositionInBetweenCuePoint(position)) {
-                        newPos = getCuePointEndTime(position);
-                    }
-                    player.seekTo(newPos > 0 ? newPos : (long) Math.floor(Consts.MILLISECONDS_MULTIPLIER * (totalPlayedAdsDuration + (streamManager.getContentTimeForStreamTime(position / Consts.MILLISECONDS_MULTIPLIER)))));
-                    mSnapBackTime = 0;//(position + totalPlayedAdsDuration * Consts.MILLISECONDS_MULTIPLIER) / Consts.MILLISECONDS_MULTIPLIER;
-                    return;
-                }
-            }
-        }
-
-        if (cuePoints != null && cuePoints.size() > 0) { //skip postroll if was played already
-            if (position == getFakePlayerDuration() && cuePoints.get(cuePoints.size()-1).isPlayed() && Math.floor(cuePoints.get(cuePoints.size()-1).getEndTime()) == Math.floor(player.getDuration() / Consts.MILLISECONDS_MULTIPLIER)) {
-                //player.seekTo((long) (cuePoints.get(cuePoints.size()-1).getStartTime() * Consts.MILLISECONDS_MULTIPLIER - 1));
-                player.seekTo((long) (cuePoints.get(cuePoints.size()-1).getStartTime() * Consts.MILLISECONDS_MULTIPLIER));
-                player.pause();
-                return;
-            }
-        }
-
-        long pos = (long) Math.floor(position + (totalPlayedAdsDuration * Consts.MILLISECONDS_MULTIPLIER));
-        if (isPositionInBetweenCuePoint(pos)) {
-            long newPos = getCuePointEndTime(pos);
-            pos = newPos > 0 ? newPos : pos;
-        }
-        player.seekTo(pos);
+//        double totalPlayedAdsDuration = 0;
+//        if (cuePoints != null) {
+//            for (CuePoint cuePoint : cuePoints) {
+//                if (cuePoint.getEndTime() * Consts.MILLISECONDS_MULTIPLIER < position || (cuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER == position && cuePoint.isPlayed())) {
+//                    totalPlayedAdsDuration += (cuePoint.getEndTime() - cuePoint.getStartTime());
+//                }
+//            }
+//        }
+//        long pos = (long) Math.floor(position + (totalPlayedAdsDuration * Consts.MILLISECONDS_MULTIPLIER));
+//        if (isPositionInBetweenCuePoint(pos)) {
+//            long newPos = getCuePointEndTime(pos);
+//            pos = newPos > 0 ? newPos : pos;
+//        }
+        log.d("XXX SEEKTO NEWPOS4 = " + position);
+        player.seekTo(position);
     }
 
     private boolean isPositionInBetweenCuePoint(long position) {
