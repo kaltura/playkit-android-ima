@@ -3,9 +3,9 @@ package com.kaltura.playkit.plugins.imadai;
 import android.content.Context;
 import android.view.ViewGroup;
 
+import com.google.ads.interactivemedia.v3.api.Ad;
 import com.google.ads.interactivemedia.v3.api.AdError;
 import com.google.ads.interactivemedia.v3.api.AdErrorEvent;
-import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.ads.interactivemedia.v3.api.AdsLoader;
 import com.google.ads.interactivemedia.v3.api.AdsManagerLoadedEvent;
 import com.google.ads.interactivemedia.v3.api.AdsRenderingSettings;
@@ -37,6 +37,8 @@ import com.kaltura.playkit.ads.AdDAIEnabledPlayerController;
 import com.kaltura.playkit.ads.AdEnabledPlayerController;
 import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
+import com.kaltura.playkit.plugins.ads.AdCuePoints;
+import com.kaltura.playkit.plugins.ads.AdEvent;
 import com.kaltura.playkit.ads.PKAdProviderListener;
 import com.kaltura.playkit.player.PlayerSettings;
 import com.kaltura.playkit.player.metadata.PKMetadata;
@@ -51,7 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, AdErrorEvent.AdErrorListener, AdsProvider {
+public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactivemedia.v3.api.AdEvent.AdEventListener, AdErrorEvent.AdErrorListener, AdsProvider {
     private static final PKLog log = PKLog.get("IMAPluginDAI");
 
     private Player player;
@@ -82,7 +84,7 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
     private List<CuePoint> cuePoints;
     private PlayerEvent.Type lastPlaybackPlayerState;
     private com.kaltura.playkit.plugins.ads.AdEvent.Type lastAdEventReceived;
-    private Map<AdEvent.AdEventType, com.kaltura.playkit.plugins.ads.AdEvent.Type> adEventsMap;
+    private Map<com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType, com.kaltura.playkit.plugins.ads.AdEvent.Type> adEventsMap;
     private Context mContext;
     private ViewGroup mAdUiContainer;
 
@@ -365,63 +367,89 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
         }
 
         lastAdEventReceived = adEventsMap.get(adEvent.getType());
-        if (adEvent.getType() != AdEvent.AdEventType.AD_PROGRESS) {
+        if (adEvent.getType() != com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_PROGRESS) {
             log.d("XXX Event: " + adEvent.getType());
         }
         switch (adEvent.getType()) {
-            case LOADED: // Fired when the stream manifest is available.
-                log.d("AD LOADED");
-                break;
             case AD_BREAK_STARTED: //Fired when an ad break starts.
                 log.d("AD AD_BREAK_STARTED");
                 isAdDisplayed = true;
+                messageBus.post(new AdEvent(AdEvent.Type.AD_BREAK_STARTED));
                 break;
             case AD_BREAK_ENDED: //Fired when an ad break ends.
                 log.d("AD AD_BREAK_ENDED");
+                messageBus.post(new AdEvent(AdEvent.Type.AD_BREAK_ENDED));
                 isAdDisplayed = false;
                 break;
             case CUEPOINTS_CHANGED: //Dispatched for on-demand streams when the cuepoints change.
-                log.d("AD CUEPOINTS_CHANGED");
                 cuePoints = streamManager.getCuePoints();
                 if (cuePoints != null) {
                     for (CuePoint cue : cuePoints) {
                         log.d(String.format("XXX Cue: %s\n", cue.getStartTime() + " " + cue.getEndTime() + " " + cue.isPlayed()));
                     }
+                    if (getFakePlayerDuration() > 0) {
+                        log.d("AD CUEPOINTS_CHANGED");
+                        sendCuePointsUpdate();
+                    }
                 }
                 break;
             case AD_PROGRESS: //Fired when there is an update to an ad's progress.
+                //messageBus.post(new AdEvent(AdEvent.Type.AD_PROGRESS));
                 break;
             case CLICKED: //Dispatched when the click element is clicked or tapped while an ad is being played.
                 log.d("AD CLICKED");
+                messageBus.post(new AdEvent(AdEvent.Type.CLICKED));
                 break;
             case STARTED: //Fired when an ad starts.
                 log.d("AD STARTED");
+                adInfo = createAdInfo(adEvent.getAd());
+                messageBus.post(new AdEvent.AdStartedEvent(adInfo));
                 break;
             case FIRST_QUARTILE: //Fired when an ad reaches its first quartile.
                 log.d("AD FIRST_QUARTILE");
+                messageBus.post(new AdEvent(AdEvent.Type.FIRST_QUARTILE));
                 break;
             case MIDPOINT: //Fired when an ad reaches its midpoint.
                 log.d("AD MIDPOINT");
+                messageBus.post(new AdEvent(AdEvent.Type.MIDPOINT));
                 break;
             case THIRD_QUARTILE: //Fired when an ad reaches its third quartile.
                 log.d("AD THIRD_QUARTILE");
+                messageBus.post(new AdEvent(AdEvent.Type.THIRD_QUARTILE));
                 break;
             case PAUSED:
                 log.d("AD PAUSED");
+                isAdIsPaused = true;
+                isAdDisplayed = true;
+                adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
+                messageBus.post(new AdEvent.AdPausedEvent(adInfo));
                 break;
             case RESUMED:
                 log.d("AD RESUMED");
+                isAdIsPaused = false;
+                adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
+                messageBus.post(new AdEvent.AdResumedEvent(adInfo));
                 break;
             case COMPLETED: //Fired when an ad is complete.
                 log.d("AD COMPLETED");
+                messageBus.post(new AdEvent(AdEvent.Type.COMPLETED));
                 break;
             case TAPPED:
                 log.d("AD TAPPED");
+                messageBus.post(new AdEvent(AdEvent.Type.TAPPED));
                 break;
             case ICON_TAPPED:
                 log.d("AD ICON_TAPPED");
+                messageBus.post(new AdEvent(AdEvent.Type.ICON_TAPPED));
             case LOG:
-                log.d("AD LOG ERROR");
+                log.e("AD LOG ERROR");
+                String error = "Non-fatal Error";
+                if (adEvent.getAdData() != null) {
+                    if (adEvent.getAdData().containsKey("errorMessage")) {
+                        error = adEvent.getAdData().get("errorMessage");
+                    }
+                }
+                sendError(PKAdErrorType.QUIET_LOG_ERROR, error, null);
                 break;
             default:
                 break;
@@ -513,6 +541,67 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
         log.e("Ad Error: " + errorType.name() + " with message " + message);
         com.kaltura.playkit.plugins.ads.AdEvent errorEvent = new com.kaltura.playkit.plugins.ads.AdEvent.Error(new PKError(errorType, message, exception));
         messageBus.post(errorEvent);
+    }
+
+    private void sendCuePointsUpdate() {
+        List<Long> cuePointsList = new ArrayList<>();
+        StringBuilder cuePointBuilder = new StringBuilder();
+        if (cuePoints != null) {
+            int cuePointIndex = 1;
+            for (CuePoint cuePoint : cuePoints) {
+                long cuePointVal = (long) streamManager.getContentTimeForStreamTime(cuePoint.getStartTime());
+
+                if (cuePointIndex == cuePoints.size() && cuePointVal * Consts.MILLISECONDS_MULTIPLIER == getFakePlayerDuration()) {
+                    cuePointBuilder.append(-1).append("|");
+                    cuePointsList.add((-1L));
+                } else {
+                    cuePointBuilder.append(cuePointVal).append("|");
+                    cuePointsList.add((cuePointVal * Consts.MILLISECONDS_MULTIPLIER));
+                }
+                cuePointIndex++;
+            }
+            log.d("sendCuePointsUpdate cuePoints = " + cuePointBuilder.toString());
+
+            if (cuePointsList.size() > 0) {
+                messageBus.post(new AdEvent.AdCuePointsUpdateEvent(new AdCuePoints(cuePointsList)));
+            }
+        }
+    }
+
+    private AdInfo createAdInfo(Ad ad) {
+        String adDescription = ad.getDescription();
+        long adDuration = (long) (ad.getDuration() * Consts.MILLISECONDS_MULTIPLIER);
+        long adPlayHead = getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER;
+        String adTitle = ad.getTitle();
+        boolean isAdSkippable = ad.isSkippable();
+        String contentType = ad.getContentType();
+        String adId = ad.getAdId();
+        String adSystem = ad.getAdSystem();
+        int adHeight = ad.getHeight();
+        int adWidth = ad.getWidth();
+        int totalAdsInPod = ad.getAdPodInfo().getTotalAds();
+        int adIndexInPod = ad.getAdPodInfo().getAdPosition();   // index starts in 1
+        int podCount = (streamManager != null && streamManager.getCuePoints() != null) ? streamManager.getCuePoints().size() : 0;
+        int podIndex = (ad.getAdPodInfo().getPodIndex() >= 0) ? ad.getAdPodInfo().getPodIndex() + 1 : podCount; // index starts in 0
+        boolean isBumper = ad.getAdPodInfo().isBumper();
+        long adPodTimeOffset = (long) (ad.getAdPodInfo().getTimeOffset() * Consts.MILLISECONDS_MULTIPLIER);
+
+
+        AdInfo adInfo = new AdInfo(adDescription, adDuration, adPlayHead,
+                adTitle, isAdSkippable,
+                contentType, adId,
+                adSystem, adHeight,
+                adWidth,
+                totalAdsInPod,
+                adIndexInPod,
+                podIndex,
+                podCount,
+                isBumper,
+                (adPodTimeOffset < 0) ? -1 : adPodTimeOffset);
+
+        log.v("AdInfo: " + adInfo.toString());
+        return adInfo;
+
     }
 
     @Override
