@@ -66,6 +66,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private PKMediaConfig mediaConfig;
     //////////////////////
 
+    private VideoStreamPlayer videoStreamPlayer;
     private boolean isAdDisplayed;
     private boolean isAdIsPaused;
     private boolean isAdRequested;
@@ -198,8 +199,6 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         isAdIsPaused  = false;
         this.mediaConfig = mediaConfig;
         imaSetup();
-        displayContainer = sdkFactory.createStreamDisplayContainer();
-
         adsLoader.requestStream(buildStreamRequest());
 
     }
@@ -242,6 +241,12 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             public void onAdsManagerLoaded(AdsManagerLoadedEvent adsManagerLoadedEvent) {
                 log.d("AdsManager loaded");
                 isAdRequested = true;
+                if (streamManager != null) {
+                    streamManager.removeAdErrorListener(IMADAIPlugin.this);
+                    streamManager.removeAdEventListener(IMADAIPlugin.this);
+                    streamManager.destroy();
+                    streamManager = null;
+                }
                 streamManager = adsManagerLoadedEvent.getStreamManager();
                 streamManager.addAdErrorListener(IMADAIPlugin.this);
                 streamManager.addAdEventListener(IMADAIPlugin.this);
@@ -267,10 +272,12 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         return renderingSettings;
     }
     private StreamRequest buildStreamRequest() {
-
-        VideoStreamPlayer videoStreamPlayer = createVideoStreamPlayer();
-        displayContainer.setVideoStreamPlayer(videoStreamPlayer);
-        displayContainer.setAdContainer(mAdUiContainer);
+        if (videoStreamPlayer == null) {
+            videoStreamPlayer = createVideoStreamPlayer();
+            displayContainer = sdkFactory.createStreamDisplayContainer();
+            displayContainer.setVideoStreamPlayer(videoStreamPlayer);
+            displayContainer.setAdContainer(mAdUiContainer);
+        }
 
         StreamRequest request;
         // Live stream request.
@@ -370,6 +377,11 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     @Override
     protected void onDestroy() {
         isAdRequested = false;
+        if (streamManager != null) {
+            streamManager.destroy();
+            streamManager = null;
+        }
+
     }
 
     @Override
