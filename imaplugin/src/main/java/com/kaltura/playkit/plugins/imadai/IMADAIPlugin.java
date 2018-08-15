@@ -56,7 +56,7 @@ import java.util.List;
 import java.util.Map;
 
 public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactivemedia.v3.api.AdEvent.AdEventListener, AdErrorEvent.AdErrorListener, AdsProvider {
-    private static final PKLog log = PKLog.get("IMAPluginDAI");
+    private static final PKLog log = PKLog.get("IMADAIPlugin");
 
     private Player player;
     private Context context;

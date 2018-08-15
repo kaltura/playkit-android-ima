@@ -72,7 +72,7 @@ import java.util.Map;
  */
 
 public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.interactivemedia.v3.api.AdEvent.AdEventListener, AdErrorEvent.AdErrorListener, ExoPlayerWithAdPlayback.OnAdPlayBackListener {
-    private static final PKLog log = PKLog.get("IMADAIPlugin");
+    private static final PKLog log = PKLog.get("IMAPlugin");
 
     private Player player;
     private Context context;
@@ -253,7 +253,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         imaSetup();
         log.d("adtag = " + adConfig.getAdTagURL());
 
-        requestAdsFromIMA("");
+        requestAdsFromIMA(adConfig.getAdTagURL());
     }
 
     @Override
