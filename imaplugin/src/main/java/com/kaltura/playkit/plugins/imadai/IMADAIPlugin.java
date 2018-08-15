@@ -157,22 +157,7 @@ public class IMADAIPlugin extends PKPlugin implements AdEvent.AdEventListener, A
                 } else if (event.eventType() == PlayerEvent.Type.PLAYING) {
 
                 } else if (event.eventType() == PlayerEvent.Type.SEEKING) {
-//                    PlayerEvent.Seeking seeking = (PlayerEvent.Seeking) event;
-//                    double timeToSeek = (double) seeking.targetPosition;
-//                    if (streamManager != null) {
-//                        CuePoint cuePoint = streamManager.getPreviousCuePointForStreamTime(timeToSeek / Consts.MILLISECONDS_MULTIPLIER);
-//                        double bookMarkStreamTime =
-//                                streamManager.getStreamTimeForContentTime(mBookMarkContentTime);
-//                        if (cuePoint != null && !cuePoint.isPlayed() && cuePoint.getEndTime() > bookMarkStreamTime) {
-//                            //mSnapBackTime = timeToSeek / 1000.0; // Update snap back time.
-//                            // Missed cue point, so snap back to the beginning of cue point.
-//                            timeToSeek = cuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER;
-//                            log.d("SnapBack to " + timeToSeek);
-//                            player.seekTo(Math.round(timeToSeek));
-//                            return;
-//                        }
-//                    }
-//                    player.seekTo(Math.round(timeToSeek));
+
                 } else if (event.eventType() == PlayerEvent.Type.METADATA_AVAILABLE) {
                     PlayerEvent.MetadataAvailable metadataAvailableEvent = (PlayerEvent.MetadataAvailable) event;
                     for (VideoStreamPlayer.VideoStreamPlayerCallback callback : mPlayerCallbacks) {
