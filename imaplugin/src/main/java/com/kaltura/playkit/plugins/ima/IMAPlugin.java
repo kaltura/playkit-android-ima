@@ -397,6 +397,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             playerLastPosition = -1;
         } else {
             log.d("onApplicationResumed Default..... lastAdEventReceived = " + lastAdEventReceived);
+            playerLastPosition = -1;
             if (adsManager != null) {
                 adsManager.resume();
                 if (lastAdEventReceived != AdEvent.Type.ALL_ADS_COMPLETED) {
