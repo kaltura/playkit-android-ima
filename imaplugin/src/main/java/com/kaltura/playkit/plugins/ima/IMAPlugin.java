@@ -1,10 +1,10 @@
 /*
  * ============================================================================
  * Copyright (C) 2017 Kaltura Inc.
- * 
+ *
  * Licensed under the AGPLv3 license, unless a different license for a
  * particular library is specified in the applicable library path.
- * 
+ *
  * You may obtain a copy of the License at
  * https://www.gnu.org/licenses/agpl-3.0.html
  * ============================================================================
@@ -118,6 +118,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private boolean isContentPrepared;
     private boolean isAutoPlay;
     private boolean appInBackgroundDuringAdLoad;
+    private long playerLastPosition = -1;
     private PlayerEvent.Type lastPlaybackPlayerState;
     private AdEvent.Type lastAdEventReceived;
     private boolean adManagerInitDuringBackground;
@@ -331,6 +332,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     @Override
     protected void onApplicationPaused() {
         log.d("onApplicationPaused");
+        if (player != null) {
+            playerLastPosition = player.getCurrentPosition();
+        }
         if (videoPlayerWithAdPlayback != null) {
             videoPlayerWithAdPlayback.setIsAppInBackground(true);
         }
@@ -383,15 +387,17 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             player.play();
         } else if (player != null && lastPlaybackPlayerState == PlayerEvent.Type.PAUSE) {
             log.d("onApplicationResumed lastPlaybackPlayerState == PlayerEvent.Type.PAUSE pos = " + player.getCurrentPosition());
-            if (player.getCurrentPosition() == 0) {
+            if (playerLastPosition == 0) {
                 if (isContentPrepared) {
                     player.play();
                 } else {
                     preparePlayer(true);
                 }
             }
+            playerLastPosition = -1;
         } else {
             log.d("onApplicationResumed Default..... lastAdEventReceived = " + lastAdEventReceived);
+            playerLastPosition = -1;
             if (adsManager != null) {
                 adsManager.resume();
                 if (lastAdEventReceived != AdEvent.Type.ALL_ADS_COMPLETED) {
