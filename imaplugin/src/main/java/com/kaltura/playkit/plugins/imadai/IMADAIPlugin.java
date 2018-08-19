@@ -215,6 +215,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             // Add listeners for when ads are loaded and for errors.
             adsLoader.addAdErrorListener(IMADAIPlugin.this);
             adsLoader.addAdsLoadedListener(getAdsLoadedListener());
+        } else {
+            // NOT sure if needed - adsLoader.contentComplete();
         }
     }
 
