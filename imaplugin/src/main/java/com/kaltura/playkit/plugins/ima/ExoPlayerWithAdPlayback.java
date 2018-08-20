@@ -164,7 +164,10 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         mVideoAdPlayer = new VideoAdPlayer() {
             @Override
             public int getVolume() {
-                return 1;
+                if (player != null) {
+                    return (int) (player.getVolume() * 100);
+                }
+                return 0;
             }
 
             @Override
