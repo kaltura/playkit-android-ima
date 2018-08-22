@@ -6,6 +6,7 @@ jdk:
 android:
   components:
     - tools
+    - extra-google-google_play_services
 before_script:
   - curl https://kaltura.github.io/fe-tools/android/license.sh | sh
 script:
