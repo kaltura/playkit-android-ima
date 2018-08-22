@@ -224,13 +224,14 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         return null;
     }
-
-
+    
     @Override
     protected void onUpdateMedia(PKMediaConfig mediaConfig) {
         log.d("Start onUpdateMedia");
         this.mediaConfig = mediaConfig;
-        log.d("mediaConfig start pos = " + mediaConfig.getStartPosition());
+        if (mediaConfig != null) {
+            log.d("mediaConfig start pos = " + mediaConfig.getStartPosition());
+        }
         isContentPrepared = false;
         isAutoPlay = false;
         isAdRequested = false;
@@ -406,10 +407,15 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     return;
                 }
             }
-            log.d("onApplicationResumed Default..... request Ad");
+
             clearAdLoadingInBackground();
-            onUpdateMedia(mediaConfig);
-            start();
+            if (mediaConfig != null) {
+                log.d("onApplicationResumed Default..... request Ad");
+                onUpdateMedia(mediaConfig);
+                start();
+            } else {
+                log.e("Error: mediaConfig == null during on resume");
+            }
         }
     }
 
