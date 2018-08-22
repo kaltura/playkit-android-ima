@@ -414,6 +414,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 log.d("onApplicationResumed Default..... request Ad");
                 onUpdateMedia(mediaConfig);
                 start();
+            } else {
+                log.e("Error: mediaConfig == null during on resume");
             }
         }
     }
