@@ -49,7 +49,7 @@ public class IMAConfig {
     public static final String AD_OMID_ENABLED          = "isOMIDExperimentalEnabled";
     public static final String AD_PLAYER_TYPE           = "playerType";
     public static final String AD_PLAYER_VERSION        = "playerVersion";
-    
+
     private String language;
     private String adTagURL;
     private AdTagType adTagType;
@@ -287,6 +287,4 @@ public class IMAConfig {
 
         return jsonObject;
     }
-
-
 }
