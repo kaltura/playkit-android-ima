@@ -44,6 +44,7 @@ import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PKMediaConfig;
 import com.kaltura.playkit.PKMediaFormat;
 import com.kaltura.playkit.PKPlugin;
+import com.kaltura.playkit.PlayKitManager;
 import com.kaltura.playkit.Player;
 import com.kaltura.playkit.PlayerDecorator;
 import com.kaltura.playkit.PlayerEvent;
@@ -320,6 +321,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (imaSdkSettings == null) {
             imaSdkSettings = ImaSdkFactory.getInstance().createImaSdkSettings();
         }
+        imaSdkSettings.setPlayerType(PlayKitManager.PLAYER_TYPE);
+        imaSdkSettings.setPlayerVersion(PlayKitManager.VERSION_STRING);
         // Tell the SDK we want to control ad break playback.
         //imaSdkSettings.setAutoPlayAdBreaks(true);
         if (adConfig.getMaxRedirects() > 0) {
