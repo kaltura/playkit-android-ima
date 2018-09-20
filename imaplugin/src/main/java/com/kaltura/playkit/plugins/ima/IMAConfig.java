@@ -32,6 +32,7 @@ public class IMAConfig {
     public static final int DEFAULT_AD_LOAD_TIMEOUT = 8;
     public static final int DEFAULT_CUE_POINTS_CHANGED_DELAY = 2000;
     public static final int DEFAULT_AD_LOAD_COUNT_DOWN_TICK = 250;
+    public static final String KALTURA_VP_ANDROID = "kaltura-vp-android";
 
     public static final String AD_TAG_LANGUAGE     = "language";
     public static final String AD_TAG_TYPE = "adTagType";
@@ -48,7 +49,7 @@ public class IMAConfig {
     public static final String AD_OMID_ENABLED          = "isOMIDExperimentalEnabled";
     public static final String AD_PLAYER_TYPE           = "playerType";
     public static final String AD_PLAYER_VERSION        = "playerVersion";
-
+    
     private String language;
     private String adTagURL;
     private AdTagType adTagType;
@@ -80,7 +81,7 @@ public class IMAConfig {
         this.videoMimeTypes.add(PKMediaFormat.mp4.mimeType);
         this.adTagURL = null;         //=> must be set via setter
         this.isOMIDExperimentalEnabled = false;
-        this.playerType                = PlayKitManager.PLAYER_TYPE;
+        this.playerType                = KALTURA_VP_ANDROID; //PlayKitManager.PLAYER_TYPE;
         this.playerVersion             = PlayKitManager.VERSION_STRING;
 
         //if (tagTimes == null) {

@@ -231,8 +231,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         log.d("Start onUpdateMedia");
         this.mediaConfig = mediaConfig;
         if (mediaConfig != null) {
-            log.d("mediaConfig start pos = " + mediaConfig.getStartPosition());
+            long startPos = (mediaConfig.getStartPosition() != null) ? mediaConfig.getStartPosition() : 0;
+            log.d("mediaConfig start pos = " + startPos);
         }
+
         isContentPrepared = false;
         isAutoPlay = false;
         isAdRequested = false;
@@ -294,7 +296,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         renderingSettings = ImaSdkFactory.getInstance().createAdsRenderingSettings();
 
-        if (mediaConfig != null && mediaConfig.getStartPosition() > 0) {
+        if (mediaConfig != null && mediaConfig.getStartPosition() != null && mediaConfig.getStartPosition() > 0) {
             renderingSettings.setPlayAdsAfterTime(mediaConfig.getStartPosition());
         }
 
