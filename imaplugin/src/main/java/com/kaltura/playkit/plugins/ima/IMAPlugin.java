@@ -321,8 +321,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (imaSdkSettings == null) {
             imaSdkSettings = ImaSdkFactory.getInstance().createImaSdkSettings();
         }
-        imaSdkSettings.setPlayerType(PlayKitManager.PLAYER_TYPE);
-        imaSdkSettings.setPlayerVersion(PlayKitManager.VERSION_STRING);
+        imaSdkSettings.setPlayerType(adConfig.getPlayerType());
+        imaSdkSettings.setPlayerVersion(adConfig.getPlayerVersion());
         // Tell the SDK we want to control ad break playback.
         //imaSdkSettings.setAutoPlayAdBreaks(true);
         if (adConfig.getMaxRedirects() > 0) {

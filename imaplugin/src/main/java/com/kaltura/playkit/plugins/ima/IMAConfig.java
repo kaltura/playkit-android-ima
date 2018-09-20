@@ -17,6 +17,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.kaltura.playkit.PKMediaFormat;
+import com.kaltura.playkit.PlayKitManager;
 import com.kaltura.playkit.ads.AdTagType;
 
 import java.util.ArrayList;
@@ -45,6 +46,8 @@ public class IMAConfig {
     public static final String AD_MAX_REDIRECTS         = "adMaxRedirects";
     public static final String AD_ENABLE_DEBUG_MODE     = "enableDebugMode";
     public static final String AD_OMID_ENABLED          = "isOMIDExperimentalEnabled";
+    public static final String AD_PLAYER_TYPE           = "playerType";
+    public static final String AD_PLAYER_VERSION        = "playerVersion";
 
     private String language;
     private String adTagURL;
@@ -57,6 +60,8 @@ public class IMAConfig {
     private int adLoadTimeOut; // in sec
     private int maxRedirects;
     private boolean isOMIDExperimentalEnabled;
+    private String playerType;
+    private String playerVersion;
     private List<String> videoMimeTypes;
     //private Map<Double,String> tagsTimes; // <AdTime,URL_to_execute>
 
@@ -75,6 +80,8 @@ public class IMAConfig {
         this.videoMimeTypes.add(PKMediaFormat.mp4.mimeType);
         this.adTagURL = null;         //=> must be set via setter
         this.isOMIDExperimentalEnabled = false;
+        this.playerType                = PlayKitManager.PLAYER_TYPE;
+        this.playerVersion             = PlayKitManager.VERSION_STRING;
 
         //if (tagTimes == null) {
         //    tagTimes = new HashMap<>();
@@ -206,6 +213,24 @@ public class IMAConfig {
         return isOMIDExperimentalEnabled;
     }
 
+    public String getPlayerType() {
+        return playerType;
+    }
+
+    public IMAConfig setPlayerType(String playerType) {
+        this.playerType = playerType;
+        return this;
+    }
+
+    public String getPlayerVersion() {
+        return playerVersion;
+    }
+
+    public IMAConfig setPlayerVersion(String playerVersion) {
+        this.playerVersion = playerVersion;
+        return this;
+    }
+
     //    public Map<Double, String> getTagsTimes() {
 //        return tagsTimes;
 //    }
@@ -236,6 +261,8 @@ public class IMAConfig {
         jsonObject.addProperty(AD_ENABLE_DEBUG_MODE, enableDebugMode);
         jsonObject.addProperty(AD_MAX_REDIRECTS, maxRedirects);
         jsonObject.addProperty(AD_OMID_ENABLED, isOMIDExperimentalEnabled);
+        jsonObject.addProperty(AD_PLAYER_TYPE, playerType);
+        jsonObject.addProperty(AD_PLAYER_VERSION, playerVersion);
 
 
         Gson gson = new Gson();
@@ -259,4 +286,6 @@ public class IMAConfig {
 
         return jsonObject;
     }
+
+
 }
