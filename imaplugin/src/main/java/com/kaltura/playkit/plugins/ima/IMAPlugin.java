@@ -387,7 +387,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             log.d("onApplicationResumed lastPlaybackPlayerState == PlayerEvent.Type.PLAYING ");
             isAdError = false;
             displayContent();
-            player.play();
+            if (isAdShouldAutoPlayOnResume()) {
+                player.play();
+            }
         } else if (player != null && lastPlaybackPlayerState == PlayerEvent.Type.PAUSE) {
             log.d("onApplicationResumed lastPlaybackPlayerState == PlayerEvent.Type.PAUSE pos = " + player.getCurrentPosition());
             if (playerLastPositionTmp == 0) {
