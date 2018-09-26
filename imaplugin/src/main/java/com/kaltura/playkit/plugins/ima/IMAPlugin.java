@@ -581,6 +581,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public void destroyAdsManager() {
+        isAdRequested = false;
         if (adsManager == null) {
             return;
         }
@@ -589,7 +590,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         contentCompleted();
         adsManager.destroy();
         adsManager = null;
-        isAdRequested = false;
         isAdDisplayed = false;
         adPlaybackCancelled = false;
     }
