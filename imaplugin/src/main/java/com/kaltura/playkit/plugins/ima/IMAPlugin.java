@@ -44,6 +44,7 @@ import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PKMediaConfig;
 import com.kaltura.playkit.PKMediaFormat;
 import com.kaltura.playkit.PKPlugin;
+import com.kaltura.playkit.PlayKitManager;
 import com.kaltura.playkit.Player;
 import com.kaltura.playkit.PlayerDecorator;
 import com.kaltura.playkit.PlayerEvent;
@@ -230,8 +231,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         log.d("Start onUpdateMedia");
         this.mediaConfig = mediaConfig;
         if (mediaConfig != null) {
-            log.d("mediaConfig start pos = " + mediaConfig.getStartPosition());
+            long startPos = (mediaConfig.getStartPosition() != null) ? mediaConfig.getStartPosition() : 0;
+            log.d("mediaConfig start pos = " + startPos);
         }
+
         isContentPrepared = false;
         isAutoPlay = false;
         isAdRequested = false;
@@ -293,7 +296,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         renderingSettings = ImaSdkFactory.getInstance().createAdsRenderingSettings();
 
-        if (mediaConfig != null && mediaConfig.getStartPosition() > 0) {
+        if (mediaConfig != null && mediaConfig.getStartPosition() != null && mediaConfig.getStartPosition() > 0) {
             renderingSettings.setPlayAdsAfterTime(mediaConfig.getStartPosition());
         }
 
@@ -320,6 +323,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (imaSdkSettings == null) {
             imaSdkSettings = ImaSdkFactory.getInstance().createImaSdkSettings();
         }
+        imaSdkSettings.setPlayerType(adConfig.getPlayerType());
+        imaSdkSettings.setPlayerVersion(adConfig.getPlayerVersion());
         // Tell the SDK we want to control ad break playback.
         //imaSdkSettings.setAutoPlayAdBreaks(true);
         if (adConfig.getMaxRedirects() > 0) {
