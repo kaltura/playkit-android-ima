@@ -32,23 +32,24 @@ public class IMAConfig {
     public static final int DEFAULT_AD_LOAD_TIMEOUT = 8;
     public static final int DEFAULT_CUE_POINTS_CHANGED_DELAY = 2000;
     public static final int DEFAULT_AD_LOAD_COUNT_DOWN_TICK = 250;
-    public static final String KALTURA_VP_ANDROID = "kaltura-vp-android";
+    public static final String AD_PLAYER_TYPE = "kaltura-vp-android";
+    public static final String AD_PLAYER_VERSION = PlayKitManager.VERSION_STRING;
 
-    public static final String AD_TAG_LANGUAGE     = "language";
-    public static final String AD_TAG_TYPE = "adTagType";
-    public static final String AD_TAG_URL          = "adTagURL";
-    public static final String ENABLE_BG_PLAYBACK  = "enableBackgroundPlayback";
-    public static final String AD_VIDEO_BITRATE    = "videoBitrate";
-    public static final String AD_VIDEO_MIME_TYPES      = "videoMimeTypes";
-    //public static final String AD_TAG_TIMES             = "tagsTimes";
-    public static final String AD_ATTRIBUTION_UIELEMENT = "adAttribution";
-    public static final String AD_COUNTDOWN_UIELEMENT   = "adCountDown";
-    public static final String AD_LOAD_TIMEOUT          = "adLoadTimeOut";
-    public static final String AD_MAX_REDIRECTS         = "adMaxRedirects";
-    public static final String AD_ENABLE_DEBUG_MODE     = "enableDebugMode";
-    public static final String AD_OMID_ENABLED          = "isOMIDExperimentalEnabled";
-    public static final String AD_PLAYER_TYPE           = "playerType";
-    public static final String AD_PLAYER_VERSION        = "playerVersion";
+    public static final String AD_TAG_LANGUAGE_KEY           = "language";
+    public static final String AD_TAG_TYPE_KEY               = "adTagType";
+    public static final String AD_TAG_URL_KEY                = "adTagURL";
+    public static final String ENABLE_BG_PLAYBACK_KEY        = "enableBackgroundPlayback";
+    public static final String AD_VIDEO_BITRATE_KEY          = "videoBitrate";
+    public static final String AD_VIDEO_MIME_TYPES_KEY       = "videoMimeTypes";
+    //public static final String AD_TAG_TIMES_KEY            = "tagsTimes";
+    public static final String AD_ATTRIBUTION_UIELEMENT_KEY  = "adAttribution";
+    public static final String AD_COUNTDOWN_UIELEMENT_KEY    = "adCountDown";
+    public static final String AD_LOAD_TIMEOUT_KEY           = "adLoadTimeOut";
+    public static final String AD_MAX_REDIRECTS_KEY          = "adMaxRedirects";
+    public static final String AD_ENABLE_DEBUG_MODE_KEY      = "enableDebugMode";
+    public static final String AD_OMID_ENABLED_KEY           = "isOMIDExperimentalEnabled";
+    public static final String AD_PLAYER_TYPE_KEY            = "playerType";
+    public static final String AD_PLAYER_VERSION_KEY         = "playerVersion";
 
     private String language;
     private String adTagURL;
@@ -81,8 +82,8 @@ public class IMAConfig {
         this.videoMimeTypes.add(PKMediaFormat.mp4.mimeType);
         this.adTagURL = null;         //=> must be set via setter
         this.isOMIDExperimentalEnabled = false;
-        this.playerType                = KALTURA_VP_ANDROID; //PlayKitManager.PLAYER_TYPE;
-        this.playerVersion             = PlayKitManager.VERSION_STRING;
+        this.playerType                = AD_PLAYER_TYPE;
+        this.playerVersion             = AD_PLAYER_VERSION;
 
         //if (tagTimes == null) {
         //    tagTimes = new HashMap<>();
@@ -251,19 +252,19 @@ public class IMAConfig {
 
     public JsonObject toJSONObject() {
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty(AD_TAG_LANGUAGE, language);
-        jsonObject.addProperty(AD_TAG_TYPE, adTagType.name());
-        jsonObject.addProperty(AD_TAG_URL, adTagURL);
-        jsonObject.addProperty(ENABLE_BG_PLAYBACK, enableBackgroundPlayback);
-        jsonObject.addProperty(AD_VIDEO_BITRATE, videoBitrate);
-        jsonObject.addProperty(AD_ATTRIBUTION_UIELEMENT, adAttribution);
-        jsonObject.addProperty(AD_COUNTDOWN_UIELEMENT, adCountDown);
-        jsonObject.addProperty(AD_LOAD_TIMEOUT, adLoadTimeOut);
-        jsonObject.addProperty(AD_ENABLE_DEBUG_MODE, enableDebugMode);
-        jsonObject.addProperty(AD_MAX_REDIRECTS, maxRedirects);
-        jsonObject.addProperty(AD_OMID_ENABLED, isOMIDExperimentalEnabled);
-        jsonObject.addProperty(AD_PLAYER_TYPE, playerType);
-        jsonObject.addProperty(AD_PLAYER_VERSION, playerVersion);
+        jsonObject.addProperty(AD_TAG_LANGUAGE_KEY , language);
+        jsonObject.addProperty(AD_TAG_TYPE_KEY , adTagType.name());
+        jsonObject.addProperty(AD_TAG_URL_KEY , adTagURL);
+        jsonObject.addProperty(ENABLE_BG_PLAYBACK_KEY , enableBackgroundPlayback);
+        jsonObject.addProperty(AD_VIDEO_BITRATE_KEY , videoBitrate);
+        jsonObject.addProperty(AD_ATTRIBUTION_UIELEMENT_KEY , adAttribution);
+        jsonObject.addProperty(AD_COUNTDOWN_UIELEMENT_KEY , adCountDown);
+        jsonObject.addProperty(AD_LOAD_TIMEOUT_KEY , adLoadTimeOut);
+        jsonObject.addProperty(AD_ENABLE_DEBUG_MODE_KEY , enableDebugMode);
+        jsonObject.addProperty(AD_MAX_REDIRECTS_KEY , maxRedirects);
+        jsonObject.addProperty(AD_OMID_ENABLED_KEY , isOMIDExperimentalEnabled);
+        jsonObject.addProperty(AD_PLAYER_TYPE_KEY , playerType);
+        jsonObject.addProperty(AD_PLAYER_VERSION_KEY , playerVersion);
 
 
         Gson gson = new Gson();
@@ -274,7 +275,7 @@ public class IMAConfig {
                 jArray.add(element);
             }
         }
-        jsonObject.add(AD_VIDEO_MIME_TYPES, jArray);
+        jsonObject.add(AD_VIDEO_MIME_TYPES_KEY, jArray);
 
 //        String tagsTimesJsonString = gson.toJson(tagsTimes);
 //        if (tagsTimesJsonString != null && !tagsTimesJsonString.isEmpty()) {
