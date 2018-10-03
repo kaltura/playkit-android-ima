@@ -5,9 +5,9 @@ jdk:
   - oraclejdk8
 android:
   components:
-  - tools
+    - tools
 before_script:
-  - ./gradlew dtglib:build dtgqueue:build
+  - curl https://kaltura.github.io/fe-tools/android/license.sh | sh
 script:
   - ./gradlew imaplugin:build
 after_failure:
