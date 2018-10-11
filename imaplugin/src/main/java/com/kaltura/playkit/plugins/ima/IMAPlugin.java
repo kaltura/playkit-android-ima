@@ -235,6 +235,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             log.d("mediaConfig start pos = " + startPos);
         }
 
+        contentCompleted();
         isContentPrepared = false;
         isAutoPlay = false;
         isAdRequested = false;
@@ -264,6 +265,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     @Override
     protected void onUpdateConfig(Object config) {
         log.d("Start onUpdateConfig");
+
         adConfig = parseConfig(config);
     }
 
@@ -964,9 +966,14 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 videoPlayerWithAdPlayback.resumeContentAfterAdPlayback();
                 if (!isContentPrepared) {
                     log.d("Content not prepared.. Preparing and calling play.");
-                    if (pkAdProviderListener != null && !appIsInBackground) {
-                        log.d("preparePlayer and play");
-                        preparePlayer(true);
+                    if (!appIsInBackground) {
+                        if (lastPlaybackPlayerState != PlayerEvent.Type.ENDED || pkAdProviderListener != null) {
+                            log.d("preparePlayer and play");
+                            if (pkAdProviderListener != null && lastPlaybackPlayerState == null) {
+                                preparePlayer(false);
+                            }
+                            player.play();
+                        }
                     }
                 } else if (player != null) {
                     displayContent();
@@ -987,6 +994,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 isAllAdsCompleted = true;
                 messageBus.post(new AdEvent(AdEvent.Type.ALL_ADS_COMPLETED));
                 displayContent();
+
                 if (adsManager != null) {
                     log.d("AD_ALL_ADS_COMPLETED onDestroy");
                     destroyIMA();
