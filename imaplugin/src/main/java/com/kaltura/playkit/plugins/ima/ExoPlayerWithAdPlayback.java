@@ -164,7 +164,10 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         mVideoAdPlayer = new VideoAdPlayer() {
             @Override
             public int getVolume() {
-                return 1;
+                if (player != null) {
+                    return (int) (player.getVolume() * 100);
+                }
+                return 0;
             }
 
             @Override
@@ -422,7 +425,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         isPlayerReady = false;
         if (mVideoPlayer != null && mVideoPlayer.getPlayer() != null) {
             mVideoPlayer.getPlayer().setPlayWhenReady(false);
-            mVideoPlayer.getPlayer().stop();
+            mVideoPlayer.getPlayer().stop(true);
         }
     }
 
@@ -547,6 +550,11 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             player.clearVideoSurface();
             player.release();
             player = null;
+            if (mVideoPlayer != null) {
+                mVideoPlayer.setPlayer(null);
+                mVideoPlayer = null;
+            }
+            mAdUiContainer = null;
             trackSelector = null;
             eventLogger = null;
             isAdFirstPlay = false;
