@@ -361,10 +361,14 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     @Override
     public void onPlayerError(ExoPlaybackException error) {
         log.d("onPlayerError error = " + error.getMessage());
-        onAdPlayBackListener.onSourceError(error);
-        for (VideoAdPlayer.VideoAdPlayerCallback callback : mAdCallbacks) {
-            log.d("onPlayerError calling callback.onError()");
-            callback.onError();
+        if (onAdPlayBackListener != null) {
+            onAdPlayBackListener.onSourceError(error);
+        }
+        if (mAdCallbacks != null) {
+            for (VideoAdPlayer.VideoAdPlayerCallback callback : mAdCallbacks) {
+                log.d("onPlayerError calling callback.onError()");
+                callback.onError();
+            }
         }
 
     }
@@ -482,7 +486,16 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
     private void initializePlayer(String adUrl, boolean adShouldAutoPlay) {
         if (TextUtils.isEmpty(adUrl)) {
-            throw new IllegalArgumentException("Ad playback url cannot be empty or null");
+            if (onAdPlayBackListener != null) {
+                onAdPlayBackListener.onSourceError(new IllegalArgumentException("Error, Ad playback url cannot be empty or null"));
+            }
+            if (mAdCallbacks != null) {
+                for (VideoAdPlayer.VideoAdPlayerCallback callback : mAdCallbacks) {
+                    log.d("onPlayerError calling callback.onError()");
+                    callback.onError();
+                }
+            }
+            return;
         }
 
         Uri currentAdUri = Uri.parse(adUrl);
