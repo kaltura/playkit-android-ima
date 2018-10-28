@@ -2,6 +2,7 @@ package com.kaltura.playkit.plugins.ima;
 
 import android.content.Context;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -480,6 +481,10 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     }
 
     private void initializePlayer(String adUrl, boolean adShouldAutoPlay) {
+        if (TextUtils.isEmpty(adUrl)) {
+            throw new IllegalArgumentException("Ad playback url cannot be empty or null");
+        }
+
         Uri currentAdUri = Uri.parse(adUrl);
         if (player == null) {
             initAdPlayer();
@@ -527,9 +532,11 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             }
         } else {
             if (deviceRequiresDecoderRelease()) {
-                initializePlayer(lastKnownAdURL, false);
-                isPlayerReady = true;
-                player.seekTo(lastKnownAdPosition);
+                if (lastKnownAdURL != null) {
+                    initializePlayer(lastKnownAdURL, false);
+                    isPlayerReady = true;
+                    player.seekTo(lastKnownAdPosition);
+                }
             }
         }
     }
