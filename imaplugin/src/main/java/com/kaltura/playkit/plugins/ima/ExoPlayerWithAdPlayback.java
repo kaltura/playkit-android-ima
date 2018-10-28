@@ -361,16 +361,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     @Override
     public void onPlayerError(ExoPlaybackException error) {
         log.d("onPlayerError error = " + error.getMessage());
-        if (onAdPlayBackListener != null) {
-            onAdPlayBackListener.onSourceError(error);
-        }
-        if (mAdCallbacks != null) {
-            for (VideoAdPlayer.VideoAdPlayerCallback callback : mAdCallbacks) {
-                log.d("onPlayerError calling callback.onError()");
-                callback.onError();
-            }
-        }
-
+        sendSourceError(error);
     }
 
     @Override
@@ -486,15 +477,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
     private void initializePlayer(String adUrl, boolean adShouldAutoPlay) {
         if (TextUtils.isEmpty(adUrl)) {
-            if (onAdPlayBackListener != null) {
-                onAdPlayBackListener.onSourceError(new IllegalArgumentException("Error, Ad playback url cannot be empty or null"));
-            }
-            if (mAdCallbacks != null) {
-                for (VideoAdPlayer.VideoAdPlayerCallback callback : mAdCallbacks) {
-                    log.d("onPlayerError calling callback.onError()");
-                    callback.onError();
-                }
-            }
+            sendSourceError(new IllegalArgumentException("Error, Ad playback url cannot be empty or null"));
             return;
         }
 
@@ -507,6 +490,18 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         mVideoPlayer.getPlayer().stop();
         player.prepare(mediaSource);
         mVideoPlayer.getPlayer().setPlayWhenReady(adShouldAutoPlay);
+    }
+
+    private void sendSourceError(Exception sourceException) {
+        if (onAdPlayBackListener != null) {
+            onAdPlayBackListener.onSourceError(sourceException);
+        }
+        if (mAdCallbacks != null) {
+            for (VideoAdPlayer.VideoAdPlayerCallback callback : mAdCallbacks) {
+                log.d("onPlayerError calling callback.onError()");
+                callback.onError();
+            }
+        }
     }
 
     private void initAdPlayer() {
