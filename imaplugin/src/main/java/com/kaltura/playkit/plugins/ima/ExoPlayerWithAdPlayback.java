@@ -214,7 +214,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 log.d("stopAd");
                 isPlayerReady = false;
                 mIsAdDisplayed = false;
-                mVideoPlayer.getPlayer().stop();
+                if (mVideoPlayer.getPlayer() != null) {
+                    mVideoPlayer.getPlayer().stop();
+                }
             }
 
             @Override
@@ -226,7 +228,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 for (VideoAdPlayer.VideoAdPlayerCallback callback : mAdCallbacks) {
                     callback.onPause();
                 }
-                mVideoPlayer.getPlayer().setPlayWhenReady(false);
+                if (mVideoPlayer.getPlayer() != null) {
+                    mVideoPlayer.getPlayer().setPlayWhenReady(false);
+                }
             }
 
             @Override
