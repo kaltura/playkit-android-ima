@@ -235,6 +235,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             log.d("mediaConfig start pos = " + startPos);
         }
 
+        if (adsManager != null) {
+            adsManager.destroy();
+        }
         contentCompleted();
         isContentPrepared = false;
         isAutoPlay = false;
@@ -244,9 +247,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         isContentEndedBeforeMidroll = false;
         lastPlaybackPlayerState = null;
         lastAdEventReceived = null;
-        if (adsManager != null) {
-            adsManager.destroy();
-        }
 
         if (videoPlayerWithAdPlayback == null) {
             log.d("onUpdateMedia videoPlayerWithAdPlayback = null recreating it");
@@ -589,8 +589,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         log.d("IMA Start destroyAdsManager");
         videoPlayerWithAdPlayback.stop();
-        contentCompleted();
         adsManager.destroy();
+        contentCompleted();
         adsManager = null;
         isAdDisplayed = false;
         adPlaybackCancelled = false;
@@ -910,7 +910,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
 
         lastAdEventReceived = adEventsMap.get(adEvent.getType());
-        log.d("onAdEvent EventName: " + lastAdEventReceived);
+        if (lastAdEventReceived != AdEvent.Type.AD_PROGRESS) {
+            log.d("onAdEvent EventName: " + lastAdEventReceived);
+        }
 
         if (adEvent.getAdData() != null) {
             log.i("EventData: " + adEvent.getAdData().toString());

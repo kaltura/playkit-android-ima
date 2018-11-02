@@ -2,6 +2,7 @@ package com.kaltura.playkit.plugins.ima;
 
 import android.content.Context;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -213,7 +214,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 log.d("stopAd");
                 isPlayerReady = false;
                 mIsAdDisplayed = false;
-                mVideoPlayer.getPlayer().stop();
+                if (mVideoPlayer.getPlayer() != null) {
+                    mVideoPlayer.getPlayer().stop();
+                }
             }
 
             @Override
@@ -225,7 +228,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 for (VideoAdPlayer.VideoAdPlayerCallback callback : mAdCallbacks) {
                     callback.onPause();
                 }
-                mVideoPlayer.getPlayer().setPlayWhenReady(false);
+                if (mVideoPlayer.getPlayer() != null) {
+                    mVideoPlayer.getPlayer().setPlayWhenReady(false);
+                }
             }
 
             @Override
@@ -360,12 +365,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     @Override
     public void onPlayerError(ExoPlaybackException error) {
         log.d("onPlayerError error = " + error.getMessage());
-        onAdPlayBackListener.onSourceError(error);
-        for (VideoAdPlayer.VideoAdPlayerCallback callback : mAdCallbacks) {
-            log.d("onPlayerError calling callback.onError()");
-            callback.onError();
-        }
-
+        sendSourceError(error);
     }
 
     @Override
@@ -480,6 +480,11 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     }
 
     private void initializePlayer(String adUrl, boolean adShouldAutoPlay) {
+        if (TextUtils.isEmpty(adUrl)) {
+            sendSourceError(new IllegalArgumentException("Error, Ad playback url cannot be empty or null"));
+            return;
+        }
+
         Uri currentAdUri = Uri.parse(adUrl);
         if (player == null) {
             initAdPlayer();
@@ -489,6 +494,18 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         mVideoPlayer.getPlayer().stop();
         player.prepare(mediaSource);
         mVideoPlayer.getPlayer().setPlayWhenReady(adShouldAutoPlay);
+    }
+
+    private void sendSourceError(Exception sourceException) {
+        if (onAdPlayBackListener != null) {
+            onAdPlayBackListener.onSourceError(sourceException);
+        }
+        if (mAdCallbacks != null) {
+            for (VideoAdPlayer.VideoAdPlayerCallback callback : mAdCallbacks) {
+                log.d("onPlayerError calling callback.onError()");
+                callback.onError();
+            }
+        }
     }
 
     private void initAdPlayer() {
@@ -527,9 +544,11 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             }
         } else {
             if (deviceRequiresDecoderRelease()) {
-                initializePlayer(lastKnownAdURL, false);
-                isPlayerReady = true;
-                player.seekTo(lastKnownAdPosition);
+                if (lastKnownAdURL != null) {
+                    initializePlayer(lastKnownAdURL, false);
+                    isPlayerReady = true;
+                    player.seekTo(lastKnownAdPosition);
+                }
             }
         }
     }
