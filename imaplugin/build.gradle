@@ -2,10 +2,10 @@ apply plugin: 'com.android.library'
 apply from: 'version.gradle'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionName libVersion
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -25,7 +25,7 @@ dependencies {
 
     // TODO: when playkit without plugins is released, replace this.
     implementation 'com.kaltura:playkit-android:dev-SNAPSHOT'
-//    implementation project(":playkit")
+    //implementation project(":playkit")
 
     //Ads libraries.
     api 'com.google.ads.interactivemedia.v3:interactivemedia:3.9.4'
@@ -39,5 +39,6 @@ dependencies {
 
 repositories {
     google()
+    jcenter()
     maven { url "https://jitpack.io" }
 }
