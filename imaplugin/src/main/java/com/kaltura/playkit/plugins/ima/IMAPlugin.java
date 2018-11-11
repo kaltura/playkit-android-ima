@@ -1071,7 +1071,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             case CUEPOINTS_CHANGED:
                 sendCuePointsUpdateEvent();
-            break;
+                break;
             case LOG:
                 isAdRequested = true;
                 //for this case no AD ERROR is fired need to show view {type=adLoadError, errorCode=1009, errorMessage=The response does not contain any valid ads.}
