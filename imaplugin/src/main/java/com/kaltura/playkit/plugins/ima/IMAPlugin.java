@@ -693,19 +693,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
     }
 
-    private void sendCuePointsUpdate() {
-        List<Long> cuePoints = getAdCuePoints();
-        StringBuilder cuePointBuilder = new StringBuilder();
-        for (Long cuePoint : cuePoints) {
-            cuePointBuilder.append(cuePoint).append("|");
-        }
-        log.d("sendCuePointsUpdate cuePoints = " + cuePointBuilder.toString());
-
-        if (cuePoints.size() > 0) {
-            messageBus.post(new AdEvent.AdCuePointsUpdateEvent(new AdCuePoints(cuePoints)));
-        }
-    }
-
     private List<Long> getAdCuePoints() {
         List<Long> adCuePoints = new ArrayList<>();
         if (adsManager != null && adsManager.getAdCuePoints() != null) {
@@ -1083,8 +1070,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 messageBus.post(new AdEvent(AdEvent.Type.AD_BREAK_ENDED));
                 break;
             case CUEPOINTS_CHANGED:
-                sendCuePointsUpdate();
-                break;
+                sendCuePointsUpdateEvent();
+            break;
             case LOG:
                 isAdRequested = true;
                 //for this case no AD ERROR is fired need to show view {type=adLoadError, errorCode=1009, errorMessage=The response does not contain any valid ads.}
@@ -1116,8 +1103,19 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private void sendCuePointsUpdateEvent() {
         adTagCuePoints = new AdCuePoints(getAdCuePoints());
+        logCuePointsData();
         videoPlayerWithAdPlayback.setAdCuePoints(adTagCuePoints);
         messageBus.post(new AdEvent.AdCuePointsUpdateEvent(adTagCuePoints));
+    }
+
+    private void logCuePointsData() {
+        StringBuilder cuePointBuilder = new StringBuilder();
+        if (adTagCuePoints != null && adTagCuePoints.getAdCuePoints() != null) {
+            for (Long cuePoint : adTagCuePoints.getAdCuePoints()) {
+                cuePointBuilder.append(cuePoint).append("|");
+            }
+            log.d("sendCuePointsUpdate cuePoints = " + cuePointBuilder.toString());
+        }
     }
 
     private AdsLoader.AdsLoadedListener getAdsLoadedListener() {
@@ -1141,7 +1139,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
                 if (isInitWaiting) {
                     adsManager.init(getRenderingSettings());
-                    sendCuePointsUpdate();
                     isInitWaiting = false;
                 }
             }
