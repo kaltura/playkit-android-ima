@@ -44,7 +44,6 @@ import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PKMediaConfig;
 import com.kaltura.playkit.PKMediaFormat;
 import com.kaltura.playkit.PKPlugin;
-import com.kaltura.playkit.PlayKitManager;
 import com.kaltura.playkit.Player;
 import com.kaltura.playkit.PlayerDecorator;
 import com.kaltura.playkit.PlayerEvent;
@@ -507,7 +506,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             CompanionAdSlot companionAdSlot = sdkFactory.createCompanionAdSlot();
             companionAdSlot.setContainer(adCompanionViewGroup);
             companionAdSlot.setSize(728, 90);
-            ArrayList<CompanionAdSlot> companionAdSlots = new ArrayList<CompanionAdSlot>();
+            ArrayList<CompanionAdSlot> companionAdSlots = new ArrayList<>();
             companionAdSlots.add(companionAdSlot);
             adDisplayContainer.setCompanionSlots(companionAdSlots);
         }
@@ -970,7 +969,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     long position = player.getCurrentPosition();
                     log.d("Content prepared.. lastPlaybackPlayerState = " + lastPlaybackPlayerState + ", time = " + position + "/" + duration);
                     if (lastPlaybackPlayerState != PlayerEvent.Type.ENDED && (duration < 0 || position <= duration)) {
-                        if (adInfo == null || (adInfo != null && adInfo.getAdPositionType() != AdPositionType.POST_ROLL)) {
+                        if (adInfo == null || (adInfo.getAdPositionType() != AdPositionType.POST_ROLL)) {
                             log.d("Content prepared.. Play called.");
                             player.play();
                         }

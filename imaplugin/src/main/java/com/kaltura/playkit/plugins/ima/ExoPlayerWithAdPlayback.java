@@ -152,8 +152,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             renderersFactory = new DefaultRenderersFactory(mContext,
                     DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
 
-            TrackSelection.Factory adaptiveTrackSelectionFactory =
-                    new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
+            TrackSelection.Factory adaptiveTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
             trackSelector = new DefaultTrackSelector(adaptiveTrackSelectionFactory);
             eventLogger = new EventLogger(trackSelector);
             initAdPlayer();
@@ -500,16 +499,16 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         if (onAdPlayBackListener != null) {
             onAdPlayBackListener.onSourceError(sourceException);
         }
-        if (mAdCallbacks != null) {
-            for (VideoAdPlayer.VideoAdPlayerCallback callback : mAdCallbacks) {
-                log.d("onPlayerError calling callback.onError()");
-                callback.onError();
-            }
+
+        for (VideoAdPlayer.VideoAdPlayerCallback callback : mAdCallbacks) {
+            log.d("onPlayerError calling callback.onError()");
+            callback.onError();
         }
+
     }
 
     private void initAdPlayer() {
-        player = ExoPlayerFactory.newSimpleInstance(renderersFactory, trackSelector);
+        player = ExoPlayerFactory.newSimpleInstance(mContext, renderersFactory, trackSelector);
         player.addAnalyticsListener(eventLogger);
         mVideoPlayer.setPlayer(player);
     }
