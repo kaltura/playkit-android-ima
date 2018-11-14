@@ -41,7 +41,6 @@ import com.kaltura.playkit.PKError;
 import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PlayerState;
 import com.kaltura.playkit.drm.DeferredDrmSessionManager;
-import com.kaltura.playkit.player.CustomRendererFactory;
 import com.kaltura.playkit.player.MediaSupport;
 import com.kaltura.playkit.plugins.ads.AdCuePoints;
 import com.kaltura.playkit.utils.Consts;
@@ -152,6 +151,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                     DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
 
             trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory());
+
             eventLogger = new EventLogger(trackSelector);
             initAdPlayer();
         }
@@ -497,17 +497,18 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         if (onAdPlayBackListener != null) {
             onAdPlayBackListener.onSourceError(sourceException);
         }
-        if (mAdCallbacks != null) {
-            for (VideoAdPlayer.VideoAdPlayerCallback callback : mAdCallbacks) {
-                log.d("onPlayerError calling callback.onError()");
-                callback.onError();
-            }
+
+        for (VideoAdPlayer.VideoAdPlayerCallback callback : mAdCallbacks) {
+            log.d("onPlayerError calling callback.onError()");
+            callback.onError();
         }
+
     }
 
     private void initAdPlayer() {
 
-        player = ExoPlayerFactory.newSimpleInstance(getContext(), renderersFactory, trackSelector);
+        player = ExoPlayerFactory.newSimpleInstance(mContext, renderersFactory, trackSelector);
+
         player.addAnalyticsListener(eventLogger);
         mVideoPlayer.setPlayer(player);
     }
