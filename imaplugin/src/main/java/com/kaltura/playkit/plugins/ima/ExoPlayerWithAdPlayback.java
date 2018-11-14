@@ -32,7 +32,6 @@ import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
@@ -42,6 +41,7 @@ import com.kaltura.playkit.PKError;
 import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PlayerState;
 import com.kaltura.playkit.drm.DeferredDrmSessionManager;
+import com.kaltura.playkit.player.CustomRendererFactory;
 import com.kaltura.playkit.player.MediaSupport;
 import com.kaltura.playkit.plugins.ads.AdCuePoints;
 import com.kaltura.playkit.utils.Consts;
@@ -55,7 +55,6 @@ import java.util.List;
 public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackPreparer, Player.EventListener {
     private static final PKLog log = PKLog.get("ExoPlayerWithAdPlayback");
 
-    private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
     private DefaultTrackSelector trackSelector;
     private EventLogger eventLogger;
     private DefaultRenderersFactory renderersFactory;
@@ -147,14 +146,12 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         mVideoPlayer.setUseController(false);
         if (player == null) {
 
-            mediaDataSourceFactory = buildDataSourceFactory(true);
+            mediaDataSourceFactory = buildDataSourceFactory();
 
             renderersFactory = new DefaultRenderersFactory(mContext,
                     DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
 
-            TrackSelection.Factory adaptiveTrackSelectionFactory =
-                    new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
-            trackSelector = new DefaultTrackSelector(adaptiveTrackSelectionFactory);
+            trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory());
             eventLogger = new EventLogger(trackSelector);
             initAdPlayer();
         }
@@ -236,7 +233,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             @Override
             public void resumeAd() {
                 log.d("resumeAd");
-                playAd();
+                //playAd(); --> resumeAd method is deprecated in IMA so nothing should be called.
 
             }
 
@@ -509,7 +506,8 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     }
 
     private void initAdPlayer() {
-        player = ExoPlayerFactory.newSimpleInstance(renderersFactory, trackSelector);
+
+        player = ExoPlayerFactory.newSimpleInstance(getContext(), renderersFactory, trackSelector);
         player.addAnalyticsListener(eventLogger);
         mVideoPlayer.setPlayer(player);
     }
@@ -520,7 +518,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             case C.TYPE_DASH:
                 return new DashMediaSource.Factory(
                         new DefaultDashChunkSource.Factory(mediaDataSourceFactory),
-                        buildDataSourceFactory(false))
+                        buildDataSourceFactory())
                         .createMediaSource(uri);
             case C.TYPE_HLS:
                 return new HlsMediaSource.Factory(mediaDataSourceFactory)
@@ -580,13 +578,13 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         }
     }
 
-    private DataSource.Factory buildDataSourceFactory(boolean useBandwidthMeter) {
-        return new DefaultDataSourceFactory(getContext(), useBandwidthMeter ? BANDWIDTH_METER : null,
-                buildHttpDataSourceFactory(useBandwidthMeter));
+    private DataSource.Factory buildDataSourceFactory() {
+        return new DefaultDataSourceFactory(getContext(),
+                buildHttpDataSourceFactory());
     }
 
-    private HttpDataSource.Factory buildHttpDataSourceFactory(boolean useBandwidthMeter) {
-        return new DefaultHttpDataSourceFactory(Util.getUserAgent(getContext(), "AdPlayKit"), useBandwidthMeter ? BANDWIDTH_METER : null,
+    private HttpDataSource.Factory buildHttpDataSourceFactory() {
+        return new DefaultHttpDataSourceFactory(Util.getUserAgent(getContext(), "AdPlayKit"),
                 adLoadTimeout,
                 adLoadTimeout, true);
     }
