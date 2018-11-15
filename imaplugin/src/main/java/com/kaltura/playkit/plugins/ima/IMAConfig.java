@@ -1,10 +1,10 @@
 /*
  * ============================================================================
  * Copyright (C) 2017 Kaltura Inc.
- * 
+ *
  * Licensed under the AGPLv3 license, unless a different license for a
  * particular library is specified in the applicable library path.
- * 
+ *
  * You may obtain a copy of the License at
  * https://www.gnu.org/licenses/agpl-3.0.html
  * ============================================================================
@@ -245,13 +245,16 @@ public class IMAConfig {
         if (this.controlsOverlayList == null) {
             this.controlsOverlayList = new ArrayList<>();
         }
-        this.controlsOverlayList.add(controlsOverlay);
+        if (controlsOverlay != null) {
+            this.controlsOverlayList.add(controlsOverlay);
+        }
         return this;
     }
 
     public List<View> getControlsOverlayList() {
         return controlsOverlayList;
     }
+
     //    public Map<Double, String> getTagsTimes() {
 //        return tagsTimes;
 //    }
