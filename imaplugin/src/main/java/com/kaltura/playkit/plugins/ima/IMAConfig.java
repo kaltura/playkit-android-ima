@@ -49,7 +49,6 @@ public class IMAConfig {
     public static final String AD_LOAD_TIMEOUT_KEY           = "adLoadTimeOut";
     public static final String AD_MAX_REDIRECTS_KEY          = "adMaxRedirects";
     public static final String AD_ENABLE_DEBUG_MODE_KEY      = "enableDebugMode";
-    public static final String AD_OMID_ENABLED_KEY           = "isOMIDExperimentalEnabled";
     public static final String AD_PLAYER_TYPE_KEY            = "playerType";
     public static final String AD_PLAYER_VERSION_KEY         = "playerVersion";
 
@@ -63,7 +62,6 @@ public class IMAConfig {
     private boolean enableDebugMode;
     private int adLoadTimeOut; // in sec
     private int maxRedirects;
-    private boolean isOMIDExperimentalEnabled;
     private String playerType;
     private String playerVersion;
     private List<String> videoMimeTypes;
@@ -84,7 +82,6 @@ public class IMAConfig {
         this.videoMimeTypes           = new ArrayList<>();
         this.videoMimeTypes.add(PKMediaFormat.mp4.mimeType);
         this.adTagURL = null;         //=> must be set via setter
-        this.isOMIDExperimentalEnabled = false;
         this.playerType                = AD_PLAYER_TYPE;
         this.playerVersion             = AD_PLAYER_VERSION;
 
@@ -209,15 +206,6 @@ public class IMAConfig {
         return enableDebugMode;
     }
 
-    public IMAConfig setEnableOMIDExperimental(boolean enableOMIDExperimental) {
-        this.isOMIDExperimentalEnabled = enableOMIDExperimental;
-        return this;
-    }
-
-    public boolean isOMIDExperimentalEnabled() {
-        return isOMIDExperimentalEnabled;
-    }
-
     public String getPlayerType() {
         return playerType;
     }
@@ -284,7 +272,6 @@ public class IMAConfig {
         jsonObject.addProperty(AD_LOAD_TIMEOUT_KEY , adLoadTimeOut);
         jsonObject.addProperty(AD_ENABLE_DEBUG_MODE_KEY , enableDebugMode);
         jsonObject.addProperty(AD_MAX_REDIRECTS_KEY , maxRedirects);
-        jsonObject.addProperty(AD_OMID_ENABLED_KEY , isOMIDExperimentalEnabled);
         jsonObject.addProperty(AD_PLAYER_TYPE_KEY , playerType);
         jsonObject.addProperty(AD_PLAYER_VERSION_KEY , playerVersion);
 
