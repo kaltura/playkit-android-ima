@@ -12,6 +12,8 @@
 
 package com.kaltura.playkit.plugins.ima;
 
+import android.view.View;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -65,6 +67,7 @@ public class IMAConfig {
     private String playerType;
     private String playerVersion;
     private List<String> videoMimeTypes;
+    private List<View> controlsOverlayList;
     //private Map<Double,String> tagsTimes; // <AdTime,URL_to_execute>
 
     //View companionView;
@@ -233,6 +236,22 @@ public class IMAConfig {
         return this;
     }
 
+    public IMAConfig setControlsOverlayList(List<View> controlsOverlayList) {
+        this.controlsOverlayList = controlsOverlayList;
+        return this;
+    }
+
+    public IMAConfig addControlsOverlay(View controlsOverlay) {
+        if (this.controlsOverlayList == null) {
+            this.controlsOverlayList = new ArrayList<>();
+        }
+        this.controlsOverlayList.add(controlsOverlay);
+        return this;
+    }
+
+    public List<View> getControlsOverlayList() {
+        return controlsOverlayList;
+    }
     //    public Map<Double, String> getTagsTimes() {
 //        return tagsTimes;
 //    }
