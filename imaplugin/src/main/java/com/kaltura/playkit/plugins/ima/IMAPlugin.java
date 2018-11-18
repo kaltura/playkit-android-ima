@@ -702,21 +702,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     public void seekTo(long position) {
         return;
     }
-
-
-//    private void sendCuePointsUpdate() {
-//        List<Long> cuePoints = getAdCuePoints();
-//        StringBuilder cuePointBuilder = new StringBuilder();
-//        for (Long cuePoint : cuePoints) {
-//            cuePointBuilder.append(cuePoint).append("|");
-//        }
-//        log.d("sendCuePointsUpdate cuePoints = " + cuePointBuilder.toString());
-//
-//        if (cuePoints.size() > 0) {
-//            messageBus.post(new AdEvent.AdCuePointsUpdateEvent(new AdCuePoints(cuePoints)));
-//        }
-//    }
-
+    
     private List<Long> getAdCuePoints() {
         List<Long> adCuePoints = new ArrayList<>();
         if (adsManager != null && adsManager.getAdCuePoints() != null) {
