@@ -1,6 +1,7 @@
 package com.kaltura.playkit.plugins.imadai;
 
 import android.content.Context;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.ads.interactivemedia.v3.api.Ad;
@@ -231,7 +232,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         }
         imaSdkSettings.setLanguage(adConfig.getLanguage());
         imaSdkSettings.setDebugMode(adConfig.isDebugMode());
-        imaSdkSettings.setEnableOmidExperimentally(adConfig.isOMIDExperimentalEnabled());
+        imaSdkSettings.setEnableOmidExperimentally(true);
     }
 
     private AdsLoader.AdsLoadedListener getAdsLoadedListener() {
@@ -277,6 +278,11 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             displayContainer = sdkFactory.createStreamDisplayContainer();
             displayContainer.setVideoStreamPlayer(videoStreamPlayer);
             displayContainer.setAdContainer(mAdUiContainer);
+            if (adConfig.getControlsOverlayList() != null) {
+                for (View controlView : adConfig.getControlsOverlayList()) {
+                    displayContainer.registerVideoControlsOverlay(controlView);
+                }
+            }
         }
 
         StreamRequest request;

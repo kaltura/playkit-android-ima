@@ -1,10 +1,10 @@
 /*
  * ============================================================================
  * Copyright (C) 2017 Kaltura Inc.
- * 
+ *
  * Licensed under the AGPLv3 license, unless a different license for a
  * particular library is specified in the applicable library path.
- * 
+ *
  * You may obtain a copy of the License at
  * https://www.gnu.org/licenses/agpl-3.0.html
  * ============================================================================
@@ -12,8 +12,14 @@
 
 package com.kaltura.playkit.plugins.imadai;
 
+import android.view.View;
+
 import com.google.ads.interactivemedia.v3.api.StreamRequest;
 import com.google.gson.JsonObject;
+import com.kaltura.playkit.plugins.ima.IMAConfig;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by gilad.nadav on 17/11/2016.
@@ -50,7 +56,8 @@ public class IMADAIConfig {
     private boolean enableDebugMode;
     private int adLoadTimeOut; // in sec
     private int maxRedirects;
-    private boolean isOMIDExperimentalEnabled;
+    private List<View> controlsOverlayList;
+
     // Map adTagParameters = new HashMap();
     private boolean disablePersonalizedAds; // adTagParameters.put("npa", 1);
     private boolean enableAgeRestriction; // adTagParameters.put("tfua", 1);
@@ -79,7 +86,6 @@ public class IMADAIConfig {
         this.adCountDown               = true;
         this.adLoadTimeOut             = DEFAULT_AD_LOAD_TIMEOUT;
         this.enableDebugMode           = false;
-        this.isOMIDExperimentalEnabled = false;
     }
 
     public String getAssetTitle() {
@@ -177,17 +183,27 @@ public class IMADAIConfig {
         return this;
     }
 
-    public boolean isDebugMode() {
-        return enableDebugMode;
-    }
-
-    public IMADAIConfig setEnableOMIDExperimental(boolean enableOMIDExperimental) {
-        this.isOMIDExperimentalEnabled = enableOMIDExperimental;
+    public IMADAIConfig setControlsOverlayList(List<View> controlsOverlayList) {
+        this.controlsOverlayList = controlsOverlayList;
         return this;
     }
 
-    public boolean isOMIDExperimentalEnabled() {
-        return isOMIDExperimentalEnabled;
+    public IMADAIConfig addControlsOverlay(View controlsOverlay) {
+        if (this.controlsOverlayList == null) {
+            this.controlsOverlayList = new ArrayList<>();
+        }
+        if (controlsOverlay != null) {
+            this.controlsOverlayList.add(controlsOverlay);
+        }
+        return this;
+    }
+
+    public List<View> getControlsOverlayList() {
+        return controlsOverlayList;
+    }
+
+    public boolean isDebugMode() {
+        return enableDebugMode;
     }
 
     public JsonObject toJSONObject() {
@@ -199,8 +215,6 @@ public class IMADAIConfig {
         jsonObject.addProperty(AD_LOAD_TIMEOUT, adLoadTimeOut);
         jsonObject.addProperty(AD_ENABLE_DEBUG_MODE, enableDebugMode);
         jsonObject.addProperty(AD_MAX_REDIRECTS, maxRedirects);
-        jsonObject.addProperty(AD_OMID_ENABLED, isOMIDExperimentalEnabled);
-
         return jsonObject;
     }
 }
