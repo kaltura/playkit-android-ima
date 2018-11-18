@@ -24,7 +24,7 @@ android {
 dependencies {
 
     // TODO: when playkit without plugins is released, replace this.
-    implementation 'com.kaltura:playkit-android:2214af6c4c918c5f4b33516040e2bfad87dd8dc9'
+    implementation 'com.kaltura:playkit-android:c0b2be0bebde0cb5105123f42e187f2e71d1744b'
     //implementation 'com.kaltura:playkit-android:dev-SNAPSHOT'
     //implementation project(":playkit")
 
