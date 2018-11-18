@@ -698,6 +698,12 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
     }
 
+    @Override
+    public void seekTo(long position) {
+        return;
+    }
+
+
 //    private void sendCuePointsUpdate() {
 //        List<Long> cuePoints = getAdCuePoints();
 //        StringBuilder cuePointBuilder = new StringBuilder();
