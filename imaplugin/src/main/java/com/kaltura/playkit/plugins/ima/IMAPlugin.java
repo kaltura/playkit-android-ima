@@ -44,7 +44,6 @@ import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PKMediaConfig;
 import com.kaltura.playkit.PKMediaFormat;
 import com.kaltura.playkit.PKPlugin;
-import com.kaltura.playkit.PlayKitManager;
 import com.kaltura.playkit.Player;
 import com.kaltura.playkit.PlayerDecorator;
 import com.kaltura.playkit.PlayerEvent;
@@ -334,7 +333,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         imaSdkSettings.setLanguage(adConfig.getLanguage());
         imaSdkSettings.setDebugMode(adConfig.isDebugMode());
-        imaSdkSettings.setEnableOmidExperimentally(adConfig.isOMIDExperimentalEnabled());
+        imaSdkSettings.setEnableOmidExperimentally(true); //should be alwayes true
     }
 
     @Override
@@ -507,9 +506,15 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             CompanionAdSlot companionAdSlot = sdkFactory.createCompanionAdSlot();
             companionAdSlot.setContainer(adCompanionViewGroup);
             companionAdSlot.setSize(728, 90);
-            ArrayList<CompanionAdSlot> companionAdSlots = new ArrayList<CompanionAdSlot>();
+            ArrayList<CompanionAdSlot> companionAdSlots = new ArrayList<>();
             companionAdSlots.add(companionAdSlot);
             adDisplayContainer.setCompanionSlots(companionAdSlots);
+        }
+
+        if (adConfig.getControlsOverlayList() != null) {
+            for (View controlView : adConfig.getControlsOverlayList()) {
+                adDisplayContainer.registerVideoControlsOverlay(controlView);
+            }
         }
 
         // Create the ads request.
@@ -693,23 +698,18 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
     }
 
-    @Override
-    public void seekTo(long position) {
-        return;
-    }
-
-    private void sendCuePointsUpdate() {
-        List<Long> cuePoints = getAdCuePoints();
-        StringBuilder cuePointBuilder = new StringBuilder();
-        for (Long cuePoint : cuePoints) {
-            cuePointBuilder.append(cuePoint).append("|");
-        }
-        log.d("sendCuePointsUpdate cuePoints = " + cuePointBuilder.toString());
-
-        if (cuePoints.size() > 0) {
-            messageBus.post(new AdEvent.AdCuePointsUpdateEvent(new AdCuePoints(cuePoints)));
-        }
-    }
+//    private void sendCuePointsUpdate() {
+//        List<Long> cuePoints = getAdCuePoints();
+//        StringBuilder cuePointBuilder = new StringBuilder();
+//        for (Long cuePoint : cuePoints) {
+//            cuePointBuilder.append(cuePoint).append("|");
+//        }
+//        log.d("sendCuePointsUpdate cuePoints = " + cuePointBuilder.toString());
+//
+//        if (cuePoints.size() > 0) {
+//            messageBus.post(new AdEvent.AdCuePointsUpdateEvent(new AdCuePoints(cuePoints)));
+//        }
+//    }
 
     private List<Long> getAdCuePoints() {
         List<Long> adCuePoints = new ArrayList<>();
@@ -988,7 +988,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     long position = player.getCurrentPosition();
                     log.d("Content prepared.. lastPlaybackPlayerState = " + lastPlaybackPlayerState + ", time = " + position + "/" + duration);
                     if (lastPlaybackPlayerState != PlayerEvent.Type.ENDED && (duration < 0 || position <= duration)) {
-                        if (adInfo == null || (adInfo != null && adInfo.getAdPositionType() != AdPositionType.POST_ROLL)) {
+                        if (adInfo == null || (adInfo.getAdPositionType() != AdPositionType.POST_ROLL)) {
                             log.d("Content prepared.. Play called.");
                             player.play();
                         }
@@ -1088,7 +1088,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 messageBus.post(new AdEvent(AdEvent.Type.AD_BREAK_ENDED));
                 break;
             case CUEPOINTS_CHANGED:
-                sendCuePointsUpdate();
+                sendCuePointsUpdateEvent();
                 break;
             case LOG:
                 isAdRequested = true;
@@ -1122,8 +1122,19 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private void sendCuePointsUpdateEvent() {
         adTagCuePoints = new AdCuePoints(getAdCuePoints());
+        logCuePointsData();
         videoPlayerWithAdPlayback.setAdCuePoints(adTagCuePoints);
         messageBus.post(new AdEvent.AdCuePointsUpdateEvent(adTagCuePoints));
+    }
+
+    private void logCuePointsData() {
+        StringBuilder cuePointBuilder = new StringBuilder();
+        if (adTagCuePoints != null && adTagCuePoints.getAdCuePoints() != null) {
+            for (Long cuePoint : adTagCuePoints.getAdCuePoints()) {
+                cuePointBuilder.append(cuePoint).append("|");
+            }
+            log.d("sendCuePointsUpdate cuePoints = " + cuePointBuilder.toString());
+        }
     }
 
     private AdsLoader.AdsLoadedListener getAdsLoadedListener() {
@@ -1147,7 +1158,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
                 if (isInitWaiting) {
                     adsManager.init(getRenderingSettings());
-                    sendCuePointsUpdate();
                     isInitWaiting = false;
                 }
             }
