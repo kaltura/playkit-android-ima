@@ -16,7 +16,6 @@ import android.view.View;
 
 import com.google.ads.interactivemedia.v3.api.StreamRequest;
 import com.google.gson.JsonObject;
-import com.kaltura.playkit.plugins.ima.IMAConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +71,6 @@ public class IMADAIConfig {
                         StreamRequest.StreamFormat streamFormat,
                         String licenseUrl) {
         this.assetTitle = assetTitle;
-        this.assetKey = assetKey;
         this.assetKey = assetKey;
         this.apiKey = apiKey;
         this.contentSourceId = contentSourceId;
