@@ -37,8 +37,6 @@ public class IMADAIConfig {
     public static final String AD_LOAD_TIMEOUT          = "adLoadTimeOut";
     public static final String AD_MAX_REDIRECTS         = "adMaxRedirects";
     public static final String AD_ENABLE_DEBUG_MODE     = "enableDebugMode";
-    public static final String AD_OMID_ENABLED          = "isOMIDExperimentalEnabled";
-
 
     private String assetTitle;
     private String assetKey;
