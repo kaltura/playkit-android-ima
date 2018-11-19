@@ -198,6 +198,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         isAdRequested = false;
         isAdDisplayed = false;
         isAdIsPaused  = false;
+        isAdError     = false;
         this.mediaConfig = mediaConfig;
         imaSetup();
         messageBus.post(new AdEvent.AdRequestedEvent(adConfig.getAssetTitle()));
@@ -494,7 +495,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     public void onAdError(AdErrorEvent adErrorEvent) {
         log.e("Event: onAdError" + adErrorEvent.getError().getErrorCode());
         isAdError = true;
-        //isAdRequested = true;
+        isAdRequested = true;
         //resetFlagsOnError();
 
         AdError adException = adErrorEvent.getError();
