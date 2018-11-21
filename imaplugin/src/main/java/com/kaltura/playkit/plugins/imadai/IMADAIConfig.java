@@ -53,7 +53,7 @@ public class IMADAIConfig {
     private boolean enableDebugMode;
     private int adLoadTimeOut; // in sec
     private int maxRedirects;
-    private List<View> controlsOverlayList;
+    private transient List<View> controlsOverlayList;
 
     // Map adTagParameters = new HashMap();
     private boolean disablePersonalizedAds; // adTagParameters.put("npa", 1);
