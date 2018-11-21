@@ -65,7 +65,7 @@ public class IMAConfig {
     private String playerType;
     private String playerVersion;
     private List<String> videoMimeTypes;
-    private List<View> controlsOverlayList;
+    private transient List<View> controlsOverlayList;
     //private Map<Double,String> tagsTimes; // <AdTime,URL_to_execute>
 
     //View companionView;
