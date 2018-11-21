@@ -200,6 +200,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         isAdIsPaused  = false;
         isAdError     = false;
         this.mediaConfig = mediaConfig;
+        clearAdsLoader();
         imaSetup();
         messageBus.post(new AdEvent.AdRequestedEvent(adConfig.getAssetTitle()));
         adsLoader.requestStream(buildStreamRequest());
@@ -244,10 +245,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 log.d("onAdsManager loaded");
                 isAdRequested = true;
                 if (streamManager != null) {
-                    streamManager.removeAdErrorListener(IMADAIPlugin.this);
-                    streamManager.removeAdEventListener(IMADAIPlugin.this);
-                    streamManager.destroy();
-                    streamManager = null;
+                    resetIMA();
                 }
                 streamManager = adsManagerLoadedEvent.getStreamManager();
                 streamManager.addAdErrorListener(IMADAIPlugin.this);
@@ -258,10 +256,24 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         return adsLoadedListener;
     }
 
-
     private void resetIMA(){
         if (displayContainer != null) {
             displayContainer.unregisterAllVideoControlsOverlays();
+            if (streamManager != null) {
+                streamManager.removeAdErrorListener(IMADAIPlugin.this);
+                streamManager.removeAdEventListener(IMADAIPlugin.this);
+                streamManager.destroy();
+                streamManager = null;
+            }
+        }
+    }
+
+    private void clearAdsLoader() {
+        if (adsLoader != null) {
+            adsLoader.removeAdErrorListener(this);
+            adsLoader.removeAdsLoadedListener(adsLoadedListener);
+            adsLoadedListener = null;
+            adsLoader = null;
         }
     }
 
@@ -391,11 +403,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     @Override
     protected void onDestroy() {
         isAdRequested = false;
-        if (streamManager != null) {
-            streamManager.destroy();
-            streamManager = null;
-        }
-
+        clearAdsLoader();
+        resetIMA();
     }
 
     @Override
