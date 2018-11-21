@@ -258,6 +258,13 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         return adsLoadedListener;
     }
 
+
+    private void resetIMA(){
+        if (displayContainer != null) {
+            displayContainer.unregisterAllVideoControlsOverlays();
+        }
+    }
+
     private AdsRenderingSettings getRenderingSettings() {
 
         renderingSettings = ImaSdkFactory.getInstance().createAdsRenderingSettings();
