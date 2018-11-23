@@ -260,6 +260,12 @@ public class IMAConfig {
 //    }
 //
 
+    /**
+     * Due to Views required for setControlsOverlayList()
+     *
+     * @deprecated pass only IMAConfig object to the plugin instead of JsonObject.
+     */
+    @Deprecated
     public JsonObject toJSONObject() {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty(AD_TAG_LANGUAGE_KEY , language);
