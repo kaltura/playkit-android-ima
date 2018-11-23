@@ -260,6 +260,12 @@ public class IMAConfig {
 //    }
 //
 
+    /**
+     * Due to Views required for setControlsOverlayList()
+     *
+     * @deprecated pass only object instead no need to convert to json object.
+     */
+    @Deprecated
     public JsonObject toJSONObject() {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty(AD_TAG_LANGUAGE_KEY , language);
