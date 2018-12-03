@@ -949,7 +949,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             case CONTENT_RESUME_REQUESTED:
                 log.d("AD REQUEST AD_CONTENT_RESUME_REQUESTED");
-                if (checkIfDiscadAdRequired()) {
+                if (checkIfDiscardAdRequired()) {
                     for (Long cuePoint : adTagCuePoints.getAdCuePoints()) {
                         if (cuePoint != 0 && cuePoint != -1 && ((cuePoint / Consts.MILLISECONDS_MULTIPLIER_FLOAT) < playbackStartPosition)) {
                             log.d("discardAdBreak");
@@ -1135,12 +1135,12 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
     }
 
-    private boolean   checkIfDiscadAdRequired() {
+    private boolean checkIfDiscardAdRequired() {
         if (!adConfig.isAlwaysStartWithPreroll() || adInfo == null || adTagCuePoints == null || mediaConfig == null || playbackStartPosition == null) {
             return false;
         }
-        log.d("XXXX getAdPositionType = " + adInfo.getAdPositionType().name());
-        log.d("XXX YYYY start = " +  playbackStartPosition);
+        log.d("getAdPositionType = " + adInfo.getAdPositionType().name());
+        log.d("playbackStartPosition = " +  playbackStartPosition);
         return adInfo.getAdPositionType() == AdPositionType.PRE_ROLL && playbackStartPosition > 0;
     }
 
