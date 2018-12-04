@@ -122,6 +122,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private AdEvent.Type lastAdEventReceived;
     private boolean adManagerInitDuringBackground;
     private PKAdProviderListener pkAdProviderListener;
+    private Long playbackStartPosition;
     private Map<com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType, AdEvent.Type> adEventsMap;
 
     @Override
@@ -229,8 +230,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         log.d("Start onUpdateMedia");
         this.mediaConfig = mediaConfig;
         if (mediaConfig != null) {
-            long startPos = (mediaConfig.getStartPosition() != null) ? mediaConfig.getStartPosition() : 0;
-            log.d("mediaConfig start pos = " + startPos);
+            playbackStartPosition = (mediaConfig.getStartPosition() != null) ? mediaConfig.getStartPosition() : null;
+            log.d("mediaConfig start pos = " + playbackStartPosition);
         }
 
         if (adsManager != null) {
@@ -296,8 +297,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         renderingSettings = ImaSdkFactory.getInstance().createAdsRenderingSettings();
 
-        if (mediaConfig != null && mediaConfig.getStartPosition() != null && mediaConfig.getStartPosition() > 0) {
-            renderingSettings.setPlayAdsAfterTime(mediaConfig.getStartPosition());
+        if (!adConfig.isAlwaysStartWithPreroll() && playbackStartPosition != null && playbackStartPosition > 0) {
+            renderingSettings.setPlayAdsAfterTime(playbackStartPosition);
         }
 
         if (adConfig.getVideoMimeTypes() != null && adConfig.getVideoMimeTypes().size() > 0) {
@@ -948,7 +949,16 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             case CONTENT_RESUME_REQUESTED:
                 log.d("AD REQUEST AD_CONTENT_RESUME_REQUESTED");
-
+                if (checkIfDiscardAdRequired()) {
+                    for (Long cuePoint : adTagCuePoints.getAdCuePoints()) {
+                        if (cuePoint != 0 && cuePoint != -1 && ((cuePoint / Consts.MILLISECONDS_MULTIPLIER_FLOAT) < playbackStartPosition)) {
+                            log.d("discardAdBreak");
+                            adsManager.discardAdBreak();
+                            playbackStartPosition = null; // making sure it will nu be done again.
+                            break;
+                        }
+                    }
+                }
                 // AdEventType.CONTENT_RESUME_REQUESTED is fired when the ad is completed
                 // and you should start playing your content.
                 if (isContentEndedBeforeMidroll && !isAllAdsCompleted && player.getCurrentPosition() >= player.getDuration()) {
@@ -1123,6 +1133,15 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             }
             log.d("sendCuePointsUpdate cuePoints = " + cuePointBuilder.toString());
         }
+    }
+
+    private boolean checkIfDiscardAdRequired() {
+        if (!adConfig.isAlwaysStartWithPreroll() || adInfo == null || adTagCuePoints == null || mediaConfig == null || playbackStartPosition == null) {
+            return false;
+        }
+        log.d("getAdPositionType = " + adInfo.getAdPositionType().name());
+        log.d("playbackStartPosition = " +  playbackStartPosition);
+        return adInfo.getAdPositionType() == AdPositionType.PRE_ROLL && playbackStartPosition > 0;
     }
 
     private AdsLoader.AdsLoadedListener getAdsLoadedListener() {

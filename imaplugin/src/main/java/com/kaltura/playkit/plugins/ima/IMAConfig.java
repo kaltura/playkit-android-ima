@@ -51,6 +51,7 @@ public class IMAConfig {
     public static final String AD_ENABLE_DEBUG_MODE_KEY      = "enableDebugMode";
     public static final String AD_PLAYER_TYPE_KEY            = "playerType";
     public static final String AD_PLAYER_VERSION_KEY         = "playerVersion";
+    public static final String AD_ALWAYES_START_WITH_PREROLL = "alwaysStartWithPreroll";
 
     private String language;
     private String adTagURL;
@@ -60,12 +61,14 @@ public class IMAConfig {
     private boolean adAttribution;
     private boolean adCountDown;
     private boolean enableDebugMode;
+    private boolean alwaysStartWithPreroll;
     private int adLoadTimeOut; // in sec
     private int maxRedirects;
     private String playerType;
     private String playerVersion;
     private List<String> videoMimeTypes;
     private transient List<View> controlsOverlayList;
+
     //private Map<Double,String> tagsTimes; // <AdTime,URL_to_execute>
 
     //View companionView;
@@ -79,6 +82,7 @@ public class IMAConfig {
         this.adCountDown              = true;
         this.adLoadTimeOut            = DEFAULT_AD_LOAD_TIMEOUT;
         this.enableDebugMode          = false;
+        this.alwaysStartWithPreroll   = false;
         this.videoMimeTypes           = new ArrayList<>();
         this.videoMimeTypes.add(PKMediaFormat.mp4.mimeType);
         this.adTagURL = null;         //=> must be set via setter
@@ -197,6 +201,15 @@ public class IMAConfig {
         return this;
     }
 
+    public IMAConfig setAlwaysStartWithPreroll(boolean alwaysStartWithPreroll) {
+        this.alwaysStartWithPreroll = alwaysStartWithPreroll;
+        return this;
+    }
+
+    public boolean isAlwaysStartWithPreroll() {
+        return alwaysStartWithPreroll;
+    }
+
     public IMAConfig enableDebugMode(boolean enableDebugMode) {
         this.enableDebugMode = enableDebugMode;
         return this;
@@ -280,6 +293,7 @@ public class IMAConfig {
         jsonObject.addProperty(AD_MAX_REDIRECTS_KEY , maxRedirects);
         jsonObject.addProperty(AD_PLAYER_TYPE_KEY , playerType);
         jsonObject.addProperty(AD_PLAYER_VERSION_KEY , playerVersion);
+        jsonObject.addProperty(AD_ALWAYES_START_WITH_PREROLL , alwaysStartWithPreroll);
 
 
         Gson gson = new Gson();
