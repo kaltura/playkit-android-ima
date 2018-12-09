@@ -224,7 +224,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         return null;
     }
-    
+
     @Override
     protected void onUpdateMedia(PKMediaConfig mediaConfig) {
         log.d("Start onUpdateMedia");
@@ -716,29 +716,39 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     private AdInfo createAdInfo(Ad ad) {
+
         String adDescription = ad.getDescription();
-        long adDuration = (long) (ad.getDuration() * Consts.MILLISECONDS_MULTIPLIER);
+        long adDuration = (long) ad.getDuration() * Consts.MILLISECONDS_MULTIPLIER;
         long adPlayHead = getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER;
         String adTitle = ad.getTitle();
         boolean isAdSkippable = ad.isSkippable();
+        long skipTimeOffset = (long) ad.getSkipTimeOffset() * Consts.MILLISECONDS_MULTIPLIER;
         String contentType = ad.getContentType();
         String adId = ad.getAdId();
         String adSystem = ad.getAdSystem();
-        int adHeight = ad.getHeight();
-        int adWidth = ad.getWidth();
+        int adHeight = ad.isLinear() ? ad.getVastMediaHeight() : ad.getHeight();
+        int adWidth  = ad.isLinear() ? ad.getVastMediaWidth() : ad.getWidth();
+        int mediaBitrate = ad.getVastMediaBitrate();
         int totalAdsInPod = ad.getAdPodInfo().getTotalAds();
         int adIndexInPod = ad.getAdPodInfo().getAdPosition();   // index starts in 1
         int podCount = (adsManager != null && adsManager.getAdCuePoints() != null) ? adsManager.getAdCuePoints().size() : 0;
         int podIndex = (ad.getAdPodInfo().getPodIndex() >= 0) ? ad.getAdPodInfo().getPodIndex() + 1 : podCount; // index starts in 0
         boolean isBumper = ad.getAdPodInfo().isBumper();
-        long adPodTimeOffset = (long) (ad.getAdPodInfo().getTimeOffset() * Consts.MILLISECONDS_MULTIPLIER);
+        long adPodTimeOffset = (long) ad.getAdPodInfo().getTimeOffset() * Consts.MILLISECONDS_MULTIPLIER;
 
+        if (!PKMediaFormat.mp4.mimeType.equals(ad.getContentType()) && adInfo != null) {
+            adHeight = adInfo.getAdWidth();
+            adWidth = adInfo.getAdHeight();
+            mediaBitrate = adInfo.getMediaBitrate();
+        }
 
         AdInfo adInfo = new AdInfo(adDescription, adDuration, adPlayHead,
-                adTitle, isAdSkippable,
+                adTitle, isAdSkippable, skipTimeOffset,
                 contentType, adId,
-                adSystem, adHeight,
+                adSystem,
+                adHeight,
                 adWidth,
+                mediaBitrate,
                 totalAdsInPod,
                 adIndexInPod,
                 podIndex,
@@ -1063,6 +1073,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 messageBus.post(new AdEvent.AdSkippedEvent(adInfo));
                 isAdDisplayed = false;
                 break;
+            case SKIPPABLE_STATE_CHANGED:
+                messageBus.post(new AdEvent(AdEvent.Type.SKIPPABLE_STATE_CHANGED));
+                break;
             case CLICKED:
                 isAdIsPaused = true;
                 messageBus.post(new AdEvent(AdEvent.Type.CLICKED));
@@ -1221,6 +1234,17 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     public void adFirstPlayStarted() {
         log.d("AD adFirstPlayStarted");
         messageBus.post(new AdEvent(AdEvent.Type.AD_FIRST_PLAY));
+    }
+
+    @Override
+    public void adPlaybackInfoUpdated(int width, int height, int bitrate) {
+        log.d("AD adPlaybackInfoUpdated");
+        if (adInfo != null) {
+            adInfo.setAdWidth(width);
+            adInfo.setAdPlayHead(height);
+            adInfo.setMediaBitrate(bitrate);
+        }
+        messageBus.post(new AdEvent.AdPlaybackInfoUpdated(width, height, bitrate));
     }
 
     private Map<com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType, AdEvent.Type> buildAdsEventMap() {
