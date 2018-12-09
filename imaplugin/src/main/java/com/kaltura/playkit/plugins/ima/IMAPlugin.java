@@ -737,8 +737,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         long adPodTimeOffset = (long) ad.getAdPodInfo().getTimeOffset() * Consts.MILLISECONDS_MULTIPLIER;
 
         if (!PKMediaFormat.mp4.mimeType.equals(ad.getContentType()) && adInfo != null) {
-            adHeight = adInfo.getAdWidth();
-            adWidth = adInfo.getAdHeight();
+            adHeight = adInfo.getAdHeight();
+            adWidth = adInfo.getAdWidth();
             mediaBitrate = adInfo.getMediaBitrate();
         }
 
@@ -1241,7 +1241,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         log.d("AD adPlaybackInfoUpdated");
         if (adInfo != null) {
             adInfo.setAdWidth(width);
-            adInfo.setAdPlayHead(height);
+            adInfo.setAdHeight(height);
             adInfo.setMediaBitrate(bitrate);
         }
         messageBus.post(new AdEvent.AdPlaybackInfoUpdated(width, height, bitrate));
