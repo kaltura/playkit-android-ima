@@ -15,6 +15,7 @@ import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.PlaybackPreparer;
 import com.google.android.exoplayer2.Player;
@@ -47,6 +48,9 @@ import com.kaltura.playkit.utils.Consts;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.google.android.exoplayer2.C.SELECTION_REASON_ADAPTIVE;
+import static com.google.android.exoplayer2.C.SELECTION_REASON_INITIAL;
 
 /**
  * Video player that can play content video and ads.
@@ -99,6 +103,8 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         void onSourceError(Exception exoPlayerException);
 
         void adFirstPlayStarted();
+
+        void adPlaybackInfoUpdated(int width, int height, int bitrate);
     }
 
     public ExoPlayerWithAdPlayback(Context context, AttributeSet attrs, int defStyle) {
@@ -286,6 +292,16 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     @Override
     public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
         log.d("onLoadingChanged");
+        if (trackSelections != null && trackSelections.length > 0) {
+            TrackSelection trackSelection = trackSelections.get(Consts.TRACK_TYPE_VIDEO);
+            if (trackSelection != null) {
+                log.d("onLoadingChanged trackSelection.getSelectionReason() = " + trackSelection.getSelectionReason());
+                if (trackSelection.getSelectionReason() == SELECTION_REASON_INITIAL || trackSelection.getSelectionReason() == SELECTION_REASON_ADAPTIVE) {
+                    Format trackFormat = trackSelection.getFormat(trackSelection.getSelectedIndex());
+                    onAdPlayBackListener.adPlaybackInfoUpdated(trackFormat.width, trackFormat.height, trackFormat.bitrate);
+                }
+            }
+        }
     }
 
     @Override
