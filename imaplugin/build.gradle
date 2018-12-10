@@ -27,9 +27,9 @@ android {
 
 dependencies {
 
-    // TODO: when playkit without plugins is released, replace this.
-    implementation 'com.kaltura:playkit-android:dev-SNAPSHOT'
-    //implementation project(":playkit")
+//    implementation 'com.kaltura.playkit:playkit:3.7.0'
+    implementation 'com.kaltura:playkit-android:FEM-2307-SNAPSHOT'
+//    implementation project(":playkit")
 
     //Ads libraries.
     api 'com.google.ads.interactivemedia.v3:interactivemedia:3.10.2'
@@ -45,4 +45,5 @@ repositories {
     google()
     jcenter()
     maven { url "https://jitpack.io" }
+    maven { url "https://google.bintray.com/exoplayer" }
 }
