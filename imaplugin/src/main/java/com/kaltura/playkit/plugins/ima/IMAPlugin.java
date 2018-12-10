@@ -71,6 +71,7 @@ import java.util.List;
 
 public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener, AdErrorEvent.AdErrorListener, ExoPlayerWithAdPlayback.OnAdPlayBackListener {
     private static final PKLog log = PKLog.get("IMAPlugin");
+    private static final int KB_MULTIPLIER = 1024;
 
     private Player player;
     private Context context;
@@ -191,7 +192,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
                 boolean isLastMidRollInValid = (adCuePoints.getAdCuePoints().size() >= 2 && adCuePoints.hasPostRoll() && adInfo != null && adCuePoints.getAdCuePoints().get(adCuePoints.getAdCuePoints().size() - 2) > player.getDuration());
                 log.d("contentCompleted isLastMidRollPlayed = " + isLastMidRollPlayed + " isLastMidRollInValid = " + isLastMidRollInValid);
 
-                if (!isAdDisplayed && (!adCuePoints.hasPostRoll() || isAllAdsCompleted || isLastMidRollPlayed || isLastMidRollInValid)) {                        log.d("contentCompleted on ended");
+                if (!isAdDisplayed && (!adCuePoints.hasPostRoll() || isAllAdsCompleted || isLastMidRollPlayed || isLastMidRollInValid)) {
+                    log.d("contentCompleted on ended");
                     contentCompleted();
                 } else {
                     log.d("contentCompleted delayed");
@@ -221,7 +223,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
         }
         return null;
     }
-    
+
     @Override
     protected void onUpdateMedia(PKMediaConfig mediaConfig) {
         log.d("Start onUpdateMedia");
@@ -364,7 +366,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
     @Override
     protected void onApplicationResumed() {
         log.d("onApplicationResumed isAdDisplayed = " + isAdDisplayed + ", lastPlaybackPlayerState = " + lastPlaybackPlayerState + " ,lastAdEventReceived = " + lastAdEventReceived);
-        long playerLastPositionTmp =  playerLastPositionForBG;
+        long playerLastPositionTmp = playerLastPositionForBG;
         playerLastPositionForBG = -1;
         if (videoPlayerWithAdPlayback != null) {
             videoPlayerWithAdPlayback.setIsAppInBackground(false);
@@ -677,7 +679,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
     public long getCurrentPosition() {
         long currPos = (long) Math.ceil(videoPlayerWithAdPlayback.getVideoAdPlayer().getAdProgress().getCurrentTime());
         //log.d("getCurrentPosition: " + currPos);
-        post(L->L.onAdPlayHead(currPos));
+        post(L -> L.onAdPlayHead(currPos));
         return currPos;
     }
 
@@ -714,29 +716,39 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
     }
 
     private AdInfo createAdInfo(Ad ad) {
+
         String adDescription = ad.getDescription();
-        long adDuration = (long) (ad.getDuration() * Consts.MILLISECONDS_MULTIPLIER);
+        long adDuration = (long) ad.getDuration() * Consts.MILLISECONDS_MULTIPLIER;
         long adPlayHead = getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER;
         String adTitle = ad.getTitle();
         boolean isAdSkippable = ad.isSkippable();
+        long skipTimeOffset = (long) ad.getSkipTimeOffset() * Consts.MILLISECONDS_MULTIPLIER;
         String contentType = ad.getContentType();
         String adId = ad.getAdId();
         String adSystem = ad.getAdSystem();
-        int adHeight = ad.getHeight();
-        int adWidth = ad.getWidth();
+        int adHeight = ad.isLinear() ? ad.getVastMediaHeight() : ad.getHeight();
+        int adWidth = ad.isLinear() ? ad.getVastMediaWidth() : ad.getWidth();
+        int mediaBitrate = ad.getVastMediaBitrate() != 0 ? ad.getVastMediaBitrate() * KB_MULTIPLIER : -1;
         int totalAdsInPod = ad.getAdPodInfo().getTotalAds();
         int adIndexInPod = ad.getAdPodInfo().getAdPosition();   // index starts in 1
         int podCount = (adsManager != null && adsManager.getAdCuePoints() != null) ? adsManager.getAdCuePoints().size() : 0;
         int podIndex = (ad.getAdPodInfo().getPodIndex() >= 0) ? ad.getAdPodInfo().getPodIndex() + 1 : podCount; // index starts in 0
         boolean isBumper = ad.getAdPodInfo().isBumper();
-        long adPodTimeOffset = (long) (ad.getAdPodInfo().getTimeOffset() * Consts.MILLISECONDS_MULTIPLIER);
+        long adPodTimeOffset = (long) ad.getAdPodInfo().getTimeOffset() * Consts.MILLISECONDS_MULTIPLIER;
 
+        if (!PKMediaFormat.mp4.mimeType.equals(ad.getContentType()) && adInfo != null) {
+            adHeight = adInfo.getAdHeight();
+            adWidth = adInfo.getAdWidth();
+            mediaBitrate = adInfo.getMediaBitrate();
+        }
 
         AdInfo adInfo = new AdInfo(adDescription, adDuration, adPlayHead,
-                adTitle, isAdSkippable,
+                adTitle, isAdSkippable, skipTimeOffset,
                 contentType, adId,
-                adSystem, adHeight,
+                adSystem,
+                adHeight,
                 adWidth,
+                mediaBitrate,
                 totalAdsInPod,
                 adIndexInPod,
                 podIndex,
@@ -834,7 +846,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
         if (videoPlayerWithAdPlayback != null && videoPlayerWithAdPlayback.getExoPlayerView() != null) {
             videoPlayerWithAdPlayback.getExoPlayerView().setVisibility(View.VISIBLE);
         }
-        if (player != null &&  player.getView() != null) {
+        if (player != null && player.getView() != null) {
             player.getView().hideVideoSurface();
         }
     }
@@ -881,7 +893,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
 
     private void sendError(Enum errorType, String message, Throwable exception) {
         log.e("Ad Error: " + errorType.name() + " with message " + message);
-        post(L->L.onError(new PKError(errorType, message, exception)));
+        post(L -> L.onError(new PKError(errorType, message, exception)));
     }
 
     @Override
@@ -908,7 +920,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
                     appInBackgroundDuringAdLoad = true;
                     if (adsManager != null) {
                         log.d("LOADED call adsManager.pause()");
-                        post(L->L.onAdLoaded(adInfo));
+                        post(L -> L.onAdLoaded(adInfo));
                         pause();
                     }
                 } else {
@@ -916,7 +928,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
                         log.d("discarding ad break");
                         adsManager.discardAdBreak();
                     } else {
-                        post(L->L.onAdLoaded(adInfo));
+                        post(L -> L.onAdLoaded(adInfo));
                         if (AdTagType.VMAP != adConfig.getAdTagType()) {
                             adsManager.start();
                         }
@@ -1003,7 +1015,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
                 isAdDisplayed = true;
                 isAdIsPaused = false;
                 adInfo = createAdInfo(adEvent.getAd());
-                post(L->L.onAdStarted(adInfo));
+                post(L -> L.onAdStarted(adInfo));
                 if (adsManager != null && appIsInBackground) {
                     log.d("AD STARTED and pause");
                     pause();
@@ -1029,13 +1041,13 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
                 isAdIsPaused = true;
                 isAdDisplayed = true;
                 adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
-                post(L->L.onAdPaused(adInfo));
+                post(L -> L.onAdPaused(adInfo));
                 break;
             case RESUMED:
                 log.d("AD RESUMED");
                 isAdIsPaused = false;
                 adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
-                post(L->L.onAdResumed(adInfo));
+                post(L -> L.onAdResumed(adInfo));
                 break;
             case COMPLETED:
                 log.d("AD COMPLETED");
@@ -1052,8 +1064,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
                 break;
             case SKIPPED:
                 adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
-                post(L->L.onAdSkipped(adInfo));
+                post(L -> L.onAdSkipped(adInfo));
                 isAdDisplayed = false;
+                break;
+            case SKIPPABLE_STATE_CHANGED:
+                post(AdsListener::onSkippableStateChanged);
                 break;
             case CLICKED:
                 isAdIsPaused = true;
@@ -1114,7 +1129,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
         adTagCuePoints = new AdCuePoints(getAdCuePoints());
         logCuePointsData();
         videoPlayerWithAdPlayback.setAdCuePoints(adTagCuePoints);
-        post(L->L.onAdCuePointsUpdate(adTagCuePoints));
+        post(L -> L.onAdCuePointsUpdate(adTagCuePoints));
     }
 
     private void logCuePointsData() {
@@ -1132,7 +1147,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
             return false;
         }
         log.d("getAdPositionType = " + adInfo.getAdPositionType().name());
-        log.d("playbackStartPosition = " +  playbackStartPosition);
+        log.d("playbackStartPosition = " + playbackStartPosition);
         return adInfo.getAdPositionType() == AdPositionType.PRE_ROLL && playbackStartPosition > 0;
     }
 
@@ -1172,7 +1187,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
         lastAdEventReceived = AdsProvider.Event.AD_BUFFER_START;
         long adPosition = videoPlayerWithAdPlayback != null ? videoPlayerWithAdPlayback.getAdPosition() : -1;
         log.d("AD onBufferStart adPosition = " + adPosition);
-        post(L->L.onAdBufferStart(adPosition));
+        post(L -> L.onAdBufferStart(adPosition));
     }
 
     @Override
@@ -1183,7 +1198,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
         lastAdEventReceived = AdsProvider.Event.AD_BUFFER_END;
         long adPosition = videoPlayerWithAdPlayback != null ? videoPlayerWithAdPlayback.getAdPosition() : -1;
         log.d("AD onBufferEnd adPosition = " + adPosition + " appIsInBackground = " + appIsInBackground);
-        post(L->L.onAdBufferEnd(adPosition));
+        post(L -> L.onAdBufferEnd(adPosition));
         if (appIsInBackground) {
             log.d("AD onBufferEnd pausing adManager");
             pause();
@@ -1218,26 +1233,46 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
     private AdsProvider.Event imaToPKEvent(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType imaEvent) {
         switch (imaEvent) {
 
-            case ALL_ADS_COMPLETED: return Event.ALL_ADS_COMPLETED;
-            case CLICKED: return Event.CLICKED;
-            case COMPLETED: return Event.COMPLETED;
-            case CUEPOINTS_CHANGED: return Event.CUEPOINTS_CHANGED;
-            case CONTENT_PAUSE_REQUESTED: return Event.CONTENT_PAUSE_REQUESTED;
-            case CONTENT_RESUME_REQUESTED: return Event.CONTENT_RESUME_REQUESTED;
-            case FIRST_QUARTILE: return Event.FIRST_QUARTILE;
-            case AD_BREAK_READY: return Event.AD_BREAK_READY;
-            case MIDPOINT: return Event.MIDPOINT;
-            case PAUSED: return Event.PAUSED;
-            case RESUMED: return Event.RESUMED;
-            case SKIPPED: return Event.SKIPPED;
-            case STARTED: return Event.STARTED;
-            case TAPPED: return Event.TAPPED;
-            case ICON_TAPPED: return Event.ICON_TAPPED;
-            case THIRD_QUARTILE: return Event.THIRD_QUARTILE;
-            case LOADED: return Event.LOADED;
-            case AD_PROGRESS: return Event.AD_PROGRESS;
-            case AD_BREAK_STARTED: return Event.AD_BREAK_STARTED;
-            case AD_BREAK_ENDED: return Event.AD_BREAK_ENDED;
+            case ALL_ADS_COMPLETED:
+                return Event.ALL_ADS_COMPLETED;
+            case CLICKED:
+                return Event.CLICKED;
+            case COMPLETED:
+                return Event.COMPLETED;
+            case CUEPOINTS_CHANGED:
+                return Event.CUEPOINTS_CHANGED;
+            case CONTENT_PAUSE_REQUESTED:
+                return Event.CONTENT_PAUSE_REQUESTED;
+            case CONTENT_RESUME_REQUESTED:
+                return Event.CONTENT_RESUME_REQUESTED;
+            case FIRST_QUARTILE:
+                return Event.FIRST_QUARTILE;
+            case AD_BREAK_READY:
+                return Event.AD_BREAK_READY;
+            case MIDPOINT:
+                return Event.MIDPOINT;
+            case PAUSED:
+                return Event.PAUSED;
+            case RESUMED:
+                return Event.RESUMED;
+            case SKIPPED:
+                return Event.SKIPPED;
+            case STARTED:
+                return Event.STARTED;
+            case TAPPED:
+                return Event.TAPPED;
+            case ICON_TAPPED:
+                return Event.ICON_TAPPED;
+            case THIRD_QUARTILE:
+                return Event.THIRD_QUARTILE;
+            case LOADED:
+                return Event.LOADED;
+            case AD_PROGRESS:
+                return Event.AD_PROGRESS;
+            case AD_BREAK_STARTED:
+                return Event.AD_BREAK_STARTED;
+            case AD_BREAK_ENDED:
+                return Event.AD_BREAK_ENDED;
 
             case LOG: // fallthrough
             case SKIPPABLE_STATE_CHANGED:
@@ -1246,12 +1281,23 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
         return null;
     }
 
-    private void post(PKMessage<AdsListener> msg) {
-        messageBus.postAdsEvent(msg);
-    }
+        @Override
+        public void adPlaybackInfoUpdated(int width, int height, int bitrate) {
+            log.d("AD adPlaybackInfoUpdated");
+            if (adInfo != null) {
+                adInfo.setAdWidth(width);
+                adInfo.setAdHeight(height);
+                adInfo.setMediaBitrate(bitrate);
+            }
+            post(L -> L.onAdPlaybackInfoUpdated(width, height, bitrate));
+        }
 
-    private enum PlayerPlaybackState {
-        playing, paused, ended
-    }
 
+        private void post(PKMessage<AdsListener> msg) {
+            messageBus.postAdsEvent(msg);
+        }
+
+        private enum PlayerPlaybackState {
+            playing, paused, ended
+        }
 }
