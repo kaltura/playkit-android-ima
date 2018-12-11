@@ -37,6 +37,7 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.EventLogger;
+import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.Util;
 import com.kaltura.playkit.PKError;
 import com.kaltura.playkit.PKLog;
@@ -51,6 +52,7 @@ import java.util.List;
 
 import static com.google.android.exoplayer2.C.SELECTION_REASON_ADAPTIVE;
 import static com.google.android.exoplayer2.C.SELECTION_REASON_INITIAL;
+import static com.google.android.exoplayer2.util.Log.LOG_LEVEL_OFF;
 
 /**
  * Video player that can play content video and ads.
@@ -499,6 +501,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         }
 
         Uri currentAdUri = Uri.parse(adUrl);
+
         if (player == null) {
             initAdPlayer();
         }
@@ -522,7 +525,8 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     }
 
     private void initAdPlayer() {
-
+        Log.setLogLevel(LOG_LEVEL_OFF);
+        Log.setLogStackTraces(false);
         player = ExoPlayerFactory.newSimpleInstance(mContext, renderersFactory, trackSelector);
 
         player.addAnalyticsListener(eventLogger);

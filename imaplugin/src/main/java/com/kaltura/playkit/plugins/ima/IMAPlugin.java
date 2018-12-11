@@ -33,7 +33,6 @@ import com.google.ads.interactivemedia.v3.api.AdsRequest;
 import com.google.ads.interactivemedia.v3.api.CompanionAdSlot;
 import com.google.ads.interactivemedia.v3.api.ImaSdkFactory;
 import com.google.ads.interactivemedia.v3.api.ImaSdkSettings;
-import com.google.ads.interactivemedia.v3.api.UiElement;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.kaltura.playkit.MessageBus;
@@ -231,7 +230,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         log.d("Start onUpdateMedia");
         this.mediaConfig = mediaConfig;
         if (mediaConfig != null) {
-            playbackStartPosition = (mediaConfig.getStartPosition() != null) ? mediaConfig.getStartPosition() : null;
+            playbackStartPosition = mediaConfig.getStartPosition();
             log.d("mediaConfig start pos = " + playbackStartPosition);
         }
 
@@ -312,7 +311,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         //if both are false we remove the support int ad count down in ad
         if (!adConfig.getAdAttribution() && !adConfig.getAdCountDown()) {
-            renderingSettings.setUiElements(Collections.<UiElement>emptySet());
+            renderingSettings.setUiElements(Collections.emptySet());
         }
 
         if (adConfig.getVideoBitrate() != -1) {
