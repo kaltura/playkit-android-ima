@@ -1273,9 +1273,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
                 return Event.AD_BREAK_STARTED;
             case AD_BREAK_ENDED:
                 return Event.AD_BREAK_ENDED;
-
-            case LOG: // fallthrough
             case SKIPPABLE_STATE_CHANGED:
+                return Event.SKIPPABLE_STATE_CHANGED;
+            case LOG: // fallthrough
                 return null;
         }
         return null;
