@@ -43,7 +43,6 @@ import com.kaltura.playkit.PKError;
 import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PKMediaConfig;
 import com.kaltura.playkit.PKMediaFormat;
-import com.kaltura.playkit.PKMessage;
 import com.kaltura.playkit.PKPlugin;
 import com.kaltura.playkit.Player;
 import com.kaltura.playkit.PlayerDecorator;
@@ -1293,7 +1292,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, AdEventListener,
         }
 
 
-        private void post(PKMessage<AdsListener> msg) {
+        private void post(MessageBus.Message<AdsListener> msg) {
             messageBus.postAdsEvent(msg);
         }
 
