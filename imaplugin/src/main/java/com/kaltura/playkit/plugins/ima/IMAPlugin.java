@@ -45,12 +45,15 @@ import com.kaltura.playkit.PKMediaFormat;
 import com.kaltura.playkit.PKPlugin;
 import com.kaltura.playkit.Player;
 import com.kaltura.playkit.PlayerDecorator;
+import com.kaltura.playkit.PlayerEngineWrapper;
 import com.kaltura.playkit.PlayerEvent;
 import com.kaltura.playkit.ads.AdEnabledPlayerController;
 import com.kaltura.playkit.ads.AdTagType;
+import com.kaltura.playkit.ads.AdsPlayerEngineWrapper;
 import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdProviderListener;
+import com.kaltura.playkit.player.PlayerEngine;
 import com.kaltura.playkit.player.PlayerSettings;
 import com.kaltura.playkit.plugin.ima.BuildConfig;
 import com.kaltura.playkit.plugins.ads.AdCuePoints;
@@ -124,13 +127,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private boolean adManagerInitDuringBackground;
     private PKAdProviderListener pkAdProviderListener;
     private Long playbackStartPosition;
+    private PlayerEngineWrapper adsPlayerEngineWrapper;
     private Map<com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType, AdEvent.Type> adEventsMap;
-
-    @Override
-    protected PlayerDecorator getPlayerDecorator() {
-        return new AdEnabledPlayerController(this);
-    }
-
 
     public static final Factory factory = new Factory() {
         @Override
@@ -208,6 +206,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     if (mediaConfig != null && mediaConfig.getMediaEntry() != null) {
                         //log.d("PlayerDuration = " + player.getDuration());
                         //log.d("PlayerDuration Metadata = " + mediaConfig.getMediaEntry().getDuration());
+
                         mediaConfig.getMediaEntry().setDuration(player.getDuration());
                         lastAdEventReceived = null;
                     }
@@ -396,6 +395,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             displayContent();
             if (isAdShouldAutoPlayOnResume()) {
                 player.play();
+
             }
         } else if (player != null && lastPlaybackPlayerState == PlayerEvent.Type.PAUSE) {
             log.d("onApplicationResumed lastPlaybackPlayerState == PlayerEvent.Type.PAUSE pos = " + player.getCurrentPosition());
@@ -620,6 +620,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             log.d("AD Manager pause");
             videoPlayerWithAdPlayback.pause();
             adsManager.pause();
+            isAdIsPaused = true;
         }
 
         if (player.isPlaying()) {
@@ -679,14 +680,14 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     @Override
     public long getCurrentPosition() {
         long currPos = (long) Math.ceil(videoPlayerWithAdPlayback.getVideoAdPlayer().getAdProgress().getCurrentTime());
-        //log.d("getCurrentPosition: " + currPos);
+        //log.d("IMA Add getCurrentPosition: " + currPos);
         messageBus.post(new AdEvent.AdPlayHeadEvent(currPos));
         return currPos;
     }
 
     @Override
-    public void setAdProviderListener(AdEnabledPlayerController adEnabledPlayerController) {
-        pkAdProviderListener = adEnabledPlayerController;
+    public void setAdProviderListener(PKAdProviderListener adProviderListener) {
+        pkAdProviderListener = adProviderListener;
     }
 
     @Override
@@ -922,7 +923,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         switch (adEvent.getType()) {
             case LOADED:
                 adInfo = createAdInfo(adEvent.getAd());
-                isAdDisplayed = true;
                 if (appIsInBackground) {
                     appInBackgroundDuringAdLoad = true;
                     if (adsManager != null) {
@@ -947,7 +947,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 if (player != null) {
                     player.pause();
                 }
+
+                player.getView().hideVideoSurface();
                 if (appIsInBackground) {
+                    log.d("CONTENT_PAUSE_REQUESTED isAdDisplayed = true");
                     isAdDisplayed = true;
                     appInBackgroundDuringAdLoad = true;
                     if (adsManager != null) {
@@ -1018,7 +1021,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 }
                 break;
             case STARTED:
-                log.d("AD STARTED");
+                log.d("AD STARTED isAdDisplayed = true");
                 isAdDisplayed = true;
                 isAdIsPaused = false;
                 adInfo = createAdInfo(adEvent.getAd());
@@ -1044,9 +1047,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 }
                 break;
             case PAUSED:
-                log.d("AD PAUSED");
+                log.d("AD PAUSED isAdIsPaused = true");
                 isAdIsPaused = true;
-                isAdDisplayed = true;
                 adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
                 messageBus.post(new AdEvent.AdPausedEvent(adInfo));
                 break;
@@ -1271,5 +1273,13 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.TAPPED, AdEvent.Type.TAPPED);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.ICON_TAPPED, AdEvent.Type.ICON_TAPPED);
         return adEventsMap;
+    }
+
+    @Override
+    protected PlayerEngineWrapper getPlayerEngineWrapper() {
+        if (adsPlayerEngineWrapper == null) {
+            adsPlayerEngineWrapper = new AdsPlayerEngineWrapper(context, this);
+        }
+        return adsPlayerEngineWrapper;
     }
 }
