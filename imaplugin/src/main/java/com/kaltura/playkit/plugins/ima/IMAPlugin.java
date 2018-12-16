@@ -182,7 +182,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             @Override
             public void onEvent(PKEvent event) {
                 log.d("Received:PlayerEvent:" + event.eventType().name() + " lastAdEventReceived = " + lastAdEventReceived);
-                AdCuePoints adCuePoints = new AdCuePoints(getAdCuePoints());
+                AdCuePoints adCuePoints = new AdCuePoints(getAdCuePointsList());
                 if (event.eventType() == PlayerEvent.Type.ENDED) {
                     if (!isContentPrepared) {
                         log.d("Event: ENDED ignored content is not prepared");
@@ -696,7 +696,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         pkAdProviderListener = null;
     }
 
-
     @Override
     public void skipAd() {
         if (adsManager != null) {
@@ -704,7 +703,12 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
     }
 
-    private List<Long> getAdCuePoints() {
+    @Override
+    public AdCuePoints getCuePoints() {
+        return adTagCuePoints;
+    }
+
+    private List<Long> getAdCuePointsList() {
         List<Long> adCuePoints = new ArrayList<>();
         if (adsManager != null && adsManager.getAdCuePoints() != null) {
             for (Float cuePoint : adsManager.getAdCuePoints()) {
@@ -713,6 +717,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 } else {
                     adCuePoints.add(cuePoint.longValue());
                 }
+            }
+            if (adCuePoints.size() == 0) { // For Vast ad as Pre-Roll
+                adCuePoints.add(0L);
             }
         }
         return adCuePoints;
@@ -735,7 +742,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         int totalAdsInPod = ad.getAdPodInfo().getTotalAds();
         int adIndexInPod = ad.getAdPodInfo().getAdPosition();   // index starts in 1
         int podCount = (adsManager != null && adsManager.getAdCuePoints() != null) ? adsManager.getAdCuePoints().size() : 0;
+
         int podIndex = (ad.getAdPodInfo().getPodIndex() >= 0) ? ad.getAdPodInfo().getPodIndex() + 1 : podCount; // index starts in 0
+        if (podIndex == 1 && podCount == 0) { // For Vast
+            podCount = 1;
+        }
         boolean isBumper = ad.getAdPodInfo().isBumper();
         long adPodTimeOffset = (long) ad.getAdPodInfo().getTimeOffset() * Consts.MILLISECONDS_MULTIPLIER;
 
@@ -1137,7 +1148,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     private void sendCuePointsUpdateEvent() {
-        adTagCuePoints = new AdCuePoints(getAdCuePoints());
+        adTagCuePoints = new AdCuePoints(getAdCuePointsList());
         logCuePointsData();
         videoPlayerWithAdPlayback.setAdCuePoints(adTagCuePoints);
         messageBus.post(new AdEvent.AdCuePointsUpdateEvent(adTagCuePoints));
