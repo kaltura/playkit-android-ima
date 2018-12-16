@@ -911,9 +911,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             return;
         }
 
-        lastAdEventReceived = adEventsMap.get(adEvent.getType());
+
         if (lastAdEventReceived != AdEvent.Type.AD_PROGRESS) {
             log.d("onAdEvent EventName: " + lastAdEventReceived);
+            lastAdEventReceived = adEventsMap.get(adEvent.getType());
         }
 
         if (adEvent.getAdData() != null) {
@@ -1190,6 +1191,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public void onBufferStart() {
+        isAdDisplayed = true;
         if (lastAdEventReceived == AdEvent.Type.AD_BUFFER_START) {
             return;
         }
@@ -1201,6 +1203,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public void onBufferEnd() {
+        isAdDisplayed = true;
         if (lastAdEventReceived == AdEvent.Type.AD_BUFFER_END) {
             return;
         }
