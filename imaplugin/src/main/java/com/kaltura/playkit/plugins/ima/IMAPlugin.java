@@ -172,7 +172,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             return;
         }
 
-        videoPlayerWithAdPlayback = new ExoPlayerWithAdPlayback(context, adConfig.getAdLoadTimeOut());
+        videoPlayerWithAdPlayback = new ExoPlayerWithAdPlayback(context, adConfig.getAdLoadTimeOut(), adConfig.isDebugMode());
         videoPlayerWithAdPlayback.addAdPlaybackEventListener(this);
         player.getView().addView(videoPlayerWithAdPlayback.getExoPlayerView());
         this.context = context;
@@ -241,7 +241,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         contentCompleted();
         isContentPrepared = false;
         isAutoPlay = false;
-        isAdRequested = false;
         isAdDisplayed = false;
         isAllAdsCompleted = false;
         isContentEndedBeforeMidroll = false;
@@ -250,7 +249,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         if (videoPlayerWithAdPlayback == null) {
             log.d("onUpdateMedia videoPlayerWithAdPlayback = null recreating it");
-            videoPlayerWithAdPlayback = new ExoPlayerWithAdPlayback(context, adConfig.getAdLoadTimeOut());
+            videoPlayerWithAdPlayback = new ExoPlayerWithAdPlayback(context, adConfig.getAdLoadTimeOut(), adConfig.isDebugMode());
             videoPlayerWithAdPlayback.addAdPlaybackEventListener(this);
         }
         videoPlayerWithAdPlayback.setContentProgressProvider(player);
@@ -462,7 +461,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     protected void resetIMA() {
         log.d("Start resetIMA");
         isAdError = false;
-        isAdRequested = false;
         isAdDisplayed = false;
         lastPlaybackPlayerState = null;
         lastAdEventReceived = null;
@@ -689,6 +687,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     @Override
     public void setAdProviderListener(PKAdProviderListener adProviderListener) {
         pkAdProviderListener = adProviderListener;
+    }
+
+    @Override
+    public void setAdRequested(boolean isAdRequested) {
+        this.isAdRequested = isAdRequested;
     }
 
     @Override
