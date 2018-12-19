@@ -503,10 +503,12 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             initAdPlayer();
         }
 
-        MediaSource mediaSource = buildMediaSource(currentAdUri);
-        mVideoPlayer.getPlayer().stop();
-        player.prepare(mediaSource);
-        mVideoPlayer.getPlayer().setPlayWhenReady(adShouldAutoPlay);
+        if (mVideoPlayer != null) {
+            MediaSource mediaSource = buildMediaSource(currentAdUri);
+            mVideoPlayer.getPlayer().stop();
+            player.prepare(mediaSource);
+            mVideoPlayer.getPlayer().setPlayWhenReady(adShouldAutoPlay);
+        }
     }
 
     private void sendSourceError(Exception sourceException) {
@@ -523,10 +525,12 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
     private void initAdPlayer() {
 
-        player = ExoPlayerFactory.newSimpleInstance(mContext, renderersFactory, trackSelector);
+        if (trackSelector != null) {
+            player = ExoPlayerFactory.newSimpleInstance(mContext, renderersFactory, trackSelector);
 
-        player.addAnalyticsListener(eventLogger);
-        mVideoPlayer.setPlayer(player);
+            player.addAnalyticsListener(eventLogger);
+            mVideoPlayer.setPlayer(player);
+        }
     }
 
     private MediaSource buildMediaSource(Uri uri) {
