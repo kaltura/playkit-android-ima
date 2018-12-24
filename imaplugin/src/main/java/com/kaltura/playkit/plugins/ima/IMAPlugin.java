@@ -1080,11 +1080,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             case CLICKED:
                 isAdIsPaused = true;
+                String clickThruUrl = null;
                 Ad ad = adEvent.getAd();
-
                 try {
                     Method clickThroughMethod = ad.getClass().getMethod("getClickThruUrl");
-                    String clickThruUrl = (String) clickThroughMethod.invoke(ad);
+                    clickThruUrl = (String) clickThroughMethod.invoke(ad);
                     messageBus.post(new AdEvent.AdClickedEvent(clickThruUrl));
                     return;
                 } catch (NoSuchMethodException e) {
@@ -1094,7 +1094,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 } catch (InvocationTargetException e) {
                     e.printStackTrace();
                 }
-                messageBus.post(new AdEvent.AdClickedEvent("Unavailable"));
+                messageBus.post(new AdEvent.AdClickedEvent(clickThruUrl));
                 break;
             case TAPPED:
                 messageBus.post(new AdEvent(AdEvent.Type.TAPPED));
