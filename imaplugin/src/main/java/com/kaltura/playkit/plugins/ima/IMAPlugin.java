@@ -1080,21 +1080,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             case CLICKED:
                 isAdIsPaused = true;
-                String clickThruUrl = null;
-                Ad ad = adEvent.getAd();
-                try {
-                    Method clickThroughMethod = ad.getClass().getMethod("getClickThruUrl");
-                    clickThruUrl = (String) clickThroughMethod.invoke(ad);
-                    messageBus.post(new AdEvent.AdClickedEvent(clickThruUrl));
-                    return;
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                }
-                messageBus.post(new AdEvent.AdClickedEvent(clickThruUrl));
+                sendAdClickedEvent(adEvent);
                 break;
             case TAPPED:
                 messageBus.post(new AdEvent(AdEvent.Type.TAPPED));
@@ -1145,6 +1131,24 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             default:
                 break;
         }
+    }
+
+    private void sendAdClickedEvent(com.google.ads.interactivemedia.v3.api.AdEvent adEvent) {
+        String clickThruUrl = null;
+        Ad ad = adEvent.getAd();
+        try {
+            Method clickThroughMethod = ad.getClass().getMethod("getClickThruUrl");
+            clickThruUrl = (String) clickThroughMethod.invoke(ad);
+            messageBus.post(new AdEvent.AdClickedEvent(clickThruUrl));
+            return;
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        messageBus.post(new AdEvent.AdClickedEvent(clickThruUrl));
     }
 
     private void sendCuePointsUpdateEvent() {
