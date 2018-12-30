@@ -452,12 +452,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     private void destroyIMA() {
+        clearAdsLoader();
         resetIMA();
-        if (adsLoader != null) {
-            adsLoader.removeAdsLoadedListener(adsLoadedListener);
-            adsLoadedListener = null;
-            adsLoader = null;
-        }
     }
 
     protected void resetIMA() {
@@ -472,6 +468,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         adTagCuePoints = null;
         adPlaybackCancelled = false;
         if (adDisplayContainer != null) {
+            adDisplayContainer.setPlayer(null);
             adDisplayContainer.unregisterAllVideoControlsOverlays();
         }
         if (adsManager != null) {
