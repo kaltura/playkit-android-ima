@@ -60,6 +60,8 @@ import com.kaltura.playkit.plugins.ads.AdPositionType;
 import com.kaltura.playkit.plugins.ads.AdsProvider;
 import com.kaltura.playkit.utils.Consts;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -526,9 +528,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         request.setAdDisplayContainer(adDisplayContainer);
         request.setContentProgressProvider(videoPlayerWithAdPlayback.getContentProgressProvider());
-        messageBus.post(new AdEvent.AdRequestedEvent(adTagUrl));
-        // Request the ad. After the ad is loaded, onAdsManagerLoaded() will be called.
 
+        // Request the ad. After the ad is loaded, onAdsManagerLoaded() will be called.
         adManagerTimer = getCountDownTimer();
         adsLoader.requestAds(request);
         adManagerTimer.start();
@@ -1076,7 +1077,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             case CLICKED:
                 isAdIsPaused = true;
-                messageBus.post(new AdEvent(AdEvent.Type.CLICKED));
+                sendAdClickedEvent(adEvent);
                 break;
             case TAPPED:
                 messageBus.post(new AdEvent(AdEvent.Type.TAPPED));
@@ -1129,6 +1130,24 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
     }
 
+    private void sendAdClickedEvent(com.google.ads.interactivemedia.v3.api.AdEvent adEvent) {
+        String clickThruUrl = null;
+        Ad ad = adEvent.getAd();
+        try {
+            Method clickThroughMethod = ad.getClass().getMethod("getClickThruUrl");
+            clickThruUrl = (String) clickThroughMethod.invoke(ad);
+            messageBus.post(new AdEvent.AdClickedEvent(clickThruUrl));
+            return;
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        messageBus.post(new AdEvent.AdClickedEvent(clickThruUrl));
+    }
+
     private void sendCuePointsUpdateEvent() {
         adTagCuePoints = new AdCuePoints(getAdCuePoints());
         logCuePointsData();
@@ -1163,6 +1182,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             @Override
             public void onAdsManagerLoaded(AdsManagerLoadedEvent adsManagerLoadedEvent) {
                 log.d("AdsManager loaded");
+                messageBus.post(new AdEvent.AdRequestedEvent(adConfig.getAdTagURL()));
                 cancelAdManagerTimer();
                 // Ads were successfully loaded, so get the AdsManager instance. AdsManager has
                 // events for ad playback and errors.
