@@ -185,7 +185,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             public void onEvent(PKEvent event) {
                 log.d("Received:PlayerEvent:" + event.eventType().name() + " lastAdEventReceived = " + lastAdEventReceived);
                 AdCuePoints adCuePoints = new AdCuePoints(getAdCuePointsList());
-                if (event.eventType() == PlayerEvent.Type.ENDED) {
+                if (event.eventType() == PlayerEvent.Type.LOADED_METADATA && isAdDisplayed) {
+                    if (player != null && player.getView() != null) {
+                        player.getView().hideVideoSurface(); // make sure video surface is set to GONE
+                    }
+                } else if (event.eventType() == PlayerEvent.Type.ENDED) {
                     if (!isContentPrepared) {
                         log.d("Event: ENDED ignored content is not prepared");
                         return;
@@ -215,7 +219,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     }
                 }
             }
-        }, PlayerEvent.Type.ENDED, PlayerEvent.Type.PLAYING);
+        }, PlayerEvent.Type.LOADED_METADATA, PlayerEvent.Type.ENDED, PlayerEvent.Type.PLAYING);
     }
 
     private static IMAConfig parseConfig(Object config) {
@@ -863,6 +867,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             videoPlayerWithAdPlayback.getExoPlayerView().setVisibility(View.VISIBLE);
         }
         if (player != null &&  player.getView() != null) {
+            log.d("displayAd -> hideVideoSurface");
             player.getView().hideVideoSurface();
         }
     }
@@ -873,6 +878,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             videoPlayerWithAdPlayback.getExoPlayerView().setVisibility(View.GONE);
         }
         if (player != null && player.getView() != null) {
+            log.d("displayContent -> showVideoSurface");
             player.getView().showVideoSurface();
         }
     }
