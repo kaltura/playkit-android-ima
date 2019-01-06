@@ -24,7 +24,6 @@ import com.kaltura.playkit.PKPlugin;
 import com.kaltura.playkit.Player;
 import com.kaltura.playkit.PlayerEngineWrapper;
 import com.kaltura.playkit.PlayerEvent;
-import com.kaltura.playkit.ads.AdsPlayerEngineWrapper;
 import com.kaltura.playkit.ads.FBAdsPlayerEngineWrapper;
 import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
@@ -37,13 +36,10 @@ import com.kaltura.playkit.plugins.ads.AdsProvider;
 import com.kaltura.playkit.utils.Consts;
 
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -109,7 +105,7 @@ public class FBInstreamPlugin extends PKPlugin implements AdsProvider {
                     long position = (playheadUpdated.position/ 100) * 100;
                     log.e("XXXXX position = " +  position);
                     long duration = playheadUpdated.duration;
-                    if (fbInStreamAdBreaksMap.containsKey(position) && !fbInStreamAdBreaksMap.get(position).isAdPlayed()) {
+                    if (fbInStreamAdBreaksMap.containsKey(position) && !fbInStreamAdBreaksMap.get(position).isAdBreakPlayed()) {
                         isAdRequested = true;
 
                         requestInStreamAdFromFB(fbInStreamAdBreaksMap.get(position));
@@ -121,6 +117,9 @@ public class FBInstreamPlugin extends PKPlugin implements AdsProvider {
                     }
                 }
                 else if (event.eventType() == PlayerEvent.Type.ENDED) {
+                    if (adConfig.fbInStreamAdBreaks.get(adConfig.fbInStreamAdBreaks.size() -1).getAdBreakTime() == -1) {
+                        requestInStreamAdFromFB(adConfig.fbInStreamAdBreaks.get(adConfig.fbInStreamAdBreaks.size() -1));
+                    }
                     //if (fbInStreamAdBreaksMap.containsKey(player.getDuration())) {
                     //    requestInStreamAdFromFB(fbInStreamAdBreaksMap.get(player.getDuration()));
                     //}
@@ -173,9 +172,9 @@ public class FBInstreamPlugin extends PKPlugin implements AdsProvider {
         } else {
             fbInStreamAdBreaksMap.clear();
         }
-        if (adConfig != null && adConfig.getAdBreaks() != null) {
-            for (FBInStreamAdBreak adBreak : adConfig.getAdBreaks()) {
-                fbInStreamAdBreaksMap.put(adBreak.getAdTime(), adBreak);
+        if (adConfig != null && adConfig.getAdBreakList() != null) {
+            for (FBInStreamAdBreak adBreak : adConfig.getAdBreakList()) {
+                fbInStreamAdBreaksMap.put(adBreak.getAdBreakTime(), adBreak);
             }
         }
         if (!fbInStreamAdBreaksMap.containsKey(0)) {
@@ -205,31 +204,39 @@ public class FBInstreamPlugin extends PKPlugin implements AdsProvider {
             playbackStartPosition = (mediaConfig.getStartPosition() != null) ? mediaConfig.getStartPosition() : null;
             log.d("mediaConfig start pos = " + playbackStartPosition);
         }
-        if(adConfig != null && adConfig.getAdBreaks() != null && adConfig.getAdBreaks().size() > 0) {
-            if (adConfig.getAdBreaks().get(0).getAdTime() == 0) {
+        if(adConfig != null && adConfig.getAdBreakList() != null && adConfig.getAdBreakList().size() > 0) {
+            if (adConfig.getAdBreakList().get(0).getAdBreakTime() == 0) {
                 isAdRequested = true;
-                requestInStreamAdFromFB(adConfig.getAdBreaks().get(0));
+                requestInStreamAdFromFB(adConfig.getAdBreakList().get(0));
             } else {
                 preparePlayer(true);
             }
         }
     }
 
-
     private void requestInStreamAdFromFB(FBInStreamAdBreak adBreak) {
-        log.e("XXXXX requestInStreamAdFromFB time = " +  adBreak.getAdTime());
-        if (adBreak.isAdPlayed()) {
+        log.e("XXXXX requestInStreamAdFromFB time = " +  adBreak.isAdBreakPlayed());
+        if (adBreak.isAdBreakPlayed()) {
             return;
-        } else {
-            fbInStreamAdBreaksMap.get(adBreak.getAdTime()).setAdPlayed(true);
-            //messageBus.post(new AdEvent.AdBufferStart(-1));
         }
+        FBInStreamAd currentAdInAdBreak = null;
+        for (FBInStreamAd adInAdBreak : adBreak.getFbInStreamAdList()) {
+            if (adInAdBreak.isAdPlayed()) {
+                continue;
+            }
+            currentAdInAdBreak = adInAdBreak;
+            break;
+
+        }
+        currentAdInAdBreak.setAdPlayed(true);
+
+        //messageBus.post(new AdEvent.AdBufferStart(-1));
         // Instantiate an InstreamVideoAdView object.
         // NOTE: the placement ID will eventually identify this as your App, you can ignore it for
         // now, while you are testing and replace it later when you have signed up.
         // While you are using this temporary code you will only get test ads and if you release
         // your code like this to the Google Play your users will not receive ads (you will get a no fill error).
-        if(adContainer == null) {
+        if (adContainer == null) {
             initAdContentFrame();
         }
         AdSettings.addTestDevice("294d7470-4781-4795-9493-36602bf29231");//("7450a453-4ba6-464b-85b6-6f319c7f7326");
@@ -237,15 +244,15 @@ public class FBInstreamPlugin extends PKPlugin implements AdsProvider {
         AdSettings.setDebugBuild(true);
 
         adView = new InstreamVideoAdView(
-                context, adBreak.getAdPlacementId(), ///*"156903085045437_239184776817267"*/
+                context, currentAdInAdBreak.getAdPlacementId(), ///*"156903085045437_239184776817267"*/
                 getAdSize());
         // set ad listener to handle events
         adView.setAdListener(new InstreamVideoAdListener() {
             @Override
             public void onError(Ad ad, AdError adError) {
                 // Instream video ad failed to load
-                log.e("Instream video ad failed to load: " + adError.getErrorMessage());
-                log.e("Start onError " + adError.getErrorCode() + ":" + adError.getErrorMessage());
+                log.e("XXX Instream video ad failed to load: " + adError.getErrorMessage());
+                log.e("XXX Start onError " + adError.getErrorCode() + ":" + adError.getErrorMessage());
                 isAdError = true;
                 isAdDisplayed = false;
                 sendError(PKAdErrorType.INTERNAL_ERROR, adError.getErrorCode() + ":" + adError.getErrorMessage(), null);
@@ -264,7 +271,7 @@ public class FBInstreamPlugin extends PKPlugin implements AdsProvider {
                 log.d("Instream video ad is loaded and ready to be displayed!");
                 //messageBus.post(new AdEvent.AdBufferEnd(-1));
                 // Race condition, load() called again before last ad was displayed
-                if(adView == null || !adView.isAdLoaded()) {
+                if (adView == null || !adView.isAdLoaded()) {
                     return;
                 }
 
@@ -276,32 +283,31 @@ public class FBInstreamPlugin extends PKPlugin implements AdsProvider {
 
 
                 adView.show();
-
                 isAdDisplayed = true;
                 if (!isPlayerPrepared) {
                     preparePlayer(false);
                 }
             }
 
-
             @Override
             public void onAdVideoComplete(Ad ad) {
                 // Instream Video View Complete - the video has been played to the end.
                 // You can use this event to continue your video playing
-                log.d("Instream video completed!");
-                if(adView!=null) {
-                    adView.destroy();
+                log.d("XXX Instream video completed!");
+
+                if (adBreak.isAdBreakPlayed()) {
+                    isAdDisplayed = false;
+                    player.getView().showVideoSurface();
+                    adContainer.setVisibility(View.GONE);
+                    getPlayerEngine().play();
+                } else {
+                    requestInStreamAdFromFB(adBreak);
                 }
-                isAdDisplayed = false;
-                player.getView().showVideoSurface();
-                adContainer.setVisibility(View.GONE);
-                getPlayerEngine().play();
             }
 
             @Override
             public void onAdClicked(Ad ad) {
                 log.d("Instream video ad clicked!");
-
             }
 
             @Override
@@ -355,7 +361,7 @@ public class FBInstreamPlugin extends PKPlugin implements AdsProvider {
 
     @Override
     protected void onDestroy() {
-        log.d("Start onDestroy");
+        log.d("XXX Start onDestroy");
         if(adView!=null) {
             adView.destroy();
         }
@@ -379,7 +385,7 @@ public class FBInstreamPlugin extends PKPlugin implements AdsProvider {
 
     @Override
     public void destroyAdsManager() {
-        log.d("Start destroyAdsManager");
+        log.d("XXX Start destroyAdsManager");
         if(adView!=null) {
             adView.destroy();
         }

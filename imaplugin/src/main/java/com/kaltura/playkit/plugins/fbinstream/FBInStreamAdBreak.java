@@ -1,65 +1,47 @@
 package com.kaltura.playkit.plugins.fbinstream;
 
-
-import com.facebook.ads.internal.protocol.AdPlacementType;
 import com.kaltura.playkit.plugins.ads.AdPositionType;
 
+import java.util.List;
+
 public class FBInStreamAdBreak {
+    private long adBreakTime;
+    private List<FBInStreamAd> fbInStreamAdList;
+    private AdPositionType adBreakType;
 
-    private String adPlacementId;
-    private AdPlacementType adPlacementType;
-    private long adTime;
-    private AdPositionType adPositionType;
-    private boolean adPlayed;
-
-    public FBInStreamAdBreak(String adPlacementId, AdPlacementType adPlacementType, long adTime, AdPositionType adPositionType) {
-        this.adPlacementId = adPlacementId;
-        this.adPlacementType = adPlacementType; //AdPlacementType.INSTREAM
-        this.adTime = adTime;
-        this.adPositionType = adPositionType;
+    public FBInStreamAdBreak(AdPositionType adBreakType, long adBreakTime, List<FBInStreamAd> fbInStreamAdList) {
+        this.adBreakType = adBreakType;
+        this.adBreakTime = adBreakTime;
+        this.fbInStreamAdList = fbInStreamAdList;
     }
 
-    public String getAdPlacementId() {
-        return adPlacementId;
+    public List<FBInStreamAd> getFbInStreamAdList() {
+        return fbInStreamAdList;
     }
 
-    public void setAdPlacementId(String adPlacementId) {
-        this.adPlacementId = adPlacementId;
+    public void setFbInStreamAdList(List<FBInStreamAd> fbInStreamAdList) {
+        this.fbInStreamAdList = fbInStreamAdList;
     }
 
-    public AdPlacementType getAdPlacementType() {
-        return adPlacementType;
+    public long getAdBreakTime() {
+        return adBreakTime;
     }
 
-    public void setAdPlacementType(AdPlacementType adPlacementType) {
-        this.adPlacementType = adPlacementType;
+    public AdPositionType getAdBreakType() {
+        return adBreakType;
     }
 
-    public long getAdTime() {
-        return adTime;
+    public void setAdBreakType(AdPositionType adBreakType) {
+        this.adBreakType = adBreakType;
     }
 
-    public void setAdTime(long adTime) {
-        this.adTime = adTime;
+    public boolean isAdBreakPlayed() {
+
+        for (FBInStreamAd  fbInStreamAd : fbInStreamAdList) {
+           if (!fbInStreamAd.isAdPlayed()) {
+               return false;
+           }
+        }
+        return true;
     }
-
-    public AdPositionType getAdPositionType() {
-        return adPositionType;
-    }
-
-    public void setAdPositionType(AdPositionType adPositionType) {
-        this.adPositionType = adPositionType;
-    }
-
-    public boolean isAdPlayed() {
-        return adPlayed;
-    }
-
-    public void setAdPlayed(boolean adPlayed) {
-        this.adPlayed = adPlayed;
-    }
-
-
-
-    //AdBreak adBreak1 = new AdBreak("156903085045437_239184776817267", 0, AdBreak.AdBreakType.PREROLL, AdResource.AdProvider.FACEBOOK, AdBreak.AdFormat.FB);
 }
