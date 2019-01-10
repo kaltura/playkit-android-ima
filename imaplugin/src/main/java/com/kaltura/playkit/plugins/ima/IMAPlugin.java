@@ -263,7 +263,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         clearAdsLoader();
         imaSetup();
         log.d("adtag = " + adConfig.getAdTagURL());
-
         requestAdsFromIMA(adConfig.getAdTagURL());
     }
 
@@ -272,6 +271,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         log.d("Start onUpdateConfig");
 
         adConfig = parseConfig(config);
+        if (adConfig == null) {
+            log.e("Error adConfig Incorrect or null");
+            adConfig = new IMAConfig().setAdTagURL("");
+        }
     }
 
     private void clearAdsLoader() {
@@ -620,8 +623,12 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         log.d("AD Event pause mIsAdDisplayed = " + isAdDisplayed);
         if (isAdDisplayed || (adsManager != null && !isAllAdsCompleted /*&& !player.isPlaying()*/)) {
             log.d("AD Manager pause");
-            videoPlayerWithAdPlayback.pause();
-            adsManager.pause();
+            if (videoPlayerWithAdPlayback != null) {
+                videoPlayerWithAdPlayback.pause();
+            }
+            if (adsManager != null) {
+                adsManager.pause();
+            }
             isAdIsPaused = true;
         }
 
@@ -1212,6 +1219,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             @Override
             public void onAdsManagerLoaded(AdsManagerLoadedEvent adsManagerLoadedEvent) {
                 log.d("AdsManager loaded");
+
                 messageBus.post(new AdEvent.AdRequestedEvent(adConfig.getAdTagURL()));
                 cancelAdManagerTimer();
                 // Ads were successfully loaded, so get the AdsManager instance. AdsManager has
