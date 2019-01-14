@@ -180,46 +180,47 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         this.context = context;
         this.messageBus = messageBus;
 
-        this.messageBus.listen(new PKEvent.Listener() {
-            @Override
-            public void onEvent(PKEvent event) {
-                log.d("Received:PlayerEvent:" + event.eventType().name() + " lastAdEventReceived = " + lastAdEventReceived);
-                AdCuePoints adCuePoints = new AdCuePoints(getAdCuePointsList());
-                if (event.eventType() == PlayerEvent.Type.LOADED_METADATA && isAdDisplayed) {
-                    if (player != null && player.getView() != null) {
-                        player.getView().hideVideoSurface(); // make sure video surface is set to GONE
-                    }
-                } else if (event.eventType() == PlayerEvent.Type.ENDED) {
-                    if (!isContentPrepared) {
-                        log.d("Event: ENDED ignored content is not prepared");
-                        return;
-                    }
-                    lastPlaybackPlayerState = PlayerEvent.Type.ENDED;
-                    if (adInfo != null) {
-                        log.d("Event: ENDED adInfo.getAdIndexInPod() = " + adInfo.getAdIndexInPod() + " -  adInfo.getTotalAdsInPod() = " + adInfo.getTotalAdsInPod());
-                    }
-                    boolean isLastMidRollPlayed = (adInfo == null) || !adCuePoints.hasMidRoll() || (adCuePoints.getAdCuePoints().size() >= 2 && adCuePoints.hasPostRoll() && adInfo != null && adInfo.getAdPodTimeOffset() == adCuePoints.getAdCuePoints().get(adCuePoints.getAdCuePoints().size() - 2));
-                    boolean isLastMidRollInValid = (adCuePoints.getAdCuePoints().size() >= 2 && adCuePoints.hasPostRoll() && adInfo != null && getPlayerEngine() != null && adCuePoints.getAdCuePoints().get(adCuePoints.getAdCuePoints().size() - 2) > getPlayerEngine().getDuration());
-                    log.d("contentCompleted isLastMidRollPlayed = " + isLastMidRollPlayed + " isLastMidRollInValid = " + isLastMidRollInValid);
-
-                    if (!isAdDisplayed && (!adCuePoints.hasPostRoll() || isAllAdsCompleted || isLastMidRollPlayed || isLastMidRollInValid)) {                        log.d("contentCompleted on ended");
-                        contentCompleted();
-                    } else {
-                        log.d("contentCompleted delayed");
-                        isContentEndedBeforeMidroll = true;
-                    }
-                } else if (event.eventType() == PlayerEvent.Type.PLAYING) {
-                    displayContent();
-                    if (mediaConfig != null && mediaConfig.getMediaEntry() != null && getPlayerEngine() != null) {
-                        //log.d("PlayerDuration = " + getPlayerEngine().getDuration());
-                        //log.d("PlayerDuration Metadata = " + mediaConfig.getMediaEntry().getDuration());
-
-                        mediaConfig.getMediaEntry().setDuration(getPlayerEngine().getDuration());
-                        lastAdEventReceived = null;
-                    }
-                }
+        this.messageBus.addListener(context, PlayerEvent.ended, event -> {
+            log.d("Received:PlayerEvent:" + event.eventType().name() + " lastAdEventReceived = " + lastAdEventReceived);
+            AdCuePoints adCuePoints = new AdCuePoints(getAdCuePointsList());
+            if (!isContentPrepared) {
+                log.d("Event: ENDED ignored content is not prepared");
+                return;
             }
-        }, PlayerEvent.Type.LOADED_METADATA, PlayerEvent.Type.ENDED, PlayerEvent.Type.PLAYING);
+            lastPlaybackPlayerState = PlayerEvent.Type.ENDED;
+            if (adInfo != null) {
+                log.d("Event: ENDED adInfo.getAdIndexInPod() = " + adInfo.getAdIndexInPod() + " -  adInfo.getTotalAdsInPod() = " + adInfo.getTotalAdsInPod());
+            }
+            boolean isLastMidRollPlayed = (adInfo == null) || !adCuePoints.hasMidRoll() || (adCuePoints.getAdCuePoints().size() >= 2 && adCuePoints.hasPostRoll() && adInfo != null && adInfo.getAdPodTimeOffset() == adCuePoints.getAdCuePoints().get(adCuePoints.getAdCuePoints().size() - 2));
+            boolean isLastMidRollInValid = (adCuePoints.getAdCuePoints().size() >= 2 && adCuePoints.hasPostRoll() && adInfo != null && getPlayerEngine() != null && adCuePoints.getAdCuePoints().get(adCuePoints.getAdCuePoints().size() - 2) > getPlayerEngine().getDuration());
+            log.d("contentCompleted isLastMidRollPlayed = " + isLastMidRollPlayed + " isLastMidRollInValid = " + isLastMidRollInValid);
+
+            if (!isAdDisplayed && (!adCuePoints.hasPostRoll() || isAllAdsCompleted || isLastMidRollPlayed || isLastMidRollInValid)) {
+                log.d("contentCompleted on ended");
+                contentCompleted();
+            } else {
+                log.d("contentCompleted delayed");
+                isContentEndedBeforeMidroll = true;
+            }
+        });
+
+        this.messageBus.addListener(context, PlayerEvent.loadedMetadata, event -> {
+            log.d("Received:PlayerEvent:" + event.eventType().name() + " lastAdEventReceived = " + lastAdEventReceived);
+            if (player != null && player.getView() != null) {
+                player.getView().hideVideoSurface(); // make sure video surface is set to GONE
+            }
+        });
+
+        this.messageBus.addListener(context, PlayerEvent.playing, event -> {
+            log.d("Received:PlayerEvent:" + event.eventType().name() + " lastAdEventReceived = " + lastAdEventReceived);
+            displayContent();
+            if (mediaConfig != null && mediaConfig.getMediaEntry() != null && getPlayerEngine() != null) {
+                //log.d("PlayerDuration = " + getPlayerEngine().getDuration());
+                //log.d("PlayerDuration Metadata = " + mediaConfig.getMediaEntry().getDuration());
+                mediaConfig.getMediaEntry().setDuration(getPlayerEngine().getDuration());
+                lastAdEventReceived = null;
+            }
+        });
     }
 
     private static IMAConfig parseConfig(Object config) {
@@ -897,19 +898,20 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             isContentPrepared = true;
             pkAdProviderListener.onAdLoadingFinished();
             if (doPlay) {
-                messageBus.listen(new PKEvent.Listener() {
+
+                messageBus.addListener(context, PlayerEvent.durationChanged, new PKEvent.Listener<PlayerEvent.DurationChanged>() {
                     @Override
-                    public void onEvent(PKEvent event) {
+                    public void onEvent(PlayerEvent.DurationChanged event) {
                         log.d("IMA DURATION_CHANGE received calling play");
-                        if (player != null && player.getView() != null && !isAdDisplayed()) {
-                            displayContent();
-                            if (getPlayerEngine() != null) {
-                                getPlayerEngine().play();
+                        if (player != null && player.getView() != null && !IMAPlugin.this.isAdDisplayed()) {
+                            IMAPlugin.this.displayContent();
+                            if (IMAPlugin.this.getPlayerEngine() != null) {
+                                IMAPlugin.this.getPlayerEngine().play();
                             }
                         }
-                        messageBus.remove(this, PlayerEvent.Type.DURATION_CHANGE);
+                        messageBus.removeListener(this);
                     }
-                }, PlayerEvent.Type.DURATION_CHANGE);
+                });
             }
         }
     }
