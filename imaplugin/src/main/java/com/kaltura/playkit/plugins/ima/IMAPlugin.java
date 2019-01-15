@@ -180,7 +180,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         this.context = context;
         this.messageBus = messageBus;
 
-        this.messageBus.addListener(context, PlayerEvent.ended, event -> {
+        this.messageBus.addListener(this, PlayerEvent.ended, event -> {
             log.d("Received:PlayerEvent:" + event.eventType().name() + " lastAdEventReceived = " + lastAdEventReceived);
             AdCuePoints adCuePoints = new AdCuePoints(getAdCuePointsList());
             if (!isContentPrepared) {
@@ -204,14 +204,14 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             }
         });
 
-        this.messageBus.addListener(context, PlayerEvent.loadedMetadata, event -> {
+        this.messageBus.addListener(this, PlayerEvent.loadedMetadata, event -> {
             log.d("Received:PlayerEvent:" + event.eventType().name() + " lastAdEventReceived = " + lastAdEventReceived);
             if (player != null && player.getView() != null) {
                 player.getView().hideVideoSurface(); // make sure video surface is set to GONE
             }
         });
 
-        this.messageBus.addListener(context, PlayerEvent.playing, event -> {
+        this.messageBus.addListener(this, PlayerEvent.playing, event -> {
             log.d("Received:PlayerEvent:" + event.eventType().name() + " lastAdEventReceived = " + lastAdEventReceived);
             displayContent();
             if (mediaConfig != null && mediaConfig.getMediaEntry() != null && getPlayerEngine() != null) {
@@ -899,7 +899,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             pkAdProviderListener.onAdLoadingFinished();
             if (doPlay) {
 
-                messageBus.addListener(context, PlayerEvent.durationChanged, new PKEvent.Listener<PlayerEvent.DurationChanged>() {
+                messageBus.addListener(this, PlayerEvent.durationChanged, new PKEvent.Listener<PlayerEvent.DurationChanged>() {
                     @Override
                     public void onEvent(PlayerEvent.DurationChanged event) {
                         log.d("IMA DURATION_CHANGE received calling play");
