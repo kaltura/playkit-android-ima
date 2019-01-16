@@ -521,7 +521,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         // Create the ads request.
         final AdsRequest request = sdkFactory.createAdsRequest();
-        request.setAdTagUrl(adTagUrl);
+        if (TextUtils.isEmpty(adTagUrl)) {
+            request.setAdsResponse(adConfig.getAdTagResponse());
+        } else{
+            request.setAdTagUrl(adTagUrl);
+        }
         if (adConfig.getAdLoadTimeOut() > 0 && adConfig.getAdLoadTimeOut() < Consts.MILLISECONDS_MULTIPLIER && adConfig.getAdLoadTimeOut() != IMAConfig.DEFAULT_AD_LOAD_TIMEOUT) {
             request.setVastLoadTimeout(adConfig.getAdLoadTimeOut() * Consts.MILLISECONDS_MULTIPLIER);
         }
