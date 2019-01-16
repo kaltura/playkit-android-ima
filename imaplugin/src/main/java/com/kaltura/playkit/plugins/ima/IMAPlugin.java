@@ -487,7 +487,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private void requestAdsFromIMA(String adTagUrl) {
 
-        if (TextUtils.isEmpty(adTagUrl)) {
+        if (TextUtils.isEmpty(adTagUrl) && (adConfig != null && TextUtils.isEmpty(adConfig.getAdTagResponse()))) {
             log.d("AdTag is empty avoiding ad request");
             isAdRequested = true;
             displayContent();
