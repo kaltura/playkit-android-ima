@@ -487,8 +487,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
 
     private void requestAdsFromIMA(String adTagUrl) {
-
-        if (TextUtils.isEmpty(adTagUrl)) {
+        String adTagResponse = null;
+        if (adConfig != null) {
+            adTagResponse = adConfig.getAdTagResponse();
+        }
+        if (TextUtils.isEmpty(adTagUrl) && TextUtils.isEmpty(adTagResponse)) {
             log.d("AdTag is empty avoiding ad request");
             isAdRequested = true;
             displayContent();
@@ -522,7 +525,12 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         // Create the ads request.
         final AdsRequest request = sdkFactory.createAdsRequest();
-        request.setAdTagUrl(adTagUrl);
+        if (TextUtils.isEmpty(adTagUrl)) {
+            request.setAdsResponse(adTagResponse);
+        } else{
+            request.setAdTagUrl(adTagUrl);
+        }
+
         if (adConfig.getAdLoadTimeOut() > 0 && adConfig.getAdLoadTimeOut() < Consts.MILLISECONDS_MULTIPLIER && adConfig.getAdLoadTimeOut() != IMAConfig.DEFAULT_AD_LOAD_TIMEOUT) {
             request.setVastLoadTimeout(adConfig.getAdLoadTimeOut() * Consts.MILLISECONDS_MULTIPLIER);
         }

@@ -55,6 +55,7 @@ public class IMAConfig {
 
     private String language;
     private String adTagURL;
+    private String adTagResponse;
     private AdTagType adTagType;
     private boolean enableBackgroundPlayback;
     private int videoBitrate; // in KB
@@ -86,6 +87,7 @@ public class IMAConfig {
         this.videoMimeTypes           = new ArrayList<>();
         this.videoMimeTypes.add(PKMediaFormat.mp4.mimeType);
         this.adTagURL = null;         //=> must be set via setter
+        this.adTagResponse = null;
         this.playerType                = AD_PLAYER_TYPE;
         this.playerVersion             = AD_PLAYER_VERSION;
 
@@ -159,6 +161,17 @@ public class IMAConfig {
         this.adTagURL = adTagURL;
         return this;
     }
+
+    public String getAdTagResponse() {
+        return adTagResponse;
+    }
+
+    // set the adTagResponse to be used
+    public IMAConfig setAdTagResponse(String adTagResponse) {
+        this.adTagResponse = adTagResponse;
+        return this;
+    }
+
 
     public boolean getAdAttribution() {
         return adAttribution;
