@@ -171,8 +171,7 @@ public class IMAConfig {
         this.adTagResponse = adTagResponse;
         return this;
     }
-
-
+    
     public boolean getAdAttribution() {
         return adAttribution;
     }
@@ -180,7 +179,6 @@ public class IMAConfig {
     public AdTagType getAdTagType() {
         return adTagType;
     }
-
 
     //ad attribution true is required for a countdown timer to be displayed
     // default is true
