@@ -6,18 +6,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.facebook.ads.Ad;
-import com.facebook.ads.AdError;
 import com.facebook.ads.AdSettings;
 import com.facebook.ads.AdSize;
 import com.facebook.ads.InstreamVideoAdListener;
 import com.facebook.ads.InstreamVideoAdView;
+import com.facebook.ads.Ad;
+import com.facebook.ads.AdError;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.kaltura.playkit.BuildConfig;
 import com.kaltura.playkit.MessageBus;
 import com.kaltura.playkit.PKError;
-import com.kaltura.playkit.PKEvent;
 import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PKMediaConfig;
 import com.kaltura.playkit.PKPlugin;
@@ -35,12 +34,13 @@ import com.kaltura.playkit.plugins.ads.AdInfo;
 import com.kaltura.playkit.plugins.ads.AdsProvider;
 import com.kaltura.playkit.utils.Consts;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 public class FBInstreamPlugin extends PKPlugin implements AdsProvider {
@@ -57,7 +57,7 @@ public class FBInstreamPlugin extends PKPlugin implements AdsProvider {
     private PlayerEngineWrapper adsPlayerEngineWrapper;
     private LinearLayout adContainer;
     private InstreamVideoAdView adView;
-    private Map<Long, FBInStreamAdBreak> fbInStreamAdBreaksMap;
+    private TreeMap<Long, FBInStreamAdBreak> fbInStreamAdBreaksMap;
     private boolean isPlayerPrepared;
     private boolean isAdDisplayed;
     private boolean isAdError;
@@ -96,66 +96,9 @@ public class FBInstreamPlugin extends PKPlugin implements AdsProvider {
             return;
         }
         this.messageBus = messageBus;
-        this.messageBus.listen(new PKEvent.Listener() {
-            @Override
-            public void onEvent(PKEvent event) {
-                //log.d("Received:PlayerEvent:" + event.eventType().name() );//+ " lastAdEventReceived = " + lastAdEventReceived);
-                if (event.eventType() == PlayerEvent.Type.PLAYHEAD_UPDATED) {
-                    PlayerEvent.PlayheadUpdated playheadUpdated = (PlayerEvent.PlayheadUpdated)event;
-                    long position = (playheadUpdated.position/ 100) * 100;
-                    log.e("XXXXX position = " +  position);
-                    long duration = playheadUpdated.duration;
-                    if (fbInStreamAdBreaksMap.containsKey(position) && !fbInStreamAdBreaksMap.get(position).isAdBreakPlayed()) {
-                        isAdRequested = true;
 
-                        requestInStreamAdFromFB(fbInStreamAdBreaksMap.get(position));
-                        if (adView != null) {
-                            if (getPlayerEngine() != null && getPlayerEngine().isPlaying()) {
-                                getPlayerEngine().pause();
-                            }
-                        }
-                    }
-                }
-                else if (event.eventType() == PlayerEvent.Type.ENDED) {
-                    if (adConfig.fbInStreamAdBreaks.get(adConfig.fbInStreamAdBreaks.size() -1).getAdBreakTime() == -1) {
-                        requestInStreamAdFromFB(adConfig.fbInStreamAdBreaks.get(adConfig.fbInStreamAdBreaks.size() -1));
-                    }
-                    //if (fbInStreamAdBreaksMap.containsKey(player.getDuration())) {
-                    //    requestInStreamAdFromFB(fbInStreamAdBreaksMap.get(player.getDuration()));
-                    //}
+        addListeners();
 
-//                    if (!isContentPrepared) {
-//                        log.d("Event: ENDED ignored content is not prepared");
-//                        return;
-//                    }
-//                    lastPlaybackPlayerState = PlayerEvent.Type.ENDED;
-//                    if (adInfo != null) {
-//                        log.d("Event: ENDED adInfo.getAdIndexInPod() = " + adInfo.getAdIndexInPod() + " -  adInfo.getTotalAdsInPod() = " + adInfo.getTotalAdsInPod());
-//                    }
-//                    boolean isLastMidRollPlayed = (adInfo == null) || !adCuePoints.hasMidRoll() || (adCuePoints.getAdCuePoints().size() >= 2 && adCuePoints.hasPostRoll() && adInfo != null && adInfo.getAdPodTimeOffset() == adCuePoints.getAdCuePoints().get(adCuePoints.getAdCuePoints().size() - 2));
-//                    boolean isLastMidRollInValid = (adCuePoints.getAdCuePoints().size() >= 2 && adCuePoints.hasPostRoll() && adInfo != null && adCuePoints.getAdCuePoints().get(adCuePoints.getAdCuePoints().size() - 2) > getPlayerEngine().getDuration());
-//                    log.d("contentCompleted isLastMidRollPlayed = " + isLastMidRollPlayed + " isLastMidRollInValid = " + isLastMidRollInValid);
-//
-//                    if (!isAdDisplayed && (!adCuePoints.hasPostRoll() || isAllAdsCompleted || isLastMidRollPlayed || isLastMidRollInValid)) {                        log.d("contentCompleted on ended");
-//                        contentCompleted();
-//                    } else {
-//                        log.d("contentCompleted delayed");
-//                        isContentEndedBeforeMidroll = true;
-//                    }
-                } else if (event.eventType() == PlayerEvent.Type.PLAYING) {
-//                    displayContent();
-//                    if (mediaConfig != null && mediaConfig.getMediaEntry() != null) {
-//                        //log.d("PlayerDuration = " + getPlayerEngine().getDuration());
-//                        //log.d("PlayerDuration Metadata = " + mediaConfig.getMediaEntry().getDuration());
-//
-//                        mediaConfig.getMediaEntry().setDuration(getPlayerEngine().getDuration());
-//                        lastAdEventReceived = null;
-//                    }
-                } else if (event.eventType() == PlayerEvent.Type.CAN_PLAY) {
-                    isPlayerPrepared = true;
-                }
-            }
-        }, PlayerEvent.Type.CAN_PLAY, PlayerEvent.Type.ENDED, PlayerEvent.Type.PLAYING, PlayerEvent.Type.PLAYHEAD_UPDATED);
         adConfig = parseConfig(config);
 
         if (adConfig == null) {
@@ -166,9 +109,102 @@ public class FBInstreamPlugin extends PKPlugin implements AdsProvider {
         initAdContentFrame();
     }
 
+    private void addListeners() {
+        this.messageBus.addListener(this, PlayerEvent.playheadUpdated, event -> {
+            PlayerEvent.PlayheadUpdated playheadUpdated = event;
+            long position = (playheadUpdated.position/ 100) * 100;
+
+            log.e("XXXXX position = " +  position);
+            long duration = playheadUpdated.duration;
+            if (fbInStreamAdBreaksMap.containsKey(position) && !fbInStreamAdBreaksMap.get(position).isAdBreakPlayed()) {
+                isAdRequested = true;
+
+                requestInStreamAdFromFB(fbInStreamAdBreaksMap.get(position));
+                if (adView != null) {
+                    if (getPlayerEngine() != null && getPlayerEngine().isPlaying()) {
+                        getPlayerEngine().pause();
+                    }
+                }
+            }
+        });
+
+        this.messageBus.addListener(this, PlayerEvent.seeking, event -> {
+            long position = event.targetPosition;
+            playPreviousUnplayedCuePoint(position);
+        });
+
+        this.messageBus.addListener(this, PlayerEvent.ended, event -> {
+            if (adConfig.fbInStreamAdBreaks.get(adConfig.fbInStreamAdBreaks.size() -1).getAdBreakTime() == Long.MAX_VALUE) {
+                requestInStreamAdFromFB(adConfig.fbInStreamAdBreaks.get(adConfig.fbInStreamAdBreaks.size() -1));
+            }
+            //if (fbInStreamAdBreaksMap.containsKey(player.getDuration())) {
+            //    requestInStreamAdFromFB(fbInStreamAdBreaksMap.get(player.getDuration()));
+            //}
+
+            //                    if (!isContentPrepared) {
+            //                        log.d("Event: ENDED ignored content is not prepared");
+            //                        return;
+            //                    }
+            //                    lastPlaybackPlayerState = PlayerEvent.Type.ENDED;
+            //                    if (adInfo != null) {
+            //                        log.d("Event: ENDED adInfo.getAdIndexInPod() = " + adInfo.getAdIndexInPod() + " -  adInfo.getTotalAdsInPod() = " + adInfo.getTotalAdsInPod());
+            //                    }
+            //                    boolean isLastMidRollPlayed = (adInfo == null) || !adCuePoints.hasMidRoll() || (adCuePoints.getAdCuePoints().size() >= 2 && adCuePoints.hasPostRoll() && adInfo != null && adInfo.getAdPodTimeOffset() == adCuePoints.getAdCuePoints().get(adCuePoints.getAdCuePoints().size() - 2));
+            //                    boolean isLastMidRollInValid = (adCuePoints.getAdCuePoints().size() >= 2 && adCuePoints.hasPostRoll() && adInfo != null && adCuePoints.getAdCuePoints().get(adCuePoints.getAdCuePoints().size() - 2) > getPlayerEngine().getDuration());
+            //                    log.d("contentCompleted isLastMidRollPlayed = " + isLastMidRollPlayed + " isLastMidRollInValid = " + isLastMidRollInValid);
+            //
+            //                    if (!isAdDisplayed && (!adCuePoints.hasPostRoll() || isAllAdsCompleted || isLastMidRollPlayed || isLastMidRollInValid)) {                        log.d("contentCompleted on ended");
+            //                        contentCompleted();
+            //                    } else {
+            //                        log.d("contentCompleted delayed");
+            //                        isContentEndedBeforeMidroll = true;
+            //                    }
+        });
+
+        this.messageBus.addListener(this, PlayerEvent.playing, event -> {
+            //                    displayContent();
+            //                    if (mediaConfig != null && mediaConfig.getMediaEntry() != null) {
+            //                        //log.d("PlayerDuration = " + getPlayerEngine().getDuration());
+            //                        //log.d("PlayerDuration Metadata = " + mediaConfig.getMediaEntry().getDuration());
+            //
+            //                        mediaConfig.getMediaEntry().setDuration(getPlayerEngine().getDuration());
+            //                        lastAdEventReceived = null;
+            //                    }
+        });
+
+        this.messageBus.addListener(this, PlayerEvent.canPlay, event -> {
+            isPlayerPrepared = true;
+        });
+    }
+
+    private void playPreviousUnplayedCuePoint(long position) {
+        if (position >= player.getDuration() && fbInStreamAdBreaksMap.containsKey(Long.MAX_VALUE) && !fbInStreamAdBreaksMap.get(Long.MAX_VALUE).isAdBreakPlayed()) {
+            return;
+        }
+        Long lastIndexPosition = null;
+        for (Map.Entry<Long, FBInStreamAdBreak> entry : fbInStreamAdBreaksMap.entrySet()) {
+            if (entry.getKey() > position) {
+                break;
+            } else if (entry.getValue().isAdBreakPlayed()) {
+                lastIndexPosition = entry.getKey();
+                continue;
+            } else {
+                lastIndexPosition = entry.getKey();
+            }
+        }
+        if (lastIndexPosition != null && fbInStreamAdBreaksMap.get(lastIndexPosition).isAdBreakPlayed() == false) {
+            requestInStreamAdFromFB(fbInStreamAdBreaksMap.get(lastIndexPosition));
+            if (adView != null) {
+                if (getPlayerEngine() != null && getPlayerEngine().isPlaying()) {
+                    getPlayerEngine().pause();
+                }
+            }
+        }
+    }
+
     private void buildAdBreaksMap() {
         if (fbInStreamAdBreaksMap == null) {
-            fbInStreamAdBreaksMap = new HashMap<>();
+            fbInStreamAdBreaksMap = new TreeMap<>();
         } else {
             fbInStreamAdBreaksMap.clear();
         }
@@ -177,7 +213,7 @@ public class FBInstreamPlugin extends PKPlugin implements AdsProvider {
                 fbInStreamAdBreaksMap.put(adBreak.getAdBreakTime(), adBreak);
             }
         }
-        if (!fbInStreamAdBreaksMap.containsKey(0)) {
+        if (!fbInStreamAdBreaksMap.containsKey(0L)) {
             isAdRequested = true; // incase no preroll prepare....
         }
     }
@@ -247,7 +283,24 @@ public class FBInstreamPlugin extends PKPlugin implements AdsProvider {
                 context, currentAdInAdBreak.getAdPlacementId(), ///*"156903085045437_239184776817267"*/
                 getAdSize());
         // set ad listener to handle events
+
         adView.setAdListener(new InstreamVideoAdListener() {
+            @Override
+            public void onAdVideoComplete(Ad ad) {
+                // Instream Video View Complete - the video has been played to the end.
+                // You can use this event to continue your video playing
+                log.d("XXX Instream video completed!");
+
+                if (adBreak.isAdBreakPlayed()) {
+                    isAdDisplayed = false;
+                    player.getView().showVideoSurface();
+                    adContainer.setVisibility(View.GONE);
+                    getPlayerEngine().play();
+                } else {
+                    requestInStreamAdFromFB(adBreak);
+                }
+            }
+
             @Override
             public void onError(Ad ad, AdError adError) {
                 // Instream video ad failed to load
@@ -286,22 +339,6 @@ public class FBInstreamPlugin extends PKPlugin implements AdsProvider {
                 isAdDisplayed = true;
                 if (!isPlayerPrepared) {
                     preparePlayer(false);
-                }
-            }
-
-            @Override
-            public void onAdVideoComplete(Ad ad) {
-                // Instream Video View Complete - the video has been played to the end.
-                // You can use this event to continue your video playing
-                log.d("XXX Instream video completed!");
-
-                if (adBreak.isAdBreakPlayed()) {
-                    isAdDisplayed = false;
-                    player.getView().showVideoSurface();
-                    adContainer.setVisibility(View.GONE);
-                    getPlayerEngine().play();
-                } else {
-                    requestInStreamAdFromFB(adBreak);
                 }
             }
 
