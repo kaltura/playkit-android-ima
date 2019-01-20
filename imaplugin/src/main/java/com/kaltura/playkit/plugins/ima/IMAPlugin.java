@@ -179,8 +179,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         player.getView().addView(videoPlayerWithAdPlayback.getExoPlayerView());
         this.context = context;
         this.messageBus = messageBus;
+        addListeners(player);
+    }
 
-        this.messageBus.addListener(this, PlayerEvent.ended, event -> {
+    private void addListeners(Player player) {
+        messageBus.addListener(this, PlayerEvent.ended, event -> {
             log.d("Received:PlayerEvent:" + event.eventType().name() + " lastAdEventReceived = " + lastAdEventReceived);
             AdCuePoints adCuePoints = new AdCuePoints(getAdCuePointsList());
             if (!isContentPrepared) {
@@ -204,14 +207,14 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             }
         });
 
-        this.messageBus.addListener(this, PlayerEvent.loadedMetadata, event -> {
+        messageBus.addListener(this, PlayerEvent.loadedMetadata, event -> {
             log.d("Received:PlayerEvent:" + event.eventType().name() + " lastAdEventReceived = " + lastAdEventReceived);
             if (player != null && player.getView() != null) {
                 player.getView().hideVideoSurface(); // make sure video surface is set to GONE
             }
         });
 
-        this.messageBus.addListener(this, PlayerEvent.playing, event -> {
+        messageBus.addListener(this, PlayerEvent.playing, event -> {
             log.d("Received:PlayerEvent:" + event.eventType().name() + " lastAdEventReceived = " + lastAdEventReceived);
             displayContent();
             if (mediaConfig != null && mediaConfig.getMediaEntry() != null && getPlayerEngine() != null) {
@@ -455,6 +458,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             videoPlayerWithAdPlayback.removeAdPlaybackEventListener();
             videoPlayerWithAdPlayback.releasePlayer();
             videoPlayerWithAdPlayback = null;
+        }
+        if (messageBus != null) {
+            messageBus.removeListeners(this);
         }
     }
 
