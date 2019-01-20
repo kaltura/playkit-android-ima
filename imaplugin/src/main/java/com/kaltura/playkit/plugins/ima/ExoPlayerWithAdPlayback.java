@@ -37,6 +37,7 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.EventLogger;
+import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.Util;
 import com.kaltura.playkit.PKError;
 import com.kaltura.playkit.PKLog;
@@ -51,6 +52,7 @@ import java.util.List;
 
 import static com.google.android.exoplayer2.C.SELECTION_REASON_ADAPTIVE;
 import static com.google.android.exoplayer2.C.SELECTION_REASON_INITIAL;
+import static com.google.android.exoplayer2.util.Log.LOG_LEVEL_OFF;
 
 /**
  * Video player that can play content video and ads.
@@ -70,6 +72,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     private boolean isPlayerReady = false;
     private AdCuePoints adCuePoints;
     private int adLoadTimeout = 8000; // mili sec
+    private boolean debugEnabled;
 
     // The wrapped video player.
     private PlayerView mVideoPlayer;
@@ -116,12 +119,13 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         super(context, attrs, 0);
     }
 
-    public ExoPlayerWithAdPlayback(Context context, int adLoadTimeout) {
+    public ExoPlayerWithAdPlayback(Context context, int adLoadTimeout, boolean debugEnabled) {
         super(context, null);
         this.mContext = context;
         if (adLoadTimeout < Consts.MILLISECONDS_MULTIPLIER) {
             this.adLoadTimeout = adLoadTimeout * 1000;
         }
+        this.debugEnabled = debugEnabled;
         init();
     }
 
@@ -524,6 +528,13 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     }
 
     private void initAdPlayer() {
+        if (debugEnabled) {
+            Log.setLogLevel(Log.LOG_LEVEL_ALL);
+            Log.setLogStackTraces(true);
+        } else {
+            Log.setLogLevel(LOG_LEVEL_OFF);
+            Log.setLogStackTraces(false);
+        }
 
         if (trackSelector != null) {
             player = ExoPlayerFactory.newSimpleInstance(mContext, renderersFactory, trackSelector);
