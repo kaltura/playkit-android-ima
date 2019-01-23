@@ -732,6 +732,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     @Override
+    public void seekTo(long position) {
+        return;
+    }
+
+    @Override
     public AdCuePoints getCuePoints() {
         return adTagCuePoints;
     }
@@ -800,7 +805,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         log.v("AdInfo: " + adInfo.toString());
         return adInfo;
-
     }
 
     @Override
