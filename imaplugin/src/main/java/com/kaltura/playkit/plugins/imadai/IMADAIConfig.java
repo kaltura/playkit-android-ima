@@ -16,6 +16,7 @@ import android.view.View;
 
 import com.google.ads.interactivemedia.v3.api.StreamRequest;
 import com.google.gson.JsonObject;
+import com.kaltura.playkit.plugins.ima.IMAConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,7 @@ public class IMADAIConfig {
     private static final String AD_LOAD_TIMEOUT          = "adLoadTimeOut";
     private static final String AD_MAX_REDIRECTS         = "adMaxRedirects";
     private static final String AD_ENABLE_DEBUG_MODE     = "enableDebugMode";
+    private static final String AD_ALWAYES_START_WITH_PREROLL = "alwaysStartWithPreroll";
 
     private String assetTitle;
     private String assetKey;
@@ -51,6 +53,7 @@ public class IMADAIConfig {
     private boolean adAttribution;
     private boolean adCountDown;
     private boolean enableDebugMode;
+    private boolean alwaysStartWithPreroll;
     private int adLoadTimeOut; // in sec
     private int maxRedirects;
     private transient List<View> controlsOverlayList;
@@ -82,6 +85,7 @@ public class IMADAIConfig {
         this.adCountDown               = true;
         this.adLoadTimeOut             = DEFAULT_AD_LOAD_TIMEOUT;
         this.enableDebugMode           = false;
+        this.alwaysStartWithPreroll   = false;
     }
 
     public String getAssetTitle() {
@@ -179,6 +183,11 @@ public class IMADAIConfig {
         return this;
     }
 
+    public IMADAIConfig setAlwaysStartWithPreroll(boolean alwaysStartWithPreroll) {
+        this.alwaysStartWithPreroll = alwaysStartWithPreroll;
+        return this;
+    }
+
     public IMADAIConfig setControlsOverlayList(List<View> controlsOverlayList) {
         this.controlsOverlayList = controlsOverlayList;
         return this;
@@ -200,6 +209,10 @@ public class IMADAIConfig {
 
     public boolean isDebugMode() {
         return enableDebugMode;
+    }
+
+    public boolean isAlwaysStartWithPreroll() {
+        return alwaysStartWithPreroll;
     }
 
 //    public JsonObject toJSONObject() {

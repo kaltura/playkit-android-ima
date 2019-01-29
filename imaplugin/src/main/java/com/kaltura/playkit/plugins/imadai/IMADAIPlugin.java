@@ -47,6 +47,7 @@ import com.kaltura.playkit.player.metadata.PKMetadata;
 import com.kaltura.playkit.player.metadata.PKTextInformationFrame;
 import com.kaltura.playkit.plugin.ima.BuildConfig;
 import com.kaltura.playkit.plugins.ads.AdInfo;
+import com.kaltura.playkit.plugins.ads.AdPositionType;
 import com.kaltura.playkit.plugins.ads.AdsProvider;
 import com.kaltura.playkit.utils.Consts;
 
@@ -77,6 +78,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private boolean appIsInBackground;
     private boolean isAutoPlay;
     private boolean isContentPrepared;
+    private Long playbackStartPosition;
 
     private ImaSdkSettings imaSdkSettings;
     private AdsRenderingSettings renderingSettings;
@@ -154,7 +156,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 if (getPlayerEngine().getCurrentPosition() >= getPlayerEngine().getDuration() && prevCuePoint != null && currentPosSec >= prevCuePoint.getEndTime()) {
                     if (cuePoints != null && cuePoints.size() > 0 && Math.floor(cuePoints.get(cuePoints.size() - 1).getEndTime()) == Math.floor(getPlayerEngine().getDuration() / Consts.MILLISECONDS_MULTIPLIER)) {
                         getPlayerEngine().seekTo((long) (cuePoints.get(cuePoints.size() - 1).getStartTime() * Consts.MILLISECONDS_MULTIPLIER) - 1000);
-                       //getPlayerEngine().play();
+                        //isAdDisplayed = false;
+                        //getPlayerEngine().play();
                     }
                 }
             }
@@ -194,6 +197,12 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 mediaConfig.getMediaEntry().getSources().get(0).getUrl().contains("dai.google.com")) {
             return;
         }
+
+        if (mediaConfig != null) {
+            playbackStartPosition = (mediaConfig.getStartPosition() != null) ? mediaConfig.getStartPosition() : null;
+            log.d("mediaConfig start pos = " + playbackStartPosition);
+        }
+
         isAutoPlay = false;
         isContentPrepared = false;
         isAdRequested = false;
@@ -283,7 +292,11 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
         renderingSettings = ImaSdkFactory.getInstance().createAdsRenderingSettings();
 
-        if (mediaConfig != null && mediaConfig.getStartPosition() > 0) {
+        //if (!adConfig.isAlwaysStartWithPreroll() && playbackStartPosition != null && playbackStartPosition > 0) {
+        //    renderingSettings.setPlayAdsAfterTime(playbackStartPosition);
+        //}
+
+        if (playbackStartPosition != null && playbackStartPosition > 0) {
             renderingSettings.setPlayAdsAfterTime(mediaConfig.getStartPosition());
         }
 
@@ -524,6 +537,15 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             default:
                 break;
         }
+    }
+
+    private boolean checkIfDiscardAdRequired() {
+        if (!adConfig.isAlwaysStartWithPreroll() || adInfo == null || cuePoints == null || mediaConfig == null || playbackStartPosition == null) {
+            return false;
+        }
+        log.d("getAdPositionType = " + adInfo.getAdPositionType().name());
+        log.d("playbackStartPosition = " +  playbackStartPosition);
+        return adInfo.getAdPositionType() == AdPositionType.PRE_ROLL && playbackStartPosition > 0;
     }
 
     @Override
