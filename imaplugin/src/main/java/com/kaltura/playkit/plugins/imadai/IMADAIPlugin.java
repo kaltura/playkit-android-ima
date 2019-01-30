@@ -1,6 +1,7 @@
 package com.kaltura.playkit.plugins.imadai;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -348,7 +349,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                     return;
                 }
                 List<PKDrmParams> drmData = null;
-                if (adConfig.getLicenseUrl() !=null) {
+                if (!TextUtils.isEmpty(adConfig.getLicenseUrl())) {
                     drmData = new ArrayList();
                     PKDrmParams pkDrmParams = new PKDrmParams(adConfig.getLicenseUrl(), PKDrmParams.Scheme.WidevineCENC);
                     drmData.add(pkDrmParams);
