@@ -871,23 +871,25 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             long contentTimeForStreamTime = (long) (streamManager.getContentTimeForStreamTime(Math.floor(playerPosition / Consts.MILLISECONDS_MULTIPLIER))) * Consts.MILLISECONDS_MULTIPLIER;
             log.d("XXX Position = " + Math.round(playerPosition / Consts.MILLISECONDS_MULTIPLIER_FLOAT));
             int totalAdsDuration = 0;
-            for (CuePoint cuePoint : cuePoints) {
-                totalAdsDuration += (cuePoint.getEndTime() - cuePoint.getStartTime());
-                if ( Math.round(playerPosition / Consts.MILLISECONDS_MULTIPLIER_FLOAT) == 79) {
-                    log.d("XXX cuePoint.getStartTime() = " + cuePoint.getStartTime());
-                    log.d("XXX cuePoint.getEndTime() = " + cuePoint.getEndTime());
-                    log.d("XXX STREAM Start = " + (long) (streamManager.getStreamTimeForContentTime(cuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER)));
-                    log.d("XXX STREAM End = " + (long) (streamManager.getStreamTimeForContentTime(cuePoint.getEndTime() * Consts.MILLISECONDS_MULTIPLIER)));
-                    log.d("XXX STREAM2 Start = " + (long) (streamManager.getContentTimeForStreamTime(cuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER)));
-                    log.d("XXX STREAM2 End = " + (long) (streamManager.getContentTimeForStreamTime(cuePoint.getEndTime() * Consts.MILLISECONDS_MULTIPLIER)));
-                }
-                if (cuePoint.isPlayed() && cuePoint.getStartTime() == Math.round(playerPosition / Consts.MILLISECONDS_MULTIPLIER_FLOAT)) {
-                    log.d("XXX NEED TO SKIP");
-                    //long nextContentTimeForStreamTime = (long) (streamManager.getContentTimeForStreamTime(cuePoint.getStartTime()  * Consts.MILLISECONDS_MULTIPLIER));
-                    //seekTo((long) cuePoint.getEndTime() * Consts.MILLISECONDS_MULTIPLIER);
-                    long newPositionToSeek = (long) Math.floor(cuePoint.getEndTime() * Consts.MILLISECONDS_MULTIPLIER);
-                    seekTo(newPositionToSeek - (totalAdsDuration * Consts.MILLISECONDS_MULTIPLIER));
-                    return (long) ((cuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER) - (totalAdsDuration * Consts.MILLISECONDS_MULTIPLIER));
+            if (cuePoints != null) {
+                for (CuePoint cuePoint : cuePoints) {
+                    totalAdsDuration += (cuePoint.getEndTime() - cuePoint.getStartTime());
+                    if (Math.round(playerPosition / Consts.MILLISECONDS_MULTIPLIER_FLOAT) == 79) {
+                        log.d("XXX cuePoint.getStartTime() = " + cuePoint.getStartTime());
+                        log.d("XXX cuePoint.getEndTime() = " + cuePoint.getEndTime());
+                        log.d("XXX STREAM Start = " + (long) (streamManager.getStreamTimeForContentTime(cuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER)));
+                        log.d("XXX STREAM End = " + (long) (streamManager.getStreamTimeForContentTime(cuePoint.getEndTime() * Consts.MILLISECONDS_MULTIPLIER)));
+                        log.d("XXX STREAM2 Start = " + (long) (streamManager.getContentTimeForStreamTime(cuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER)));
+                        log.d("XXX STREAM2 End = " + (long) (streamManager.getContentTimeForStreamTime(cuePoint.getEndTime() * Consts.MILLISECONDS_MULTIPLIER)));
+                    }
+                    if (cuePoint.isPlayed() && cuePoint.getStartTime() == Math.round(playerPosition / Consts.MILLISECONDS_MULTIPLIER_FLOAT)) {
+                        log.d("XXX NEED TO SKIP");
+                        //long nextContentTimeForStreamTime = (long) (streamManager.getContentTimeForStreamTime(cuePoint.getStartTime()  * Consts.MILLISECONDS_MULTIPLIER));
+                        //seekTo((long) cuePoint.getEndTime() * Consts.MILLISECONDS_MULTIPLIER);
+                        long newPositionToSeek = (long) Math.floor(cuePoint.getEndTime() * Consts.MILLISECONDS_MULTIPLIER);
+                        seekTo(newPositionToSeek - (totalAdsDuration * Consts.MILLISECONDS_MULTIPLIER));
+                        return (long) ((cuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER) - (totalAdsDuration * Consts.MILLISECONDS_MULTIPLIER));
+                    }
                 }
             }
             log.d("XXX ------------------ " + contentTimeForStreamTime);
