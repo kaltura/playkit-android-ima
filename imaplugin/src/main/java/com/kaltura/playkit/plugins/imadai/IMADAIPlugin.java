@@ -124,6 +124,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             ImaSdkFactory.getInstance().createAdsLoader(context);
         }
     };
+
+
     @Override
     protected void onLoad(final Player player, Object config, MessageBus messageBus, Context context) {
         log.d("onLoad");
@@ -356,6 +358,10 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 }
                 for (PKMediaSource source : mediaConfig.getMediaEntry().getSources()) {
                     source.setUrl(url).setMediaFormat(PKMediaFormat.valueOfUrl(url)).setDrmData(drmData);
+                }
+                if (adConfig.isAlwaysStartWithPreroll() && mediaConfig.getStartPosition() != null && mediaConfig.getStartPosition() > 0) {
+                    mSnapBackTime = mediaConfig.getStartPosition();
+                    mediaConfig.setStartPosition(0L);
                 }
                 player.prepare(mediaConfig);
                 getPlayerEngine().play();
