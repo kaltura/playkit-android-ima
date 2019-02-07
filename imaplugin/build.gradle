@@ -31,7 +31,7 @@ dependencies {
     //implementation 'com.kaltura:playkit-android:dev-SNAPSHOT'
     //implementation project(":playkit")
     //implementation 'com.kaltura.playkit:playkit:3.7.1'
-    implementation 'com.kaltura:playkit-android:ab2ac0333b90e3a632b88ab98ff59699d2a4bba3'
+    implementation 'com.kaltura:playkit-android:60aec345a2c9588e664daed1fce46ccad5ca500f'
 
     //Ads libraries.
     api 'com.google.ads.interactivemedia.v3:interactivemedia:3.10.2'
