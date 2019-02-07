@@ -360,7 +360,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                     source.setUrl(url).setMediaFormat(PKMediaFormat.valueOfUrl(url)).setDrmData(drmData);
                 }
                 if (adConfig.isAlwaysStartWithPreroll() && mediaConfig.getStartPosition() != null && mediaConfig.getStartPosition() > 0) {
-                    mSnapBackTime = mediaConfig.getStartPosition();
+                    mSnapBackTime = streamManager.getStreamTimeForContentTime(mediaConfig.getStartPosition());
                     mediaConfig.setStartPosition(0L);
                 }
                 player.prepare(mediaConfig);
