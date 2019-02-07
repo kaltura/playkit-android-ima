@@ -714,7 +714,15 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
     @Override
     public void destroyAdsManager() {
-
+        isAdRequested = false;
+        if (streamManager == null) {
+            return;
+        }
+        log.d("IMADAI Start destroyAdsManager");
+        streamManager.destroy();
+        contentCompleted();
+        streamManager = null;
+        isAdDisplayed = false;
     }
 
     @Override
@@ -731,12 +739,14 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
     @Override
     public void contentCompleted() {
-
+        if (adsLoader != null) {
+            adsLoader.contentComplete();
+        }
     }
 
     @Override
     public PKAdInfo getAdInfo() {
-        return null;
+        return adInfo;
     }
 
     @Override
