@@ -132,6 +132,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private PKAdProviderListener pkAdProviderListener;
     private Long playbackStartPosition;
     private PlayerEngineWrapper adsPlayerEngineWrapper;
+    private Boolean playerPlayingBeforeAdArrived;
     private Map<com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType, AdEvent.Type> adEventsMap;
 
     public static final Factory factory = new Factory() {
@@ -997,6 +998,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             case CONTENT_PAUSE_REQUESTED:
                 log.d("CONTENT_PAUSE_REQUESTED appIsInBackground = " + appIsInBackground);
+                playerPlayingBeforeAdArrived = getPlayerEngine().isPlaying();
                 if (getPlayerEngine() != null) {
                     getPlayerEngine().pause();
                 }
@@ -1013,6 +1015,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 } else {
                     displayAd();
                 }
+
                 messageBus.post(new AdEvent(AdEvent.Type.CONTENT_PAUSE_REQUESTED));
                 break;
             case CONTENT_RESUME_REQUESTED:
@@ -1078,9 +1081,15 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             case STARTED:
                 log.d("AD STARTED isAdDisplayed = true");
-                isAdDisplayed = true;
-                isAdIsPaused = false;
                 adInfo = createAdInfo(adEvent.getAd());
+                if (adInfo.getAdPositionType() != AdPositionType.PRE_ROLL && !playerPlayingBeforeAdArrived) {
+                    pause();
+                    playerPlayingBeforeAdArrived = false;
+                } else {
+                    isAdIsPaused = false;
+                }
+
+                isAdDisplayed = true;
                 messageBus.post(new AdEvent.AdStartedEvent(adInfo));
                 if (adsManager != null && appIsInBackground) {
                     log.d("AD STARTED and pause");
