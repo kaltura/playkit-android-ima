@@ -200,7 +200,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                     }
                 }
 
-                //Make sure events will be fired ater pause
+                //Make sure events will be fired after pause
                 for (VideoAdPlayer.VideoAdPlayerCallback callback : mAdCallbacks) {
                     callback.onPlay();
                 }
