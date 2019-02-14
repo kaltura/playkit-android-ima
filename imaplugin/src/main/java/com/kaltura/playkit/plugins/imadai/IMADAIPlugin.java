@@ -18,7 +18,6 @@ import com.google.ads.interactivemedia.v3.api.ImaSdkSettings;
 import com.google.ads.interactivemedia.v3.api.StreamDisplayContainer;
 import com.google.ads.interactivemedia.v3.api.StreamManager;
 import com.google.ads.interactivemedia.v3.api.StreamRequest;
-import com.google.ads.interactivemedia.v3.api.UiElement;
 import com.google.ads.interactivemedia.v3.api.player.VideoProgressUpdate;
 import com.google.ads.interactivemedia.v3.api.player.VideoStreamPlayer;
 import com.google.gson.Gson;
