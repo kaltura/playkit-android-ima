@@ -29,7 +29,6 @@ import com.kaltura.playkit.PKError;
 import com.kaltura.playkit.PKEvent;
 import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PKMediaConfig;
-import com.kaltura.playkit.PKMediaEntry;
 import com.kaltura.playkit.PKMediaFormat;
 import com.kaltura.playkit.PKMediaSource;
 import com.kaltura.playkit.PKPlugin;
@@ -102,8 +101,6 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
     private double mBookMarkContentTime; // Bookmarked content time, in seconds.
     private double mSnapBackTime; // Stream time to snap back to, in seconds.
-
-    //private String mFallbackUrl;
 
     public static final Factory factory = new Factory() {
         @Override
@@ -948,13 +945,17 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     public long getCurrentPosition() {
         if (isAdDisplayed) {
             if (streamManager != null && streamManager.getAdProgressInfo() != null) {
+                double adCurrTime = streamManager.getAdProgressInfo().getCurrentTime();
+                double adDuration = streamManager.getAdProgressInfo().getDuration();
+
                 //log.d("getCurrentPosition = " + Math.round(streamManager.getAdProgressInfo().getCurrentTime()) + " / " + (long) Math.floor(streamManager.getAdProgressInfo().getDuration()));
                 long adPosition = 0;
-                if (streamManager.getAdProgressInfo().getCurrentTime() < 0) {
-                    adPosition = Math.max(Math.round(streamManager.getAdProgressInfo().getDuration() - (-1 * Math.round(streamManager.getAdProgressInfo().getCurrentTime()))), Math.round(streamManager.getAdProgressInfo().getCurrentTime()));
+                if (adCurrTime < 0) {
+                    adPosition = Math.max(Math.round(adDuration - (-1 * Math.round(adCurrTime))), Math.round(adCurrTime));
                 } else {
-                    adPosition = Math.round(streamManager.getAdProgressInfo().getCurrentTime());
+                    adPosition = Math.round(adCurrTime);
                 }
+
                 if (streamManager.getCuePoints().size() > 0 && adPosition > getPlayerEngine().getCurrentPosition()) {
                     adPosition = 0; // vod error case
                 }
