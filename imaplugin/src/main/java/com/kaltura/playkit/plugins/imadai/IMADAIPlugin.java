@@ -434,7 +434,12 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                     return VideoProgressUpdate.VIDEO_TIME_NOT_READY;
                 }
                 long position = (long) streamManager.getStreamTimeForContentTime(getPlayerEngine().getCurrentPosition());
-                long duration = (long) streamManager.getStreamTimeForContentTime(getPlayerEngine().getDuration());
+                if (getPlayerEngine().isLive()) {
+                     long pos = getPlayerEngine().getCurrentPosition();
+                     pos -= getPlayerEngine().getPositionInWindowMs();
+                    position = Math.round(streamManager.getStreamTimeForContentTime(pos));
+                }
+                long duration = Math.round(streamManager.getStreamTimeForContentTime(getPlayerEngine().getDuration()));
                 if (position < 0 || duration < 0) {
                     return VideoProgressUpdate.VIDEO_TIME_NOT_READY;
                 }
@@ -944,22 +949,13 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     @Override
     public long getCurrentPosition() {
         if (isAdDisplayed) {
+            long adPosition = 0;
             if (streamManager != null && streamManager.getAdProgressInfo() != null) {
-                double adCurrTime = streamManager.getAdProgressInfo().getCurrentTime();
-                double adDuration = streamManager.getAdProgressInfo().getDuration();
-
-                //log.d("getCurrentPosition = " + Math.round(streamManager.getAdProgressInfo().getCurrentTime()) + " / " + (long) Math.floor(streamManager.getAdProgressInfo().getDuration()));
-                long adPosition = 0;
-                if (adCurrTime < 0) {
-                    adPosition = Math.max(Math.round(adDuration - (-1 * Math.round(adCurrTime))), Math.round(adCurrTime));
-                } else {
-                    adPosition = Math.round(adCurrTime);
-                }
-
+                adPosition = Math.round(streamManager.getAdProgressInfo().getCurrentTime());
                 if (streamManager.getCuePoints().size() > 0 && adPosition > getPlayerEngine().getCurrentPosition()) {
                     adPosition = 0; // vod error case
                 }
-                //log.d("getCurrentPosition = " + adPosition);
+                log.d("getCurrentPosition = " + adPosition);
                 messageBus.post(new AdEvent.AdPlayHeadEvent(adPosition));
                 return adPosition;
             } else {
