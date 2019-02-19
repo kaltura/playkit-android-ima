@@ -12,6 +12,7 @@
 
 package com.kaltura.playkit.plugins.imadai;
 
+import android.text.TextUtils;
 import android.view.View;
 
 import com.google.ads.interactivemedia.v3.api.StreamRequest;
@@ -213,6 +214,13 @@ public class IMADAIConfig {
 
     public boolean isAlwaysStartWithPreroll() {
         return alwaysStartWithPreroll;
+    }
+
+    public boolean isLiveDAI() {
+        if (!TextUtils.isEmpty(assetKey)) {
+            return true;
+        }
+        return false;
     }
 
 //    public JsonObject toJSONObject() {

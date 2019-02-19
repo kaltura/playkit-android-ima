@@ -29,6 +29,7 @@ import com.kaltura.playkit.PKError;
 import com.kaltura.playkit.PKEvent;
 import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PKMediaConfig;
+import com.kaltura.playkit.PKMediaEntry;
 import com.kaltura.playkit.PKMediaFormat;
 import com.kaltura.playkit.PKMediaSource;
 import com.kaltura.playkit.PKPlugin;
@@ -457,6 +458,12 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         }
 
         if (mediaConfig.getMediaEntry() != null && mediaConfig.getMediaEntry().getSources() != null) {
+            if (adConfig.isLiveDAI()) {
+                if (PKMediaEntry.MediaEntryType.Vod.equals(mediaConfig.getMediaEntry().getMediaType())){
+                    mediaConfig.getMediaEntry().setMediaType(PKMediaEntry.MediaEntryType.Live);
+                }
+            }
+
             for (PKMediaSource source : mediaConfig.getMediaEntry().getSources()) {
                 source.setUrl(url).setMediaFormat(PKMediaFormat.valueOfUrl(url)).setDrmData(drmData);
             }
@@ -1002,7 +1009,6 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             }
             log.d("contentTimeForStreamTime = " + contentTimeForStreamTime);
             return contentTimeForStreamTime;
-
         }
 
         long playerPositionSec = (long) Math.round(playerPosition / Consts.MILLISECONDS_MULTIPLIER);
