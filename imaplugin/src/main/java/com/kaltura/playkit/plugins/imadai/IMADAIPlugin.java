@@ -444,7 +444,10 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 if (position < 0 || duration < 0) {
                     return VideoProgressUpdate.VIDEO_TIME_NOT_READY;
                 }
-                return new VideoProgressUpdate(position, duration);
+                if (getPlayerEngine().isLive()) {
+                    return new VideoProgressUpdate(position, duration);
+                }
+                return new VideoProgressUpdate(getPlayerEngine().getCurrentPosition(), getPlayerEngine().getDuration());
             }
         };
     }
@@ -642,6 +645,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     public void onAdError(AdErrorEvent adErrorEvent) {
         log.e("Event: onAdError" + adErrorEvent.getError().getErrorCode());
         isAdError = true;
+        isAdDisplayed = false;
         isAdRequested = true;
         //resetFlagsOnError();
 
@@ -986,7 +990,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     @Override
     public long getFakePlayerPosition(long realPlayerPosition) {
 
-        if (realPlayerPosition < 0 || realPlayerPosition == C.TIME_UNSET) {
+        if (realPlayerPosition < 0 || realPlayerPosition == C.POSITION_UNSET) {
             return 0;
         }
         if (streamManager != null) {
@@ -1055,6 +1059,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                         newPositionToSeek = getCuePointEndTime(position);
                     }
                     newPositionToSeek = (long) streamManager.getStreamTimeForContentTime(Math.floor(newPositionToSeek / Consts.MILLISECONDS_MULTIPLIER)) * Consts.MILLISECONDS_MULTIPLIER;
+                    isAdDisplayed = false;
                     getPlayerEngine().seekTo(newPositionToSeek);
                     mSnapBackTime = 0;
                     return;
