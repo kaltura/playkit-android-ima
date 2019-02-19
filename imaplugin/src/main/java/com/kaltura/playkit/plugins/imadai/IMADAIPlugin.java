@@ -1,8 +1,8 @@
 package com.kaltura.playkit.plugins.imadai;
 
 import android.content.Context;
-import android.text.TextUtils;
 import android.util.Pair;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -436,8 +436,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 }
                 long position = (long) streamManager.getStreamTimeForContentTime(getPlayerEngine().getCurrentPosition());
                 if (getPlayerEngine().isLive()) {
-                     long pos = getPlayerEngine().getCurrentPosition();
-                     pos -= getPlayerEngine().getPositionInWindowMs();
+                    long pos = getPlayerEngine().getCurrentPosition();
+                    pos -= getPlayerEngine().getPositionInWindowMs();
                     position = Math.round(streamManager.getStreamTimeForContentTime(pos));
                 }
                 long duration = Math.round(streamManager.getStreamTimeForContentTime(getPlayerEngine().getDuration()));
@@ -955,6 +955,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
     @Override
     public long getCurrentPosition() {
+        // works for case that ad is diaplayed!
         if (isAdDisplayed) {
             long adPosition = 0;
             if (streamManager != null && streamManager.getAdProgressInfo() != null) {
@@ -969,7 +970,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 return 0;
             }
         }
-        return getFakePlayerPosition();
+        return 0;
     }
 
     @Override
@@ -982,25 +983,21 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         this.isAdRequested = isAdRequested;
     }
 
-    private long getFakePlayerPosition() {
-        long playerPosition = getPlayerEngine().getCurrentPosition();
-        if (playerPosition < 0 || playerPosition == C.TIME_UNSET) {
+    @Override
+    public long getFakePlayerPosition(long realPlayerPosition) {
+
+        if (realPlayerPosition < 0 || realPlayerPosition == C.TIME_UNSET) {
             return 0;
         }
         if (streamManager != null) {
-            long contentTimeForStreamTime = (long) (streamManager.getContentTimeForStreamTime(Math.floor(playerPosition / Consts.MILLISECONDS_MULTIPLIER))) * Consts.MILLISECONDS_MULTIPLIER;
-            log.d("Position = " + Math.round(playerPosition / Consts.MILLISECONDS_MULTIPLIER_FLOAT));
+            long contentTimeForStreamTime = (long) (streamManager.getContentTimeForStreamTime(Math.floor(realPlayerPosition / Consts.MILLISECONDS_MULTIPLIER))) * Consts.MILLISECONDS_MULTIPLIER;
+            log.d("Position = " + Math.round(realPlayerPosition / Consts.MILLISECONDS_MULTIPLIER_FLOAT));
             int totalAdsDuration = 0;
             if (pluginCuePoints != null) {
                 for (CuePoint cuePoint : pluginCuePoints) {
                     totalAdsDuration += (cuePoint.getEndTime() - cuePoint.getStartTime());
-                    if (Math.round(playerPosition / Consts.MILLISECONDS_MULTIPLIER_FLOAT) == 79) {
-                        printCuePointStreamData(cuePoint);
-                    }
-                    if (cuePoint.isPlayed() && cuePoint.getStartTime() == Math.round(playerPosition / Consts.MILLISECONDS_MULTIPLIER_FLOAT)) {
-                        log.d("NEED TO SKIP");
-                        //long nextContentTimeForStreamTime = (long) (streamManager.getContentTimeForStreamTime(cuePoint.getStartTime()  * Consts.MILLISECONDS_MULTIPLIER));
-                        //seekTo((long) cuePoint.getEndTime() * Consts.MILLISECONDS_MULTIPLIER);
+                    if (!isAdDisplayed && cuePoint.isPlayed() && cuePoint.getStartTime() == Math.round(realPlayerPosition / Consts.MILLISECONDS_MULTIPLIER_FLOAT)) {
+                        log.d("AD PLAYED - SKIP");
                         long newPositionToSeek = (long) Math.floor(cuePoint.getEndTime() * Consts.MILLISECONDS_MULTIPLIER);
                         seekTo(newPositionToSeek - (totalAdsDuration * Consts.MILLISECONDS_MULTIPLIER));
                         return (long) ((cuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER) - (totalAdsDuration * Consts.MILLISECONDS_MULTIPLIER));
@@ -1011,31 +1008,21 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             return contentTimeForStreamTime;
         }
 
-        long playerPositionSec = (long) Math.round(playerPosition / Consts.MILLISECONDS_MULTIPLIER);
+        long playerPositionSec = (long) Math.round(realPlayerPosition / Consts.MILLISECONDS_MULTIPLIER);
         if (pluginCuePoints != null) {
             for (CuePoint cuePoint : pluginCuePoints) {
                 if (cuePoint.isPlayed() && cuePoint.getEndTime() <= playerPositionSec) {
-                    playerPosition -= Consts.MILLISECONDS_MULTIPLIER * (cuePoint.getEndTime() - cuePoint.getStartTime());
+                    realPlayerPosition -= Consts.MILLISECONDS_MULTIPLIER * (cuePoint.getEndTime() - cuePoint.getStartTime());
                 }
             }
         }
-        if (playerPosition > getFakePlayerDuration()) {
+        if (realPlayerPosition > getFakePlayerDuration()) {
             return getFakePlayerDuration();
         }
-        if (playerPosition < 0) {
+        if (realPlayerPosition < 0) {
             return 0;
         }
-        return playerPosition;
-    }
-
-    private void printCuePointStreamData(CuePoint cuePoint) {
-        log.d("STREAM cuePoint.getStartTime() = " + cuePoint.getStartTime());
-        log.d("STREAM cuePoint.getStartTime() = " + cuePoint.getStartTime());
-        log.d("STREAM cuePoint.getEndTime() = " + cuePoint.getEndTime());
-        log.d("STREAM Start = " + (long) (streamManager.getStreamTimeForContentTime(cuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER)));
-        log.d("STREAM End = " + (long) (streamManager.getStreamTimeForContentTime(cuePoint.getEndTime() * Consts.MILLISECONDS_MULTIPLIER)));
-        log.d("STREAM2 Start = " + (long) (streamManager.getContentTimeForStreamTime(cuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER)));
-        log.d("STREAM2 End = " + (long) (streamManager.getContentTimeForStreamTime(cuePoint.getEndTime() * Consts.MILLISECONDS_MULTIPLIER)));
+        return realPlayerPosition;
     }
 
     @Override
