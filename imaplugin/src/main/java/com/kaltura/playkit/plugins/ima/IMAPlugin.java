@@ -63,6 +63,7 @@ import com.kaltura.playkit.plugins.ads.AdEvent;
 import com.kaltura.playkit.plugins.ads.AdInfo;
 import com.kaltura.playkit.plugins.ads.AdPositionType;
 import com.kaltura.playkit.plugins.ads.AdsProvider;
+import com.kaltura.playkit.plugins.imadai.IMADAIPlugin;
 import com.kaltura.playkit.utils.Consts;
 
 import java.lang.reflect.InvocationTargetException;
@@ -188,6 +189,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         messageBus.addListener(this, PlayerEvent.ended, event -> {
             log.d("Received:PlayerEvent:" + event.eventType().name() + " lastAdEventReceived = " + lastAdEventReceived);
             AdCuePoints adCuePoints = new AdCuePoints(getAdCuePointsList());
+            adCuePoints.setAdPluginName(IMADAIPlugin.factory.getName());
             if (!isContentPrepared) {
                 log.d("Event: ENDED ignored content is not prepared");
                 return;
@@ -1219,6 +1221,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private void sendCuePointsUpdateEvent() {
         adTagCuePoints = new AdCuePoints(getAdCuePointsList());
+        adTagCuePoints.setAdPluginName(IMAPlugin.factory.getName());
         logCuePointsData();
         videoPlayerWithAdPlayback.setAdCuePoints(adTagCuePoints);
         messageBus.post(new AdEvent.AdCuePointsUpdateEvent(adTagCuePoints));

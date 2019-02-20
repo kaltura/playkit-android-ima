@@ -1,7 +1,6 @@
 package com.kaltura.playkit.plugins.imadai;
 
 import android.content.Context;
-import android.util.Pair;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -730,11 +729,24 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     }
 
     private void sendCuePointsUpdate() {
+        log.d("sendCuePointsUpdate");
+        List<Long> cuePointsList = buildCuePointsList();
+        if (cuePointsList == null)
+            return;
+        if (cuePointsList.size() > 0) {
+            AdCuePoints adCuePointsForEvent = new AdCuePoints(cuePointsList);
+            adCuePointsForEvent.setAdPluginName(IMADAIPlugin.factory.getName());
+            messageBus.post(new AdEvent.AdCuePointsUpdateEvent(adCuePointsForEvent));
+        }
+    }
+
+    private List<Long> buildCuePointsList() {
         List<Long> cuePointsList = new ArrayList<>();
         StringBuilder cuePointBuilder = new StringBuilder();
         if (streamManager == null) {
-            return;
+            return cuePointsList;
         }
+
         pluginCuePoints = streamManager.getCuePoints();
         if (pluginCuePoints != null) {
             int cuePointIndex = 1;
@@ -750,12 +762,9 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 }
                 cuePointIndex++;
             }
-            log.d("sendCuePointsUpdate pluginCuePoints = " + cuePointBuilder.toString());
-
-            if (cuePointsList.size() > 0) {
-                messageBus.post(new AdEvent.AdCuePointsUpdateEvent(new AdCuePoints(cuePointsList)));
-            }
+            log.d("buildCuePointsList pluginCuePoints = " + cuePointBuilder.toString());
         }
+        return cuePointsList;
     }
 
     private AdInfo createAdInfo(Ad ad) {
@@ -860,31 +869,9 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         if (playkitAdCuePoints != null) {
             return playkitAdCuePoints;
         }
-        List<Long> cuePointsList = new ArrayList<>();
-        StringBuilder cuePointBuilder = new StringBuilder();
-        if (streamManager == null) {
-            return new AdCuePoints(new ArrayList<>());
-        }
-        pluginCuePoints = streamManager.getCuePoints();
-        if (pluginCuePoints != null) {
-            int cuePointIndex = 1;
-            for (CuePoint cuePoint : pluginCuePoints) {
-                if (cuePoint == null) {
-                    continue;
-                }
-                long cuePointVal = (long) streamManager.getContentTimeForStreamTime(cuePoint.getStartTime());
-
-                if (cuePointIndex == pluginCuePoints.size() && cuePointVal * Consts.MILLISECONDS_MULTIPLIER == getPlayerEngine().getDuration()) {
-                    cuePointBuilder.append(-1).append("|");
-                    cuePointsList.add((-1L));
-                } else {
-                    cuePointBuilder.append(cuePointVal).append("|");
-                    cuePointsList.add((cuePointVal * Consts.MILLISECONDS_MULTIPLIER));
-                }
-                cuePointIndex++;
-            }
-        }
-        playkitAdCuePoints =  new AdCuePoints(cuePointsList);
+        log.d("create new getCuePoints");
+        playkitAdCuePoints =  new AdCuePoints(buildCuePointsList());
+        playkitAdCuePoints.setAdPluginName(IMADAIPlugin.factory.getName());
         return playkitAdCuePoints;
     }
 
