@@ -999,7 +999,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             case CONTENT_PAUSE_REQUESTED:
                 log.d("CONTENT_PAUSE_REQUESTED appIsInBackground = " + appIsInBackground);
-                playerPlayingBeforeAdArrived = getPlayerEngine().isPlaying();
+                playerPlayingBeforeAdArrived = getPlayerEngine().isPlaying() || lastPlaybackPlayerState == PlayerEvent.Type.ENDED;
                 if (getPlayerEngine() != null) {
                     getPlayerEngine().pause();
                 }
