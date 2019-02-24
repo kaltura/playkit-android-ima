@@ -95,6 +95,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private PlayerEvent.Type lastPlaybackPlayerState;
     private com.kaltura.playkit.plugins.ads.AdEvent.Type lastAdEventReceived;
     private PlayerEngineWrapper adsPlayerEngineWrapper;
+    private boolean shouldPrepareOnResume;
     private Map<com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType, com.kaltura.playkit.plugins.ads.AdEvent.Type> adEventsMap;
     private Context mContext;
     private ViewGroup mAdUiContainer;
@@ -236,6 +237,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         isAdDisplayed = false;
         isAdIsPaused  = false;
         isAdError     = false;
+        shouldPrepareOnResume = false;
         this.mediaConfig = mediaConfig;
         clearAdsLoader();
         imaSetup();
@@ -384,12 +386,15 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                     return;
                 }
                 updateMediaConfig(url);
-
-                if (isAutoPlay) {
-                    player.prepare(mediaConfig);
-                    player.play();
+                if (!appIsInBackground) {
+                    if (isAutoPlay) {
+                        player.prepare(mediaConfig);
+                        player.play();
+                    } else {
+                        player.prepare(mediaConfig);
+                    }
                 } else {
-                    player.prepare(mediaConfig);
+                    shouldPrepareOnResume = true;
                 }
             }
 
@@ -498,6 +503,16 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     @Override
     protected void onApplicationResumed() {
         appIsInBackground = false;
+        if (shouldPrepareOnResume) {
+            if (isAutoPlay) {
+                player.prepare(mediaConfig);
+                player.play();
+            } else {
+                player.prepare(mediaConfig);
+            }
+            shouldPrepareOnResume = false;
+            return;
+        }
         if (isAdShouldAutoPlayOnResume() && isAdDisplayed) {
             getPlayerEngine().play();
         }
@@ -958,7 +973,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 if (streamManager.getCuePoints().size() > 0 && adPosition > getPlayerEngine().getCurrentPosition()) {
                     adPosition = 0; // vod error case
                 }
-                log.d("getCurrentPosition = " + adPosition);
+                //log.d("getCurrentPosition = " + adPosition);
                 messageBus.post(new AdEvent.AdPlayHeadEvent(adPosition));
                 return adPosition;
             } else {
@@ -986,7 +1001,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         }
         if (streamManager != null) {
             long contentTimeForStreamTime = (long) (streamManager.getContentTimeForStreamTime(Math.floor(realPlayerPosition / Consts.MILLISECONDS_MULTIPLIER))) * Consts.MILLISECONDS_MULTIPLIER;
-            log.d("Position = " + Math.round(realPlayerPosition / Consts.MILLISECONDS_MULTIPLIER_FLOAT));
+            //log.d("Position = " + Math.round(realPlayerPosition / Consts.MILLISECONDS_MULTIPLIER_FLOAT));
             int totalAdsDuration = 0;
             if (pluginCuePoints != null) {
                 for (CuePoint cuePoint : pluginCuePoints) {
@@ -999,7 +1014,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                     }
                 }
             }
-            log.d("contentTimeForStreamTime = " + contentTimeForStreamTime);
+            //log.d("contentTimeForStreamTime = " + contentTimeForStreamTime);
             return contentTimeForStreamTime;
         }
 
