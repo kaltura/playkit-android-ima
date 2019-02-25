@@ -217,10 +217,7 @@ public class IMADAIConfig {
     }
 
     public boolean isLiveDAI() {
-        if (!TextUtils.isEmpty(assetKey)) {
-            return true;
-        }
-        return false;
+        return !TextUtils.isEmpty(assetKey);
     }
 
 //    public JsonObject toJSONObject() {
