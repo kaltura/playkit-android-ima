@@ -414,11 +414,19 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             }
         } else if (player != null && lastPlaybackPlayerState == PlayerEvent.Type.PAUSE && getPlayerEngine() != null) {
             log.d("onApplicationResumed lastPlaybackPlayerState == PlayerEvent.Type.PAUSE pos = " + getPlayerEngine().getCurrentPosition());
-            if (playerLastPositionTmp == 0) {
+            if (playerLastPositionTmp <= 0) {
                 if (isContentPrepared) {
+                    log.d("content prepared!");
+                    displayContent();
                     getPlayerEngine().play();
                 } else {
-                    preparePlayer(true);
+                    log.d("content NOT prepared!");
+                    clearAdLoadingInBackground();
+                    if (mediaConfig != null) {
+                        log.d("onApplicationResumed unprepared..... request Ad");
+                        onUpdateMedia(mediaConfig);
+                        start();
+                    }
                 }
             }
         } else {
@@ -1060,7 +1068,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     long duration = getPlayerEngine().getDuration();
                     long position = getPlayerEngine().getCurrentPosition();
                     log.d("Content prepared.. lastPlaybackPlayerState = " + lastPlaybackPlayerState + ", time = " + position + "/" + duration);
-                    if (lastPlaybackPlayerState != PlayerEvent.Type.ENDED && (duration < 0 || position <= duration)) {
+                    if (duration < 0) {
+                        preparePlayer(true);
+                    } else if (lastPlaybackPlayerState != PlayerEvent.Type.ENDED && (duration < 0 || position <= duration)) {
                         if (adInfo == null || (adInfo.getAdPositionType() != AdPositionType.POST_ROLL)) {
                             log.d("Content prepared.. Play called.");
                             getPlayerEngine().play();
