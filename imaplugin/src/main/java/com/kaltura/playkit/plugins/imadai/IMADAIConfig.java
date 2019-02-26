@@ -31,7 +31,7 @@ public class IMADAIConfig {
     private static final int DEFAULT_AD_LOAD_TIMEOUT = 8;
     private static final int DEFAULT_CUE_POINTS_CHANGED_DELAY = 2000;
     private static final int DEFAULT_AD_LOAD_COUNT_DOWN_TICK = 250;
-    
+
     private String assetTitle;
     private String assetKey;
     private String apiKey;
@@ -245,16 +245,4 @@ public class IMADAIConfig {
     public boolean isLiveDAI() {
         return !TextUtils.isEmpty(assetKey);
     }
-
-//    public JsonObject toJSONObject() {
-//        JsonObject jsonObject = new JsonObject();
-//        jsonObject.addProperty(AD_TAG_LANGUAGE, language);
-//        //jsonObject.addProperty(AD_VIDEO_BITRATE, videoBitrate);
-//        jsonObject.addProperty(AD_ATTRIBUTION_UIELEMENT, adAttribution);
-//        jsonObject.addProperty(AD_COUNTDOWN_UIELEMENT, adCountDown);
-//        jsonObject.addProperty(AD_LOAD_TIMEOUT, adLoadTimeOut);
-//        jsonObject.addProperty(AD_ENABLE_DEBUG_MODE, enableDebugMode);
-//        jsonObject.addProperty(AD_MAX_REDIRECTS, maxRedirects);
-//        return jsonObject;
-//    }
 }
