@@ -31,16 +31,7 @@ public class IMADAIConfig {
     private static final int DEFAULT_AD_LOAD_TIMEOUT = 8;
     private static final int DEFAULT_CUE_POINTS_CHANGED_DELAY = 2000;
     private static final int DEFAULT_AD_LOAD_COUNT_DOWN_TICK = 250;
-
-    private static final String AD_TAG_LANGUAGE     = "language";
-    //public static final String AD_VIDEO_BITRATE    = "videoBitrate";
-    private static final String AD_ATTRIBUTION_UIELEMENT = "adAttribution";
-    private static final String AD_COUNTDOWN_UIELEMENT   = "adCountDown";
-    private static final String AD_LOAD_TIMEOUT          = "adLoadTimeOut";
-    private static final String AD_MAX_REDIRECTS         = "adMaxRedirects";
-    private static final String AD_ENABLE_DEBUG_MODE     = "enableDebugMode";
-    private static final String AD_ALWAYES_START_WITH_PREROLL = "alwaysStartWithPreroll";
-
+    
     private String assetTitle;
     private String assetKey;
     private String apiKey;
@@ -64,22 +55,57 @@ public class IMADAIConfig {
     private boolean enableAgeRestriction; // adTagParameters.put("tfua", 1);
     // request.setAdTagParameters(adTagParameters);
 
+    private IMADAIConfig(String assetTitle,
+                         String assetKey, // null for VOD
+                         String contentSourceId, // null for Live
+                         String videoId, // null for Live
+                         String apiKey, // seems to be always null in demos
+                         StreamRequest.StreamFormat streamFormat,
+                         String licenseUrl) {
 
-    public IMADAIConfig(String assetTitle,
-                        String assetKey, // null for VOD
-                        String contentSourceId, // null for Live
-                        String apiKey, // seems to be always null in demos
-                        String videoId, // null for Live
-                        StreamRequest.StreamFormat streamFormat,
-                        String licenseUrl) {
-        this.assetTitle = assetTitle;
         this.assetKey = assetKey;
-        this.apiKey = apiKey;
         this.contentSourceId = contentSourceId;
         this.videoId = videoId;
+        setValues(assetTitle, apiKey, streamFormat, licenseUrl);
+    }
+
+    //VOD Factory
+    public static IMADAIConfig getVodIMADAIConfig(String assetTitle,
+                                                  String contentSourceId,
+                                                  String videoId,
+                                                  String apiKey,
+                                                  StreamRequest.StreamFormat streamFormat,
+                                                  String licenseUrl) {
+
+        return new IMADAIConfig(assetTitle,
+                null,
+                contentSourceId,
+                videoId ,
+                apiKey,
+                streamFormat,
+                licenseUrl);
+    }
+
+    //Live Factory
+    public static IMADAIConfig getLiveIMADAIConfig(String assetTitle,
+                                                  String assetKey,
+                                                  String apiKey,
+                                                  StreamRequest.StreamFormat streamFormat,
+                                                  String licenseUrl) {
+        return new IMADAIConfig(assetTitle,
+                assetKey,
+                null,
+                null,
+                apiKey,
+                streamFormat,
+                licenseUrl);
+    }
+
+    private void setValues(String assetTitle, String apiKey, StreamRequest.StreamFormat streamFormat, String licenseUrl) {
+        this.assetTitle = assetTitle;
+        this.apiKey = apiKey;
         this.streamFormat = streamFormat;
         this.licenseUrl = licenseUrl;
-
         this.language                  = "en";
         //this.videoBitrate              = -1;
         this.adAttribution             = true;
