@@ -39,7 +39,9 @@ import com.kaltura.playkit.ads.AdsDAIPlayerEngineWrapper;
 import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdPluginType;
+import com.kaltura.playkit.player.PKMediaSourceConfig;
 import com.kaltura.playkit.player.PlayerEngine;
+import com.kaltura.playkit.player.vr.VRPKMediaEntry;
 import com.kaltura.playkit.plugins.ads.AdCuePoints;
 import com.kaltura.playkit.plugins.ads.AdEvent;
 import com.kaltura.playkit.ads.PKAdProviderListener;
@@ -372,11 +374,14 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 }
                 updateMediaConfig(url);
                 if (!appIsInBackground) {
-                    if (isAutoPlay) {
-                        player.prepare(mediaConfig);
-                        player.play();
+                    PKMediaSourceConfig pkMediaSourceConfig = toPKMediaSourceConfig(mediaConfig);
+                    if (pkMediaSourceConfig != null) {
+                        getPlayerEngine().load(pkMediaSourceConfig);
+                        if (isAutoPlay) {
+                            getPlayerEngine().play();
+                        }
                     } else {
-                        player.prepare(mediaConfig);
+                        log.e("ERROR when calling loadUrl = " + url + " pkMediaSourceConfig = null");
                     }
                 } else {
                     shouldPrepareOnResume = true;
@@ -1189,5 +1194,21 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             return  null;
         }
         return adsPlayerEngineWrapper.getPlayerEngine();
+    }
+
+    private PKMediaSourceConfig toPKMediaSourceConfig(PKMediaConfig pkMediaConfig) {
+        PKMediaSourceConfig sourceConfig = null;
+        if (pkMediaConfig != null) {
+            PKMediaEntry mediaEntry = pkMediaConfig.getMediaEntry();
+            if (mediaEntry != null && mediaEntry.getSources() != null && mediaEntry.getSources().size() > 0) {
+                if (mediaEntry instanceof VRPKMediaEntry) {
+                    VRPKMediaEntry vrEntry = (VRPKMediaEntry) mediaEntry;
+                    sourceConfig = new PKMediaSourceConfig(pkMediaConfig, mediaEntry.getSources().get(0), (PlayerSettings) player.getSettings(), vrEntry.getVrSettings());
+                } else {
+                    sourceConfig = new PKMediaSourceConfig(pkMediaConfig, mediaEntry.getSources().get(0), (PlayerSettings) player.getSettings());
+                }
+            }
+        }
+        return sourceConfig;
     }
 }
