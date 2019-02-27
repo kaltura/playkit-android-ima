@@ -32,7 +32,6 @@ import com.google.ads.interactivemedia.v3.api.AdsRequest;
 import com.google.ads.interactivemedia.v3.api.CompanionAdSlot;
 import com.google.ads.interactivemedia.v3.api.ImaSdkFactory;
 import com.google.ads.interactivemedia.v3.api.ImaSdkSettings;
-import com.google.ads.interactivemedia.v3.api.UiElement;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.kaltura.playkit.MessageBus;
@@ -51,7 +50,7 @@ import com.kaltura.playkit.ads.AdTagType;
 import com.kaltura.playkit.ads.AdsPlayerEngineWrapper;
 import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
-import com.kaltura.playkit.ads.PKAdPlugin;
+import com.kaltura.playkit.ads.PKAdPluginType;
 import com.kaltura.playkit.ads.PKAdProviderListener;
 
 import com.kaltura.playkit.player.PlayerEngine;
@@ -678,6 +677,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     @Override
+    public PKAdPluginType getAdPluginType() {
+        return PKAdPluginType.client;
+    }
+
+    @Override
     public boolean isAdDisplayed() {
         //log.d("isAdDisplayed: " + mIsAdDisplayed);
         return isAdDisplayed;
@@ -894,7 +898,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             }
         }
         if (adConfig != null) {
-            messageBus.post(new AdEvent.AdRequestedEvent(PKAdPlugin.ima, !TextUtils.isEmpty(adConfig.getAdTagURL()) ? adConfig.getAdTagURL() : adConfig.getAdTagResponse()));
+            messageBus.post(new AdEvent.AdRequestedEvent(getAdPluginType(), !TextUtils.isEmpty(adConfig.getAdTagURL()) ? adConfig.getAdTagURL() : adConfig.getAdTagResponse()));
         }
         sendError(errorType, errorMessage, adException);
         displayContent();
@@ -1259,7 +1263,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         adsLoadedListener = adsManagerLoadedEvent -> {
             log.d("AdsManager loaded");
-            messageBus.post(new AdEvent.AdRequestedEvent(PKAdPlugin.ima, !TextUtils.isEmpty(adConfig.getAdTagURL()) ? adConfig.getAdTagURL() : adConfig.getAdTagResponse()));
+            messageBus.post(new AdEvent.AdRequestedEvent(getAdPluginType(), !TextUtils.isEmpty(adConfig.getAdTagURL()) ? adConfig.getAdTagURL() : adConfig.getAdTagResponse()));
             cancelAdManagerTimer();
             // Ads were successfully loaded, so get the AdsManager instance. AdsManager has
             // events for ad playback and errors.

@@ -38,7 +38,7 @@ import com.kaltura.playkit.PlayerState;
 import com.kaltura.playkit.ads.AdsDAIPlayerEngineWrapper;
 import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
-import com.kaltura.playkit.ads.PKAdPlugin;
+import com.kaltura.playkit.ads.PKAdPluginType;
 import com.kaltura.playkit.player.PlayerEngine;
 import com.kaltura.playkit.plugins.ads.AdCuePoints;
 import com.kaltura.playkit.plugins.ads.AdEvent;
@@ -60,6 +60,7 @@ import java.util.Map;
 public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactivemedia.v3.api.AdEvent.AdEventListener, AdErrorEvent.AdErrorListener, AdsProvider {
     private static final PKLog log = PKLog.get("IMADAIPlugin");
     private static final int KB_MULTIPLIER = 1024;
+    private static final String TXXX = "TXXX";
 
     private Player player;
     private Context context;
@@ -199,7 +200,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 for (PKMetadata pkMetadata : event.metadataList){
                     if (pkMetadata instanceof PKTextInformationFrame) {
                         PKTextInformationFrame textFrame = (PKTextInformationFrame) pkMetadata;
-                        if ("TXXX".equals(textFrame.id)) {
+                        if (TXXX.equals(textFrame.id)) {
                             log.d("Received user text: " + textFrame.value);
                             if (mPlayerCallbacks != null) {
                                 callback.onUserTextReceived(textFrame.value);
@@ -246,7 +247,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             adRequestInfo = adConfig.getContentSourceId() + "/" + adConfig.getVideoId();
         }
         adsLoader.requestStream(buildStreamRequest());
-        messageBus.post(new AdEvent.AdRequestedEvent(PKAdPlugin.ima_dai, adRequestInfo));
+        messageBus.post(new AdEvent.AdRequestedEvent(getAdPluginType(), adRequestInfo));
     }
 
     ////////Ads Plugin
@@ -268,8 +269,6 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         if (imaSdkSettings == null) {
             imaSdkSettings = ImaSdkFactory.getInstance().createImaSdkSettings();
         }
-        // Tell the SDK we want to control ad break playback.
-        //imaSdkSettings.setAutoPlayAdBreaks(true);
         if (adConfig.getMaxRedirects() > 0) {
             imaSdkSettings.setMaxRedirects(adConfig.getMaxRedirects());
         }
@@ -364,7 +363,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             @Override
             public void loadUrl(String url, List<HashMap<String, String>> subtitles) {
                 log.d("loadUrl = " + url + " lastAdEventReceived = " + lastAdEventReceived);
-                messageBus.post(new com.kaltura.playkit.plugins.ads.AdEvent.DAISourceSelected(url));
+                messageBus.post(new AdEvent.DAISourceSelected(url));
                 if (isAdError) {
                     log.e("ERROR when calling loadUrl = " + url + " lastAdEventReceived = " + lastAdEventReceived);
                     preparePlayer(true);
@@ -661,35 +660,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 case INTERNAL_ERROR:
                     errorType = PKAdErrorType.INTERNAL_ERROR;
                     break;
-                case VAST_MALFORMED_RESPONSE:
-                    errorType = PKAdErrorType.VAST_MALFORMED_RESPONSE;
-                    break;
-                case UNKNOWN_AD_RESPONSE:
-                    errorType = PKAdErrorType.UNKNOWN_AD_RESPONSE;
-                    break;
-                case VAST_LOAD_TIMEOUT:
-                    errorType = PKAdErrorType.VAST_LOAD_TIMEOUT;
-                    break;
-                case VAST_TOO_MANY_REDIRECTS:
-                    errorType = PKAdErrorType.VAST_TOO_MANY_REDIRECTS;
-                    break;
                 case VIDEO_PLAY_ERROR:
                     errorType = PKAdErrorType.VIDEO_PLAY_ERROR;
-                    break;
-                case VAST_MEDIA_LOAD_TIMEOUT:
-                    errorType = PKAdErrorType.VAST_MEDIA_LOAD_TIMEOUT;
-                    break;
-                case VAST_LINEAR_ASSET_MISMATCH:
-                    errorType = PKAdErrorType.VAST_LINEAR_ASSET_MISMATCH;
-                    break;
-                case OVERLAY_AD_PLAYING_FAILED:
-                    errorType = PKAdErrorType.OVERLAY_AD_PLAYING_FAILED;
-                    break;
-                case OVERLAY_AD_LOADING_FAILED:
-                    errorType = PKAdErrorType.OVERLAY_AD_LOADING_FAILED;
-                    break;
-                case VAST_NONLINEAR_ASSET_MISMATCH:
-                    errorType = PKAdErrorType.VAST_NONLINEAR_ASSET_MISMATCH;
                     break;
                 case COMPANION_AD_LOADING_FAILED:
                     errorType = PKAdErrorType.COMPANION_AD_LOADING_FAILED;
@@ -697,14 +669,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 case UNKNOWN_ERROR:
                     errorType = PKAdErrorType.UNKNOWN_ERROR;
                     break;
-                case VAST_EMPTY_RESPONSE:
-                    errorType = PKAdErrorType.VAST_EMPTY_RESPONSE;
-                    break;
                 case FAILED_TO_REQUEST_ADS:
                     errorType = PKAdErrorType.FAILED_TO_REQUEST_ADS;
-                    break;
-                case VAST_ASSET_NOT_FOUND:
-                    errorType = PKAdErrorType.VAST_ASSET_NOT_FOUND;
                     break;
                 case ADS_REQUEST_NETWORK_ERROR:
                     errorType = PKAdErrorType.ADS_REQUEST_NETWORK_ERROR;
@@ -1073,6 +1039,11 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         }
         log.d("streamManager = null seekTo " + position);
         getPlayerEngine().seekTo(position);
+    }
+
+    @Override
+    public PKAdPluginType getAdPluginType() {
+        return PKAdPluginType.server;
     }
 
     private boolean isPositionInBetweenCuePoint(long position) {
