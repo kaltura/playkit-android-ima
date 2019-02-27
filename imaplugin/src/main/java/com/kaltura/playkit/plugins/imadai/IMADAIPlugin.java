@@ -42,6 +42,7 @@ import com.kaltura.playkit.ads.PKAdPluginType;
 import com.kaltura.playkit.player.PKMediaSourceConfig;
 import com.kaltura.playkit.player.PlayerEngine;
 import com.kaltura.playkit.player.vr.VRPKMediaEntry;
+import com.kaltura.playkit.player.vr.VRSettings;
 import com.kaltura.playkit.plugins.ads.AdCuePoints;
 import com.kaltura.playkit.plugins.ads.AdEvent;
 import com.kaltura.playkit.ads.PKAdProviderListener;
@@ -57,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactivemedia.v3.api.AdEvent.AdEventListener, AdErrorEvent.AdErrorListener, AdsProvider {
@@ -162,7 +164,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 if (streamManager != null) {
                     CuePoint prevCuePoint = streamManager.getPreviousCuePointForStreamTime(currentPosSec);
                     if (getPlayerEngine().getCurrentPosition() >= getPlayerEngine().getDuration() && prevCuePoint != null && currentPosSec >= prevCuePoint.getEndTime()) {
-                        if (pluginCuePoints != null && pluginCuePoints.size() > 0 && Math.floor(pluginCuePoints.get(pluginCuePoints.size() - 1).getEndTime()) == Math.floor(getPlayerEngine().getDuration() / Consts.MILLISECONDS_MULTIPLIER)) {
+                        if (pluginCuePoints != null && !pluginCuePoints.isEmpty() && Math.floor(pluginCuePoints.get(pluginCuePoints.size() - 1).getEndTime()) == Math.floor(getPlayerEngine().getDuration() / Consts.MILLISECONDS_MULTIPLIER)) {
                             if (!pluginCuePoints.get(pluginCuePoints.size() - 1).isPlayed()) {
                                 getPlayerEngine().seekTo((long) (pluginCuePoints.get(pluginCuePoints.size() - 1).getStartTime() * Consts.MILLISECONDS_MULTIPLIER));
                             }
@@ -372,9 +374,19 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                     getPlayerEngineWrapper().play();
                     return;
                 }
-                updateMediaConfig(url);
+
                 if (!appIsInBackground) {
-                    PKMediaSourceConfig pkMediaSourceConfig = toPKMediaSourceConfig(mediaConfig);
+                    PKMediaSourceConfig pkMediaSourceConfig = toPKMediaSourceConfig(url);
+                    if (mediaConfig.getStartPosition() != null && mediaConfig.getStartPosition() > 0) {
+                        double fakeStartPos = streamManager.getStreamTimeForContentTime(mediaConfig.getStartPosition());
+                        if (adConfig.isAlwaysStartWithPreroll()) {
+                            mSnapBackTime = fakeStartPos;
+                            mediaConfig.setStartPosition(0L);
+                        } else {
+                            mediaConfig.setStartPosition((long) fakeStartPos);
+                        }
+                    }
+
                     if (pkMediaSourceConfig != null) {
                         getPlayerEngine().load(pkMediaSourceConfig);
                         if (isAutoPlay) {
@@ -448,36 +460,6 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         };
     }
 
-    private void updateMediaConfig(String url) {
-        List<PKDrmParams> drmData = null;
-        if (!TextUtils.isEmpty(adConfig.getLicenseUrl())) {
-            drmData = new ArrayList<>();
-            PKDrmParams pkDrmParams = new PKDrmParams(adConfig.getLicenseUrl(), PKDrmParams.Scheme.WidevineCENC);
-            drmData.add(pkDrmParams);
-        }
-
-        if (mediaConfig.getMediaEntry() != null && mediaConfig.getMediaEntry().getSources() != null) {
-            if (adConfig.isLiveDAI()) {
-                if (PKMediaEntry.MediaEntryType.Vod.equals(mediaConfig.getMediaEntry().getMediaType())){
-                    mediaConfig.getMediaEntry().setMediaType(PKMediaEntry.MediaEntryType.Live);
-                }
-            }
-
-            for (PKMediaSource source : mediaConfig.getMediaEntry().getSources()) {
-                source.setUrl(url).setMediaFormat(PKMediaFormat.valueOfUrl(url)).setDrmData(drmData);
-            }
-            if (mediaConfig.getStartPosition() != null && mediaConfig.getStartPosition() > 0) {
-                double fakeStartPos = streamManager.getStreamTimeForContentTime(mediaConfig.getStartPosition());
-                if (adConfig.isAlwaysStartWithPreroll()) {
-                    mSnapBackTime = fakeStartPos;
-                    mediaConfig.setStartPosition(0L);
-                } else {
-                    mediaConfig.setStartPosition((long) fakeStartPos);
-                }
-            }
-        }
-    }
-
     @Override
     protected void onUpdateConfig(Object config) {
         log.d("Start onUpdateConfig");
@@ -548,19 +530,22 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 boolean lastAdPlayed = true;
                 List<CuePoint> cuesList = streamManager.getCuePoints();
                 if (cuesList != null) {
-                    for (int i = 0 ; i < cuesList.size() ; i++) {
-                        if (!cuesList.get(i).isPlayed()) {
-                            allAdsPlayed = false;
-                        }
-                        if (i == cuesList.size() -1) {
-                            lastAdPlayed = cuesList.get(i).isPlayed();
+                    for (ListIterator<CuePoint> iter = cuesList.listIterator(); iter.hasNext(); ) {
+                        CuePoint cue = iter.next();
+                        if (cue != null) {
+                            if (!cue.isPlayed()) {
+                                allAdsPlayed = false;
+                            }
+                            if (!iter.hasNext()) {
+                                lastAdPlayed = cue.isPlayed();
+                            }
                         }
                     }
-
                     if (allAdsPlayed || lastAdPlayed && getPlayerEngine() != null && getPlayerEngine().getCurrentPosition() >= getPlayerEngine().getDuration()) {
                         messageBus.post(new AdEvent(AdEvent.Type.ALL_ADS_COMPLETED));
                     }
                 }
+
                 isAdDisplayed = false;
                 break;
             case CUEPOINTS_CHANGED: //Dispatched for on-demand streams when the cuepoints change.
@@ -707,7 +692,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         List<Long> cuePointsList = buildCuePointsList();
         if (cuePointsList == null)
             return;
-        if (cuePointsList.size() > 0) {
+        if (!cuePointsList.isEmpty()) {
             AdCuePoints adCuePointsForEvent = new AdCuePoints(cuePointsList);
             adCuePointsForEvent.setAdPluginName(IMADAIPlugin.factory.getName());
             messageBus.post(new AdEvent.AdCuePointsUpdateEvent(adCuePointsForEvent));
@@ -873,7 +858,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
     @Override
     public boolean isAllAdsCompleted() {
-        if (pluginCuePoints != null && pluginCuePoints.size() > 0) {
+        if (pluginCuePoints != null && !pluginCuePoints.isEmpty()) {
             CuePoint cuePoint = pluginCuePoints.get(pluginCuePoints.size() -1);
             return cuePoint.isPlayed();
         }
@@ -892,7 +877,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 //log.d("AD Duration = " + streamManager.getAdProgressInfo().getDuration());
                 long adDuration = Math.max(0, (long) Math.floor(streamManager.getAdProgressInfo().getDuration()));
                 if (getPlayerEngine() != null) {
-                    if (streamManager.getCuePoints().size() > 0 && adDuration > getPlayerEngine().getDuration()) {
+                    if (!streamManager.getCuePoints().isEmpty() && adDuration > getPlayerEngine().getDuration()) {
                         adDuration = getPlayerEngine().getDuration();
                     }
                 }
@@ -935,7 +920,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             long adPosition = 0;
             if (streamManager != null && streamManager.getAdProgressInfo() != null) {
                 adPosition = Math.round(streamManager.getAdProgressInfo().getCurrentTime());
-                if (streamManager.getCuePoints().size() > 0 && getPlayerEngine() != null && adPosition > getPlayerEngine().getCurrentPosition()) {
+                if (!streamManager.getCuePoints().isEmpty() && getPlayerEngine() != null && adPosition > getPlayerEngine().getCurrentPosition()) {
                     adPosition = 0; // vod error case
                 }
                 //log.d("getCurrentPosition = " + adPosition);
@@ -1111,54 +1096,44 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         }
     }
 
-//    private PKMediaConfig createMediaConfig(String url) {
-//
-//        PKMediaConfig adMediaConfig = new PKMediaConfig();//.setStartPosition(daiStartPosition);
-//        long daiStartPosition = (mediaConfig != null && mediaConfig.getStartPosition() != null && mediaConfig.getStartPosition() > 0) ? mediaConfig.getStartPosition() : 0;
-//        if (streamManager != null && daiStartPosition > 0) {
-//            daiStartPosition = (long) streamManager.getStreamTimeForContentTime(daiStartPosition);
-//            adMediaConfig.setStartPosition(daiStartPosition);
-//        }
-//
-//        PKMediaEntry adMediaEntry = createMediaEntry(url);
-//        adMediaConfig.setMediaEntry(adMediaEntry);
-//        return adMediaConfig;
-//    }
-//
-//    private PKMediaEntry createMediaEntry(String url) {
-//
-//        PKMediaEntry mediaEntry = new PKMediaEntry();
-//        mediaEntry.setId("adId");
-//        if (adConfig.getVideoId() == null) {
-//            mediaEntry.setMediaType(PKMediaEntry.MediaEntryType.Live);
-//        } else {
-//            mediaEntry.setMediaType(PKMediaEntry.MediaEntryType.Vod);
-//        }
-//
-//        List<PKMediaSource> mediaSources = createMediaSources(url);
-//        mediaEntry.setSources(mediaSources);
-//
-//        return mediaEntry;
-//    }
-//
-//    private List<PKMediaSource> createMediaSources(String url) {
-//
-//        List<PKMediaSource> mediaSources = new ArrayList<>();
-//        PKMediaSource mediaSource = new PKMediaSource();
-//        mediaSource.setId("adId");
-//        mediaSource.setUrl(url);
-//        mediaSource.setMediaFormat(PKMediaFormat.valueOfUrl(url));
-//
-//        if (adConfig.getLicenseUrl() !=null) {
-//            List<PKDrmParams> drmData = new ArrayList<>();
-//            PKDrmParams pkDrmParams = new PKDrmParams(adConfig.getLicenseUrl(), PKDrmParams.Scheme.WidevineCENC);
-//            drmData.add(pkDrmParams);
-//            mediaSource.setDrmData(drmData);
-//        }
-//
-//        mediaSources.add(mediaSource);
-//        return mediaSources;
-//    }
+    private PKMediaEntry createMediaEntry(String url) {
+        PKMediaEntry mediaEntry = new PKMediaEntry();
+        if (mediaConfig.getMediaEntry() instanceof VRPKMediaEntry) {
+            mediaEntry = new VRPKMediaEntry().setVRParams(((VRPKMediaEntry) mediaConfig.getMediaEntry()).getVrSettings() != null ?
+                    ((VRPKMediaEntry) mediaConfig.getMediaEntry()).getVrSettings() : new VRSettings());
+        }
+        mediaEntry.setId(mediaConfig.getMediaEntry().getId());
+        if (adConfig.getVideoId() == null) {
+            mediaEntry.setMediaType(PKMediaEntry.MediaEntryType.Live);
+        } else {
+            mediaEntry.setMediaType(PKMediaEntry.MediaEntryType.Vod);
+        }
+        mediaEntry.setMetadata(mediaConfig.getMediaEntry().getMetadata());
+        mediaEntry.setName(mediaConfig.getMediaEntry().getName());
+        List<PKMediaSource> mediaSources = createMediaSources(url);
+        mediaEntry.setSources(mediaSources);
+
+        return mediaEntry;
+    }
+
+    private List<PKMediaSource> createMediaSources(String url) {
+
+        List<PKMediaSource> mediaSources = new ArrayList<>();
+        PKMediaSource mediaSource = new PKMediaSource();
+        mediaSource.setId(adConfig.getContentSourceId());
+        mediaSource.setUrl(url);
+        mediaSource.setMediaFormat(PKMediaFormat.valueOfUrl(url));
+
+        if (adConfig.getLicenseUrl() !=null) {
+            List<PKDrmParams> drmData = new ArrayList<>();
+            PKDrmParams pkDrmParams = new PKDrmParams(adConfig.getLicenseUrl(), PKDrmParams.Scheme.WidevineCENC);
+            drmData.add(pkDrmParams);
+            mediaSource.setDrmData(drmData);
+        }
+
+        mediaSources.add(mediaSource);
+        return mediaSources;
+    }
 
     private Map<com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType, com.kaltura.playkit.plugins.ads.AdEvent.Type> buildAdsEventMap() {
         adEventsMap = new HashMap<>();
@@ -1196,16 +1171,16 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         return adsPlayerEngineWrapper.getPlayerEngine();
     }
 
-    private PKMediaSourceConfig toPKMediaSourceConfig(PKMediaConfig pkMediaConfig) {
+    private PKMediaSourceConfig toPKMediaSourceConfig(String daiUrl) {
         PKMediaSourceConfig sourceConfig = null;
-        if (pkMediaConfig != null) {
-            PKMediaEntry mediaEntry = pkMediaConfig.getMediaEntry();
-            if (mediaEntry != null && mediaEntry.getSources() != null && mediaEntry.getSources().size() > 0) {
+        if (mediaConfig != null) {
+            PKMediaEntry mediaEntry = createMediaEntry(daiUrl);
+            if (!mediaEntry.getSources().isEmpty()) {
                 if (mediaEntry instanceof VRPKMediaEntry) {
                     VRPKMediaEntry vrEntry = (VRPKMediaEntry) mediaEntry;
-                    sourceConfig = new PKMediaSourceConfig(pkMediaConfig, mediaEntry.getSources().get(0), (PlayerSettings) player.getSettings(), vrEntry.getVrSettings());
+                    sourceConfig = new PKMediaSourceConfig(mediaConfig, mediaEntry.getSources().get(0), (PlayerSettings) player.getSettings(), vrEntry.getVrSettings());
                 } else {
-                    sourceConfig = new PKMediaSourceConfig(pkMediaConfig, mediaEntry.getSources().get(0), (PlayerSettings) player.getSettings());
+                    sourceConfig = new PKMediaSourceConfig(mediaConfig, mediaEntry.getSources().get(0), (PlayerSettings) player.getSettings());
                 }
             }
         }
