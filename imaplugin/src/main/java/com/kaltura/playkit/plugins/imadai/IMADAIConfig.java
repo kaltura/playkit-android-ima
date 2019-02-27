@@ -16,8 +16,6 @@ import android.text.TextUtils;
 import android.view.View;
 
 import com.google.ads.interactivemedia.v3.api.StreamRequest;
-import com.google.gson.JsonObject;
-import com.kaltura.playkit.plugins.ima.IMAConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +64,17 @@ public class IMADAIConfig {
         this.assetKey = assetKey;
         this.contentSourceId = contentSourceId;
         this.videoId = videoId;
-        setValues(assetTitle, apiKey, streamFormat, licenseUrl);
+        this.assetTitle = assetTitle;
+        this.apiKey = apiKey;
+        this.streamFormat = streamFormat;
+        this.licenseUrl = licenseUrl;
+        this.language                  = "en";
+        //this.videoBitrate              = -1;
+        this.adAttribution             = true;
+        this.adCountDown               = true;
+        this.adLoadTimeOut             = DEFAULT_AD_LOAD_TIMEOUT;
+        this.enableDebugMode           = false;
+        this.alwaysStartWithPreroll   = false;
     }
 
     //VOD Factory
@@ -99,20 +107,6 @@ public class IMADAIConfig {
                 apiKey,
                 streamFormat,
                 licenseUrl);
-    }
-
-    private void setValues(String assetTitle, String apiKey, StreamRequest.StreamFormat streamFormat, String licenseUrl) {
-        this.assetTitle = assetTitle;
-        this.apiKey = apiKey;
-        this.streamFormat = streamFormat;
-        this.licenseUrl = licenseUrl;
-        this.language                  = "en";
-        //this.videoBitrate              = -1;
-        this.adAttribution             = true;
-        this.adCountDown               = true;
-        this.adLoadTimeOut             = DEFAULT_AD_LOAD_TIMEOUT;
-        this.enableDebugMode           = false;
-        this.alwaysStartWithPreroll   = false;
     }
 
     public String getAssetTitle() {
