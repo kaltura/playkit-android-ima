@@ -389,9 +389,9 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                         }
                     }
 
-                    if (pkMediaSourceConfig != null) {
+                    if (getPlayerEngineWrapper() != null && pkMediaSourceConfig != null) {
                         getPlayerEngineWrapper().load(pkMediaSourceConfig);
-                        if (isAutoPlay) {
+                        if (getPlayerEngine() != null && isAutoPlay) {
                             getPlayerEngine().play();
                         }
                         isContentPrepared = true;
@@ -483,7 +483,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         if (shouldPrepareOnResume) {
             if (pkMediaSourceConfig != null) {
                 getPlayerEngineWrapper().load(pkMediaSourceConfig);
-                if (isAutoPlay) {
+                if (getPlayerEngine() != null && isAutoPlay) {
                     getPlayerEngine().play();
                 }
                 isContentPrepared = true;
@@ -1110,33 +1110,20 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         }
     }
 
-    private PKMediaEntry createMediaEntry(String url) {
-        PKMediaEntry mediaEntry = new PKMediaEntry();
-        if (mediaConfig.getMediaEntry() instanceof VRPKMediaEntry) {
-            mediaEntry = new VRPKMediaEntry().setVRParams(((VRPKMediaEntry) mediaConfig.getMediaEntry()).getVrSettings() != null ?
-                    ((VRPKMediaEntry) mediaConfig.getMediaEntry()).getVrSettings() : new VRSettings());
-        }
-        mediaEntry.setId(mediaConfig.getMediaEntry().getId());
+    private PKMediaEntry.MediaEntryType getDAIMediaType() {
+
         if (adConfig.getVideoId() == null) {
-            if (mediaConfig.getMediaEntry().getMediaType() == PKMediaEntry.MediaEntryType.DvrLive) {
-                mediaEntry.setMediaType(PKMediaEntry.MediaEntryType.DvrLive);
+            if (mediaConfig.getMediaEntry() != null && mediaConfig.getMediaEntry().getMediaType() == PKMediaEntry.MediaEntryType.DvrLive) {
+                return PKMediaEntry.MediaEntryType.DvrLive;
             } else {
-                mediaEntry.setMediaType(PKMediaEntry.MediaEntryType.Live);
+                return PKMediaEntry.MediaEntryType.Live;
             }
         } else {
-            mediaEntry.setMediaType(PKMediaEntry.MediaEntryType.Vod);
+            return PKMediaEntry.MediaEntryType.Vod;
         }
-        mediaEntry.setMetadata(mediaConfig.getMediaEntry().getMetadata());
-        mediaEntry.setName(mediaConfig.getMediaEntry().getName());
-        List<PKMediaSource> mediaSources = createMediaSources(url);
-        mediaEntry.setSources(mediaSources);
-
-        return mediaEntry;
     }
 
-    private List<PKMediaSource> createMediaSources(String url) {
-
-        List<PKMediaSource> mediaSources = new ArrayList<>();
+    private PKMediaSource createDAIMediaSource(String url) {
         PKMediaSource mediaSource = new PKMediaSource();
         mediaSource.setId(adConfig.getContentSourceId());
         mediaSource.setUrl(url);
@@ -1148,9 +1135,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             drmData.add(pkDrmParams);
             mediaSource.setDrmData(drmData);
         }
-
-        mediaSources.add(mediaSource);
-        return mediaSources;
+        return mediaSource;
     }
 
     private Map<com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType, com.kaltura.playkit.plugins.ads.AdEvent.Type> buildAdsEventMap() {
@@ -1192,13 +1177,12 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private PKMediaSourceConfig toPKMediaSourceConfig(String daiUrl) {
         PKMediaSourceConfig sourceConfig = null;
         if (mediaConfig != null) {
-            PKMediaEntry mediaEntry = createMediaEntry(daiUrl);
-            if (!mediaEntry.getSources().isEmpty()) {
-                if (mediaEntry instanceof VRPKMediaEntry) {
-                    VRPKMediaEntry vrEntry = (VRPKMediaEntry) mediaEntry;
-                    sourceConfig = new PKMediaSourceConfig(mediaEntry.getSources().get(0), mediaEntry.getMediaType(), mediaConfig.getMediaEntry().getExternalSubtitleList(), (PlayerSettings) player.getSettings(), vrEntry.getVrSettings());
+            PKMediaSource daiMediaSource = createDAIMediaSource(daiUrl);
+            if (!TextUtils.isEmpty(daiMediaSource.getUrl())) {
+                if (mediaConfig.getMediaEntry() instanceof VRPKMediaEntry) {
+                    sourceConfig = new PKMediaSourceConfig(daiMediaSource, getDAIMediaType(), mediaConfig.getMediaEntry().getExternalSubtitleList(), (PlayerSettings) player.getSettings(), ((VRPKMediaEntry)mediaConfig.getMediaEntry()).getVrSettings());
                 } else {
-                    sourceConfig = new PKMediaSourceConfig(mediaEntry.getSources().get(0), mediaEntry.getMediaType(), mediaConfig.getMediaEntry().getExternalSubtitleList(), (PlayerSettings) player.getSettings());
+                    sourceConfig = new PKMediaSourceConfig(daiMediaSource, getDAIMediaType(), mediaConfig.getMediaEntry().getExternalSubtitleList(), (PlayerSettings) player.getSettings());
                 }
             }
         }
