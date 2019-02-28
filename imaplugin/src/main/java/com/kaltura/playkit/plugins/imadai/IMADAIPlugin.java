@@ -72,6 +72,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private AdInfo adInfo;
     private IMADAIConfig adConfig;
     private PKMediaConfig mediaConfig;
+    private PKMediaSourceConfig pkMediaSourceConfig;
     //////////////////////
 
     private VideoStreamPlayer videoStreamPlayer;
@@ -229,6 +230,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             log.d("mediaConfig start pos = " + playbackStartPosition);
         }
 
+        pkMediaSourceConfig = null;
         playkitAdCuePoints = null;
         pluginCuePoints = null;
         isAutoPlay = false;
@@ -368,6 +370,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             public void loadUrl(String url, List<HashMap<String, String>> subtitles) {
                 log.d("loadUrl = " + url + " lastAdEventReceived = " + lastAdEventReceived);
                 messageBus.post(new AdEvent.DAISourceSelected(url));
+                pkMediaSourceConfig = toPKMediaSourceConfig(url);
                 if (isAdError) {
                     log.e("ERROR when calling loadUrl = " + url + " lastAdEventReceived = " + lastAdEventReceived);
                     preparePlayer(true);
@@ -376,7 +379,6 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 }
 
                 if (!appIsInBackground) {
-                    PKMediaSourceConfig pkMediaSourceConfig = toPKMediaSourceConfig(url);
                     if (mediaConfig.getStartPosition() != null && mediaConfig.getStartPosition() > 0) {
                         double fakeStartPos = streamManager.getStreamTimeForContentTime(mediaConfig.getStartPosition());
                         if (adConfig.isAlwaysStartWithPreroll()) {
@@ -388,10 +390,11 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                     }
 
                     if (pkMediaSourceConfig != null) {
-                        getPlayerEngine().load(pkMediaSourceConfig);
+                        getPlayerEngineWrapper().load(pkMediaSourceConfig);
                         if (isAutoPlay) {
                             getPlayerEngine().play();
                         }
+                        isContentPrepared = true;
                     } else {
                         log.e("ERROR when calling loadUrl = " + url + " pkMediaSourceConfig = null");
                     }
@@ -478,11 +481,17 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     protected void onApplicationResumed() {
         appIsInBackground = false;
         if (shouldPrepareOnResume) {
-            if (isAutoPlay) {
-                player.prepare(mediaConfig);
-                player.play();
+            if (pkMediaSourceConfig != null) {
+                getPlayerEngineWrapper().load(pkMediaSourceConfig);
+                if (isAutoPlay) {
+                    getPlayerEngine().play();
+                }
+                isContentPrepared = true;
             } else {
                 player.prepare(mediaConfig);
+                if (isAutoPlay) {
+                    player.play();
+                }
             }
             shouldPrepareOnResume = false;
             return;
@@ -1034,6 +1043,11 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     @Override
     public PKAdPluginType getAdPluginType() {
         return PKAdPluginType.server;
+    }
+
+    @Override
+    public boolean isContentPerpared() {
+        return isContentPrepared;
     }
 
     private boolean isPositionInBetweenCuePoint(long position) {

@@ -682,6 +682,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     @Override
+    public boolean isContentPerpared() {
+        return isContentPrepared;
+    }
+
+    @Override
     public boolean isAdDisplayed() {
         //log.d("isAdDisplayed: " + mIsAdDisplayed);
         return isAdDisplayed;
