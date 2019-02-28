@@ -903,7 +903,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             }
         }
         if (adConfig != null) {
-            messageBus.post(new AdEvent.AdRequestedEvent(getAdPluginType(), !TextUtils.isEmpty(adConfig.getAdTagURL()) ? adConfig.getAdTagURL() : adConfig.getAdTagResponse()));
+            messageBus.post(new AdEvent.AdRequestedEvent(!TextUtils.isEmpty(adConfig.getAdTagURL()) ? adConfig.getAdTagURL() : adConfig.getAdTagResponse()));
         }
         sendError(errorType, errorMessage, adException);
         displayContent();
@@ -1268,7 +1268,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         adsLoadedListener = adsManagerLoadedEvent -> {
             log.d("AdsManager loaded");
-            messageBus.post(new AdEvent.AdRequestedEvent(getAdPluginType(), !TextUtils.isEmpty(adConfig.getAdTagURL()) ? adConfig.getAdTagURL() : adConfig.getAdTagResponse()));
+            messageBus.post(new AdEvent.AdRequestedEvent(!TextUtils.isEmpty(adConfig.getAdTagURL()) ? adConfig.getAdTagURL() : adConfig.getAdTagResponse()));
             cancelAdManagerTimer();
             // Ads were successfully loaded, so get the AdsManager instance. AdsManager has
             // events for ad playback and errors.

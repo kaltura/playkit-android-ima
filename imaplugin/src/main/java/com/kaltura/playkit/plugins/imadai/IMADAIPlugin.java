@@ -253,7 +253,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             adRequestInfo = adConfig.getContentSourceId() + "/" + adConfig.getVideoId();
         }
         adsLoader.requestStream(buildStreamRequest());
-        messageBus.post(new AdEvent.AdRequestedEvent(getAdPluginType(), adRequestInfo));
+        messageBus.post(new AdEvent.AdRequestedEvent(adRequestInfo));
     }
 
     ////////Ads Plugin
