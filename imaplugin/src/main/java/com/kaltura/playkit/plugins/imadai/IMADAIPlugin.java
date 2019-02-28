@@ -1046,7 +1046,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     }
 
     @Override
-    public boolean isContentPerpared() {
+    public boolean isContentPrepared() {
         return isContentPrepared;
     }
 
@@ -1118,7 +1118,11 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         }
         mediaEntry.setId(mediaConfig.getMediaEntry().getId());
         if (adConfig.getVideoId() == null) {
-            mediaEntry.setMediaType(PKMediaEntry.MediaEntryType.Live);
+            if (mediaConfig.getMediaEntry().getMediaType() == PKMediaEntry.MediaEntryType.DvrLive) {
+                mediaEntry.setMediaType(PKMediaEntry.MediaEntryType.DvrLive);
+            } else {
+                mediaEntry.setMediaType(PKMediaEntry.MediaEntryType.Live);
+            }
         } else {
             mediaEntry.setMediaType(PKMediaEntry.MediaEntryType.Vod);
         }
@@ -1192,9 +1196,9 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             if (!mediaEntry.getSources().isEmpty()) {
                 if (mediaEntry instanceof VRPKMediaEntry) {
                     VRPKMediaEntry vrEntry = (VRPKMediaEntry) mediaEntry;
-                    sourceConfig = new PKMediaSourceConfig(mediaConfig, mediaEntry.getSources().get(0), (PlayerSettings) player.getSettings(), vrEntry.getVrSettings());
+                    sourceConfig = new PKMediaSourceConfig(mediaEntry.getSources().get(0), mediaEntry.getMediaType(), mediaConfig.getMediaEntry().getExternalSubtitleList(), (PlayerSettings) player.getSettings(), vrEntry.getVrSettings());
                 } else {
-                    sourceConfig = new PKMediaSourceConfig(mediaConfig, mediaEntry.getSources().get(0), (PlayerSettings) player.getSettings());
+                    sourceConfig = new PKMediaSourceConfig(mediaEntry.getSources().get(0), mediaEntry.getMediaType(), mediaConfig.getMediaEntry().getExternalSubtitleList(), (PlayerSettings) player.getSettings());
                 }
             }
         }
