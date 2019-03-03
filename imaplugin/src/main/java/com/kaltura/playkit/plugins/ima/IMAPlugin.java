@@ -983,10 +983,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             return;
         }
 
-
+        lastAdEventReceived = adEventsMap.get(adEvent.getType());
         if (lastAdEventReceived != AdEvent.Type.AD_PROGRESS) {
             log.d("onAdEvent EventName: " + lastAdEventReceived);
-            lastAdEventReceived = adEventsMap.get(adEvent.getType());
         }
 
         if (adEvent.getAdData() != null) {
