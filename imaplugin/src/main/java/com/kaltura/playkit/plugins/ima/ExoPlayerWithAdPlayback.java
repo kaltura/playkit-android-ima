@@ -52,7 +52,6 @@ import java.util.List;
 
 import static com.google.android.exoplayer2.C.SELECTION_REASON_ADAPTIVE;
 import static com.google.android.exoplayer2.C.SELECTION_REASON_INITIAL;
-import static com.google.android.exoplayer2.DefaultRenderersFactory.DEFAULT_ALLOWED_VIDEO_JOINING_TIME_MS;
 import static com.google.android.exoplayer2.util.Log.LOG_LEVEL_OFF;
 
 /**
