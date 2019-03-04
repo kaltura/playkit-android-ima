@@ -1088,13 +1088,11 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
     private void preparePlayer(boolean doPlay) {
         log.d("IMADAI prepare");
-        if (!appIsInBackground) {
-            if (pkAdProviderListener != null) {
-                log.d("IMADAI prepare player");
-                isContentPrepared = true;
-                pkAdProviderListener.onAdLoadingFinished();
-            }
-            if (isContentPrepared && doPlay) {
+        if (pkAdProviderListener != null && !appIsInBackground) {
+            log.d("IMADAI prepare player");
+            isContentPrepared = true;
+            pkAdProviderListener.onAdLoadingFinished();
+            if (doPlay) {
                 messageBus.addListener(this, PlayerEvent.durationChanged, new PKEvent.Listener<PlayerEvent.DurationChanged>() {
                     @Override
                     public void onEvent(PlayerEvent.DurationChanged event) {
