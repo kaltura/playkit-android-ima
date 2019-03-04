@@ -420,12 +420,12 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
             @Override
             public void onAdBreakStarted() {
-                log.d(" onAdBreakStarted");
+                log.d("VideoStreamPlayer onAdBreakStarted");
             }
 
             @Override
             public void onAdBreakEnded() {
-                log.d("onAdBreakEnded");
+                log.d("VideoStreamPlayer onAdBreakEnded");
 
                 if (mSnapBackTime > 0) {
                     long snapBackTimeMili = (long) mSnapBackTime * Consts.MILLISECONDS_MULTIPLIER;
@@ -438,6 +438,21 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                     }
                 }
                 mSnapBackTime = 0;
+            }
+
+            @Override
+            public void onAdPeriodStarted() {
+                log.d("VideoStreamPlayer onAdPeriodStarted");
+            }
+
+            @Override
+            public void onAdPeriodEnded() {
+                log.d("VideoStreamPlayer onAdPeriodEnded");
+            }
+
+            @Override
+            public void seek(long seekPosition) {
+                log.d("VideoStreamPlayer onSeekTo " + seekPosition);
             }
 
             @Override
@@ -525,37 +540,27 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             log.d("Event: " + adEvent.getType());
         }
         switch (adEvent.getType()) {
+            case AD_PERIOD_STARTED:
+                log.d("AD AD_PERIOD_STARTED");
+                onAdBreakStarted();
+                break;
             case AD_BREAK_STARTED: //Fired when an ad break starts.
+                if (adConfig.isLiveDAI()) {
+                    return;
+                }
                 log.d("AD AD_BREAK_STARTED");
-                isAdDisplayed = true;
-                messageBus.post(new AdEvent(AdEvent.Type.AD_BREAK_STARTED));
-                messageBus.post(new AdEvent(AdEvent.Type.CONTENT_PAUSE_REQUESTED));
+                onAdBreakStarted();
+                break;
+            case AD_PERIOD_ENDED: //Fired when an ad break ends.
+                log.d("AD AD_PERIOD_ENDED");
+                onAdBreakEnded();
                 break;
             case AD_BREAK_ENDED: //Fired when an ad break ends.
-                log.d("AD AD_BREAK_ENDED");
-                messageBus.post(new AdEvent(AdEvent.Type.AD_BREAK_ENDED));
-                messageBus.post(new AdEvent(AdEvent.Type.CONTENT_RESUME_REQUESTED));
-                boolean allAdsPlayed = true;
-                boolean lastAdPlayed = true;
-                List<CuePoint> cuesList = streamManager.getCuePoints();
-                if (cuesList != null) {
-                    for (ListIterator<CuePoint> iter = cuesList.listIterator(); iter.hasNext(); ) {
-                        CuePoint cue = iter.next();
-                        if (cue != null) {
-                            if (!cue.isPlayed()) {
-                                allAdsPlayed = false;
-                            }
-                            if (!iter.hasNext()) {
-                                lastAdPlayed = cue.isPlayed();
-                            }
-                        }
-                    }
-                    if (allAdsPlayed || lastAdPlayed && getPlayerEngine() != null && getPlayerEngine().getCurrentPosition() >= getPlayerEngine().getDuration()) {
-                        messageBus.post(new AdEvent(AdEvent.Type.ALL_ADS_COMPLETED));
-                    }
+                if (adConfig.isLiveDAI()) {
+                    return;
                 }
-
-                isAdDisplayed = false;
+                log.d("AD AD_BREAK_ENDED");
+                onAdBreakEnded();
                 break;
             case CUEPOINTS_CHANGED: //Dispatched for on-demand streams when the cuepoints change.
                 pluginCuePoints = streamManager.getCuePoints();
@@ -630,6 +635,40 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             default:
                 break;
         }
+    }
+
+    private void onAdBreakEnded() {
+        messageBus.post(new AdEvent(AdEvent.Type.AD_BREAK_ENDED));
+        messageBus.post(new AdEvent(AdEvent.Type.CONTENT_RESUME_REQUESTED));
+        boolean allAdsPlayed = true;
+        boolean lastAdPlayed = true;
+        List<CuePoint> cuesList = streamManager.getCuePoints();
+        if (cuesList != null) {
+            for (ListIterator<CuePoint> iter = cuesList.listIterator(); iter.hasNext(); ) {
+                CuePoint cue = iter.next();
+                if (cue != null) {
+                    if (!cue.isPlayed()) {
+                        allAdsPlayed = false;
+                    }
+                    if (!iter.hasNext()) {
+                        lastAdPlayed = cue.isPlayed();
+                    }
+                }
+            }
+            if (!adConfig.isLiveDAI()) {
+                if (allAdsPlayed || lastAdPlayed && getPlayerEngine() != null && getPlayerEngine().getCurrentPosition() >= getPlayerEngine().getDuration()) {
+                    messageBus.post(new AdEvent(AdEvent.Type.ALL_ADS_COMPLETED));
+                }
+            }
+        }
+
+        isAdDisplayed = false;
+    }
+
+    private void onAdBreakStarted() {
+        isAdDisplayed = true;
+        messageBus.post(new AdEvent(AdEvent.Type.AD_BREAK_STARTED));
+        messageBus.post(new AdEvent(AdEvent.Type.CONTENT_PAUSE_REQUESTED));
     }
 
 //    private boolean checkIfDiscardAdRequired() {

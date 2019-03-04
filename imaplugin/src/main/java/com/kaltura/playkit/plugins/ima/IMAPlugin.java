@@ -271,6 +271,29 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         requestAdsFromIMA(adConfig.getAdTagURL());
     }
 
+    private AdDisplayContainer createAdDisplayContainer() {
+        adDisplayContainer = sdkFactory.createAdDisplayContainer();
+
+        // Set up spots for companions.
+        ViewGroup adCompanionViewGroup = null;
+        if (adCompanionViewGroup != null) {
+            CompanionAdSlot companionAdSlot = sdkFactory.createCompanionAdSlot();
+            companionAdSlot.setContainer(adCompanionViewGroup);
+            companionAdSlot.setSize(728, 90);
+            ArrayList<CompanionAdSlot> companionAdSlots = new ArrayList<>();
+            companionAdSlots.add(companionAdSlot);
+            adDisplayContainer.setCompanionSlots(companionAdSlots);
+        }
+
+        if (adConfig.getControlsOverlayList() != null) {
+            for (View controlView : adConfig.getControlsOverlayList()) {
+                adDisplayContainer.registerVideoControlsOverlay(controlView);
+            }
+        }
+
+        return adDisplayContainer;
+    }
+
     @Override
     protected void onUpdateConfig(Object config) {
         log.d("Start onUpdateConfig");
@@ -300,7 +323,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             sdkFactory = ImaSdkFactory.getInstance();
         }
         if (adsLoader == null) {
-            adsLoader = sdkFactory.createAdsLoader(context, imaSdkSettings);
+            adsLoader = sdkFactory.createAdsLoader(context, imaSdkSettings, createAdDisplayContainer());
             // Add listeners for when ads are loaded and for errors.
             adsLoader.addAdErrorListener(this);
             adsLoader.addAdsLoadedListener(getAdsLoadedListener());
@@ -493,6 +516,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (adDisplayContainer != null) {
             adDisplayContainer.setPlayer(null);
             adDisplayContainer.unregisterAllVideoControlsOverlays();
+            adDisplayContainer.destroy();
         }
         if (adsManager != null) {
             adsManager.destroy();
@@ -524,27 +548,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         resetIMA();
 
         log.d("Do requestAdsFromIMA");
-        adDisplayContainer = sdkFactory.createAdDisplayContainer();
         adDisplayContainer.setPlayer(videoPlayerWithAdPlayback.getVideoAdPlayer());
         adDisplayContainer.setAdContainer(videoPlayerWithAdPlayback.getAdUiContainer());
-
-        // Set up spots for companions.
-
-        ViewGroup adCompanionViewGroup = null;
-        if (adCompanionViewGroup != null) {
-            CompanionAdSlot companionAdSlot = sdkFactory.createCompanionAdSlot();
-            companionAdSlot.setContainer(adCompanionViewGroup);
-            companionAdSlot.setSize(728, 90);
-            ArrayList<CompanionAdSlot> companionAdSlots = new ArrayList<>();
-            companionAdSlots.add(companionAdSlot);
-            adDisplayContainer.setCompanionSlots(companionAdSlots);
-        }
-
-        if (adConfig.getControlsOverlayList() != null) {
-            for (View controlView : adConfig.getControlsOverlayList()) {
-                adDisplayContainer.registerVideoControlsOverlay(controlView);
-            }
-        }
 
         // Create the ads request.
         final AdsRequest request = sdkFactory.createAdsRequest();
@@ -557,7 +562,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (adConfig.getAdLoadTimeOut() > 0 && adConfig.getAdLoadTimeOut() < Consts.MILLISECONDS_MULTIPLIER && adConfig.getAdLoadTimeOut() != IMAConfig.DEFAULT_AD_LOAD_TIMEOUT) {
             request.setVastLoadTimeout(adConfig.getAdLoadTimeOut() * Consts.MILLISECONDS_MULTIPLIER);
         }
-        request.setAdDisplayContainer(adDisplayContainer);
         request.setContentProgressProvider(videoPlayerWithAdPlayback.getContentProgressProvider());
 
         // Request the ad. After the ad is loaded, onAdsManagerLoaded() will be called.
