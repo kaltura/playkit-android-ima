@@ -200,7 +200,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                     }
                 }
 
-                //Make sure events will be fired ater pause
+                //Make sure events will be fired after pause
                 for (VideoAdPlayer.VideoAdPlayerCallback callback : mAdCallbacks) {
                     callback.onPlay();
                 }
@@ -403,24 +403,21 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
     public void setContentProgressProvider(final com.kaltura.playkit.Player contentPlayer) {
         this.contentPlayer = contentPlayer;
-        mContentProgressProvider = new ContentProgressProvider() {
-            @Override
-            public VideoProgressUpdate getContentProgress() {
+        mContentProgressProvider = () -> {
 
-                if (contentPlayer.getDuration() <= 0) {
-                    return VideoProgressUpdate.VIDEO_TIME_NOT_READY;
-                }
-                long duration = contentPlayer.getDuration();
-                long position = contentPlayer.getCurrentPosition();
-                //log.d("xxx getContentProgress getDuration " +  duration);
-                //log.d("xxx getContentProgress getCurrentPosition " + position);
-                if (position > 0 && duration > 0 && position >= duration && adCuePoints != null && !adCuePoints.hasPostRoll()) {
-                    mContentProgressProvider = null;
-                    return VideoProgressUpdate.VIDEO_TIME_NOT_READY;
-                }
-                return new VideoProgressUpdate(contentPlayer.getCurrentPosition(),
-                        duration);
+            if (contentPlayer.getDuration() <= 0) {
+                return VideoProgressUpdate.VIDEO_TIME_NOT_READY;
             }
+            long duration = contentPlayer.getDuration();
+            long position = contentPlayer.getCurrentPosition();
+            //log.d("getContentProgress getDuration " +  duration);
+            //log.d("getContentProgress getCurrentPosition " + position);
+            if (position > 0 && duration > 0 && position >= duration && adCuePoints != null && !adCuePoints.hasPostRoll()) {
+                mContentProgressProvider = null;
+                return VideoProgressUpdate.VIDEO_TIME_NOT_READY;
+            }
+            return new VideoProgressUpdate(contentPlayer.getCurrentPosition(),
+                    duration);
         };
     }
 
