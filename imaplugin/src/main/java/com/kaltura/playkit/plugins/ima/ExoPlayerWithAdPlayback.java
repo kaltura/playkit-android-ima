@@ -139,7 +139,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
     private DeferredDrmSessionManager.DrmSessionListener initDrmSessionListener() {
         return error -> {
-            log.e("Error :" +  error.message);
+            if (error != null) {
+                log.e("Error :" + error.message);
+            }
         };
     }
 
