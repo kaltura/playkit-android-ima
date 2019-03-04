@@ -43,6 +43,7 @@ import com.kaltura.playkit.PKError;
 import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PlayerState;
 import com.kaltura.playkit.drm.DeferredDrmSessionManager;
+import com.kaltura.playkit.player.CustomRendererFactory;
 import com.kaltura.playkit.player.MediaSupport;
 import com.kaltura.playkit.plugins.ads.AdCuePoints;
 import com.kaltura.playkit.utils.Consts;
@@ -52,6 +53,7 @@ import java.util.List;
 
 import static com.google.android.exoplayer2.C.SELECTION_REASON_ADAPTIVE;
 import static com.google.android.exoplayer2.C.SELECTION_REASON_INITIAL;
+import static com.google.android.exoplayer2.DefaultRenderersFactory.DEFAULT_ALLOWED_VIDEO_JOINING_TIME_MS;
 import static com.google.android.exoplayer2.util.Log.LOG_LEVEL_OFF;
 
 /**
@@ -157,9 +159,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
             mediaDataSourceFactory = buildDataSourceFactory();
 
-            renderersFactory = new DefaultRenderersFactory(mContext,
-                    DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
-
+            renderersFactory = new CustomRendererFactory(mContext, true, DEFAULT_ALLOWED_VIDEO_JOINING_TIME_MS);
             trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory());
 
             eventLogger = new EventLogger(trackSelector);
