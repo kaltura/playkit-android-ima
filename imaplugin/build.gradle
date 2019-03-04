@@ -29,7 +29,7 @@ dependencies {
 
     // TODO: when playkit without plugins is released, replace this.
     implementation 'com.kaltura:playkit-android:dev-SNAPSHOT'
-    // implementation project(":playkit")
+    //implementation project(":playkit")
 
     //Ads libraries.
     api 'com.google.ads.interactivemedia.v3:interactivemedia:3.10.7'
