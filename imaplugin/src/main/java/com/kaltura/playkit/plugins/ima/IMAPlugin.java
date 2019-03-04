@@ -934,12 +934,14 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private void preparePlayer(boolean doPlay) {
         log.d("IMA prepare");
-        if (pkAdProviderListener != null && !appIsInBackground) {
-            log.d("IMA prepare player");
-            isContentPrepared = true;
-            pkAdProviderListener.onAdLoadingFinished();
-            if (doPlay) {
+        if (!appIsInBackground) {
+            if (pkAdProviderListener != null) {
+                log.d("IMA prepare player");
+                isContentPrepared = true;
+                pkAdProviderListener.onAdLoadingFinished();
 
+            }
+            if (isContentPrepared && doPlay) {
                 messageBus.addListener(this, PlayerEvent.durationChanged, new PKEvent.Listener<PlayerEvent.DurationChanged>() {
                     @Override
                     public void onEvent(PlayerEvent.DurationChanged event) {
@@ -1101,6 +1103,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             case STARTED:
                 log.d("AD STARTED isAdDisplayed = true");
+
                 adInfo = createAdInfo(adEvent.getAd());
                 if (adInfo.getAdPositionType() != AdPositionType.PRE_ROLL && !playerPlayingBeforeAdArrived) {
                     pause();

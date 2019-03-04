@@ -140,10 +140,8 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     }
 
     private DeferredDrmSessionManager.DrmSessionListener initDrmSessionListener() {
-        return new DeferredDrmSessionManager.DrmSessionListener() {
-            @Override
-            public void onError(PKError error) {
-            }
+        return error -> {
+            log.e("Error :" +  error.message);
         };
     }
 
@@ -159,7 +157,8 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
             mediaDataSourceFactory = buildDataSourceFactory();
 
-            renderersFactory = new CustomRendererFactory(mContext, true, DEFAULT_ALLOWED_VIDEO_JOINING_TIME_MS);
+            renderersFactory = new DefaultRenderersFactory(mContext);
+
             trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory());
 
             eventLogger = new EventLogger(trackSelector);
