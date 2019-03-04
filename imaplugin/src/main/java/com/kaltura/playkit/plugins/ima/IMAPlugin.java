@@ -906,7 +906,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             messageBus.post(new AdEvent.AdRequestedEvent(!TextUtils.isEmpty(adConfig.getAdTagURL()) ? adConfig.getAdTagURL() : adConfig.getAdTagResponse()));
         }
         sendError(errorType, errorMessage, adException);
-        displayContent();
         preparePlayer(isAutoPlay);
     }
 
@@ -985,7 +984,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             return;
         }
 
-        lastAdEventReceived = adEventsMap.get(adEvent.getType());
+        if (adEventsMap.containsKey(adEvent.getType())) {
+            lastAdEventReceived = adEventsMap.get(adEvent.getType());
+        }
         if (lastAdEventReceived != AdEvent.Type.AD_PROGRESS) {
             log.d("onAdEvent EventName: " + lastAdEventReceived);
         }
@@ -1057,7 +1058,12 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     contentCompleted();
                     return;
                 }
-                displayContent();
+
+                if (getPlayerEngine().getDuration() != Consts.TIME_UNSET) {
+                    log.d("XXX CONTENT RESUME DISPLAY CONTENT");
+                    displayContent();
+                }
+
                 messageBus.post(new AdEvent(AdEvent.Type.CONTENT_RESUME_REQUESTED));
                 isAdDisplayed = false;
                 videoPlayerWithAdPlayback.resumeContentAfterAdPlayback();
@@ -1075,7 +1081,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                         }
                     }
                 } else if (getPlayerEngine() != null) {
-                    displayContent();
                     long duration = getPlayerEngine().getDuration();
                     long position = getPlayerEngine().getCurrentPosition();
                     log.d("Content prepared.. lastPlaybackPlayerState = " + lastPlaybackPlayerState + ", time = " + position + "/" + duration);
