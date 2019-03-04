@@ -420,12 +420,12 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
             @Override
             public void onAdBreakStarted() {
-                log.d(" onAdBreakStarted");
+                log.d("VideoStreamPlayer onAdBreakStarted");
             }
 
             @Override
             public void onAdBreakEnded() {
-                log.d("onAdBreakEnded");
+                log.d("VideoStreamPlayer onAdBreakEnded");
 
                 if (mSnapBackTime > 0) {
                     long snapBackTimeMili = (long) mSnapBackTime * Consts.MILLISECONDS_MULTIPLIER;
@@ -438,6 +438,21 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                     }
                 }
                 mSnapBackTime = 0;
+            }
+
+            @Override
+            public void onAdPeriodStarted() {
+                log.d("VideoStreamPlayer onAdPeriodStarted");
+            }
+
+            @Override
+            public void onAdPeriodEnded() {
+                log.d("VideoStreamPlayer onAdPeriodEnded");
+            }
+
+            @Override
+            public void seek(long seekPosition) {
+                log.d("VideoStreamPlayer onSeekTo " + seekPosition);
             }
 
             @Override
@@ -550,8 +565,10 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                             }
                         }
                     }
-                    if (allAdsPlayed || lastAdPlayed && getPlayerEngine() != null && getPlayerEngine().getCurrentPosition() >= getPlayerEngine().getDuration()) {
-                        messageBus.post(new AdEvent(AdEvent.Type.ALL_ADS_COMPLETED));
+                    if (!adConfig.isLiveDAI()) {
+                        if (allAdsPlayed || lastAdPlayed && getPlayerEngine() != null && getPlayerEngine().getCurrentPosition() >= getPlayerEngine().getDuration()) {
+                            messageBus.post(new AdEvent(AdEvent.Type.ALL_ADS_COMPLETED));
+                        }
                     }
                 }
 
