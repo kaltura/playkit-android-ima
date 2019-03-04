@@ -1060,7 +1060,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 }
 
                 if (getPlayerEngine().getDuration() != Consts.TIME_UNSET) {
-                    log.d("XXX CONTENT RESUME DISPLAY CONTENT");
+                    log.d("CONTENT_RESUME_REQUESTED DISPLAY CONTENT");
                     displayContent();
                 }
 
