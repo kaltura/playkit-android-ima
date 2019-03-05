@@ -903,12 +903,14 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
     @Override
     public AdCuePoints getCuePoints() {
-        if (playkitAdCuePoints != null && playkitAdCuePoints.getAdCuePoints() != null && !playkitAdCuePoints.getAdCuePoints().isEmpty()) {
+        if (playkitAdCuePoints != null && playkitAdCuePoints.getAdCuePoints() != null && (!playkitAdCuePoints.getAdCuePoints().isEmpty() || isAdError ||adConfig.isLiveDAI())) {
             return playkitAdCuePoints;
         }
-        log.d("create new getCuePoints");
-        playkitAdCuePoints =  new AdCuePoints(buildCuePointsList());
+
+        log.d("create new AdCuePoints");
+        playkitAdCuePoints = new AdCuePoints(buildCuePointsList());
         playkitAdCuePoints.setAdPluginName(IMADAIPlugin.factory.getName());
+
         return playkitAdCuePoints;
     }
 
