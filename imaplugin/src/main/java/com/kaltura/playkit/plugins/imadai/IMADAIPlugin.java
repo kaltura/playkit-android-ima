@@ -904,7 +904,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     @Override
     public AdCuePoints getCuePoints() {
         //in change media it might take some time to populate cuepoints so if playkitAdCuePoints.getAdCuePoints().isEmpty() we may try again to create the cuepoints
-        if (playkitAdCuePoints != null && playkitAdCuePoints.getAdCuePoints() != null && (!playkitAdCuePoints.getAdCuePoints().isEmpty() || isAdError ||adConfig.isLiveDAI())) {
+        if (playkitAdCuePoints != null && playkitAdCuePoints.getAdCuePoints() != null && (!playkitAdCuePoints.getAdCuePoints().isEmpty() || isAdError || adConfig.isLiveDAI())) {
             return playkitAdCuePoints;
         }
 
