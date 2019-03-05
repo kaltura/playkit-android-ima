@@ -366,7 +366,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private StreamDisplayContainer createStreamDisplayContainer() {
         log.d("createStreamDisplayContainer");
         if (displayContainer != null) {
-            log.d("displayContainer already return current displayContainer");
+            log.d("displayContainer != null return current displayContainer");
             displayContainer.unregisterAllVideoControlsOverlays();
             registerControlsOverlays();
             return displayContainer;
