@@ -911,7 +911,6 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         log.d("create new AdCuePoints");
         playkitAdCuePoints = new AdCuePoints(buildCuePointsList());
         playkitAdCuePoints.setAdPluginName(IMADAIPlugin.factory.getName());
-
         return playkitAdCuePoints;
     }
 
