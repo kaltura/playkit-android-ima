@@ -286,9 +286,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
         adsLoadedListener = adsManagerLoadedEvent -> {
             log.d("onAdsManager loaded");
-
             if (streamManager != null) {
-                resetIMA();
+                destroyStreamManager();
             }
             streamManager = adsManagerLoadedEvent.getStreamManager();
             streamManager.addAdErrorListener(IMADAIPlugin.this);
@@ -300,15 +299,27 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     }
 
     private void resetIMA(){
+        log.d("resetIMA");
+        destroyDisplayContainer();
+        destroyStreamManager();
+    }
+
+    private void destroyDisplayContainer() {
         if (displayContainer != null) {
+            log.d("destroyDisplayContainer");
             displayContainer.unregisterAllVideoControlsOverlays();
             displayContainer.destroy();
-            if (streamManager != null) {
-                streamManager.removeAdErrorListener(IMADAIPlugin.this);
-                streamManager.removeAdEventListener(IMADAIPlugin.this);
-                streamManager.destroy();
-                streamManager = null;
-            }
+            displayContainer = null;
+        }
+    }
+
+    private void destroyStreamManager() {
+        if (streamManager != null) {
+            log.d("destroyStreamManager");
+            streamManager.removeAdErrorListener(IMADAIPlugin.this);
+            streamManager.removeAdEventListener(IMADAIPlugin.this);
+            streamManager.destroy();
+            streamManager = null;
         }
     }
 
@@ -353,19 +364,30 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     }
 
     private StreamDisplayContainer createStreamDisplayContainer() {
+        log.d("createStreamDisplayContainer");
+        if (displayContainer != null) {
+            log.d("displayContainer != null return current displayContainer");
+            displayContainer.unregisterAllVideoControlsOverlays();
+            registerControlsOverlays();
+            return displayContainer;
+        }
         displayContainer = sdkFactory.createStreamDisplayContainer();
         if (videoStreamPlayer == null) {
             videoStreamPlayer = createVideoStreamPlayer();
             displayContainer.setVideoStreamPlayer(videoStreamPlayer);
             displayContainer.setAdContainer(mAdUiContainer);
-            if (adConfig.getControlsOverlayList() != null) {
-                for (View controlView : adConfig.getControlsOverlayList()) {
-                    displayContainer.registerVideoControlsOverlay(controlView);
-                }
-            }
+            registerControlsOverlays();
         }
         return displayContainer;
-}
+    }
+
+    private void registerControlsOverlays() {
+        if (adConfig.getControlsOverlayList() != null) {
+            for (View controlView : adConfig.getControlsOverlayList()) {
+                displayContainer.registerVideoControlsOverlay(controlView);
+            }
+        }
+    }
 
     private VideoStreamPlayer createVideoStreamPlayer() {
         return new VideoStreamPlayer() {
@@ -846,9 +868,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             return;
         }
         log.d("IMADAI Start destroyAdsManager");
-        streamManager.destroy();
+        destroyStreamManager();
         contentCompleted();
-        streamManager = null;
         isAdDisplayed = false;
     }
 
@@ -882,11 +903,13 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
     @Override
     public AdCuePoints getCuePoints() {
-        if (playkitAdCuePoints != null && playkitAdCuePoints.getAdCuePoints() != null && !playkitAdCuePoints.getAdCuePoints().isEmpty()) {
+        //in change media it might take some time to populate cuepoints so if playkitAdCuePoints.getAdCuePoints().isEmpty() we may try again to create the cuepoints
+        if (playkitAdCuePoints != null && playkitAdCuePoints.getAdCuePoints() != null && (!playkitAdCuePoints.getAdCuePoints().isEmpty() || isAdError || adConfig.isLiveDAI())) {
             return playkitAdCuePoints;
         }
-        log.d("create new getCuePoints");
-        playkitAdCuePoints =  new AdCuePoints(buildCuePointsList());
+
+        log.d("create new AdCuePoints");
+        playkitAdCuePoints = new AdCuePoints(buildCuePointsList());
         playkitAdCuePoints.setAdPluginName(IMADAIPlugin.factory.getName());
         return playkitAdCuePoints;
     }
