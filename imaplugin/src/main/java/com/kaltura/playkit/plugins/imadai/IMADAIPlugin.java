@@ -42,7 +42,6 @@ import com.kaltura.playkit.ads.PKAdPluginType;
 import com.kaltura.playkit.player.PKMediaSourceConfig;
 import com.kaltura.playkit.player.PlayerEngine;
 import com.kaltura.playkit.player.vr.VRPKMediaEntry;
-import com.kaltura.playkit.player.vr.VRSettings;
 import com.kaltura.playkit.plugins.ads.AdCuePoints;
 import com.kaltura.playkit.plugins.ads.AdEvent;
 import com.kaltura.playkit.ads.PKAdProviderListener;
@@ -264,7 +263,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             sdkFactory = ImaSdkFactory.getInstance();
         }
         if (adsLoader == null) {
-            adsLoader = sdkFactory.createAdsLoader(context, imaSdkSettings);
+            adsLoader = sdkFactory.createAdsLoader(context, imaSdkSettings, createStreamDisplayContainer());
             // Add listeners for when ads are loaded and for errors.
             adsLoader.addAdErrorListener(IMADAIPlugin.this);
             adsLoader.addAdsLoadedListener(getAdsLoadedListener());
@@ -303,6 +302,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private void resetIMA(){
         if (displayContainer != null) {
             displayContainer.unregisterAllVideoControlsOverlays();
+            displayContainer.destroy();
             if (streamManager != null) {
                 streamManager.removeAdErrorListener(IMADAIPlugin.this);
                 streamManager.removeAdEventListener(IMADAIPlugin.this);
@@ -337,9 +337,25 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         return renderingSettings;
     }
     private StreamRequest buildStreamRequest() {
+        StreamRequest request;
+        // Live stream request.
+        if (adConfig.getAssetKey() != null) {
+            request = sdkFactory.createLiveStreamRequest(adConfig.getAssetKey(),
+                    adConfig.getApiKey());
+        } else { // VOD request.
+            request = sdkFactory.createVodStreamRequest(adConfig.getContentSourceId(),
+                    adConfig.getVideoId(), adConfig.getApiKey());
+        }
+        // Set the stream format (HLS or DASH).
+        request.setFormat(adConfig.getStreamFormat());
+
+        return request;
+    }
+
+    private StreamDisplayContainer createStreamDisplayContainer() {
+        displayContainer = sdkFactory.createStreamDisplayContainer();
         if (videoStreamPlayer == null) {
             videoStreamPlayer = createVideoStreamPlayer();
-            displayContainer = sdkFactory.createStreamDisplayContainer();
             displayContainer.setVideoStreamPlayer(videoStreamPlayer);
             displayContainer.setAdContainer(mAdUiContainer);
             if (adConfig.getControlsOverlayList() != null) {
@@ -348,21 +364,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 }
             }
         }
-
-        StreamRequest request;
-        // Live stream request.
-        if (adConfig.getAssetKey() != null) {
-            request = sdkFactory.createLiveStreamRequest(adConfig.getAssetKey(),
-                    adConfig.getApiKey(), displayContainer);
-        } else { // VOD request.
-            request = sdkFactory.createVodStreamRequest(adConfig.getContentSourceId(),
-                    adConfig.getVideoId(), adConfig.getApiKey(), displayContainer);
-        }
-        // Set the stream format (HLS or DASH).
-        request.setFormat(adConfig.getStreamFormat());
-
-        return request;
-    }
+        return displayContainer;
+}
 
     private VideoStreamPlayer createVideoStreamPlayer() {
         return new VideoStreamPlayer() {
@@ -965,7 +968,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     public long getCurrentPosition() {
         // works for case that ad is diaplayed!
         if (isAdDisplayed) {
-            long adPosition = 0;
+            long adPosition;
             if (streamManager != null && streamManager.getAdProgressInfo() != null) {
                 adPosition = Math.round(streamManager.getAdProgressInfo().getCurrentTime());
                 if (!streamManager.getCuePoints().isEmpty() && getPlayerEngine() != null && adPosition > getPlayerEngine().getCurrentPosition()) {
@@ -1215,7 +1218,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
     private PKMediaSourceConfig toPKMediaSourceConfig(String daiUrl) {
         PKMediaSourceConfig sourceConfig = null;
-        if (mediaConfig != null) {
+        if (mediaConfig != null && mediaConfig.getMediaEntry() != null) {
             PKMediaSource daiMediaSource = createDAIMediaSource(daiUrl);
             if (!TextUtils.isEmpty(daiMediaSource.getUrl())) {
                 if (mediaConfig.getMediaEntry() instanceof VRPKMediaEntry) {
