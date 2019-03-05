@@ -300,18 +300,22 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
     private void resetIMA(){
         log.d("resetIMA");
+        destroyDisplayContainer();
+        destroyStreamManager();
+    }
+
+    private void destroyDisplayContainer() {
         if (displayContainer != null) {
-            log.d("reset displayContainer");
+            log.d("destroyDisplayContainer");
             displayContainer.unregisterAllVideoControlsOverlays();
             displayContainer.destroy();
             displayContainer = null;
-            destroyStreamManager();
         }
     }
 
     private void destroyStreamManager() {
         if (streamManager != null) {
-            log.d("reset streamManager");
+            log.d("destroyStreamManager");
             streamManager.removeAdErrorListener(IMADAIPlugin.this);
             streamManager.removeAdEventListener(IMADAIPlugin.this);
             streamManager.destroy();
