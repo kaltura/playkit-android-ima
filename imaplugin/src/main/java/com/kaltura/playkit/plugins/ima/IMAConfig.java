@@ -40,7 +40,7 @@ public class IMAConfig {
 
     private static final String AD_TAG_LANGUAGE_KEY           = "language";
     private static final String AD_TAG_TYPE_KEY               = "adTagType";
-    private static final String AD_TAG_URL_KEY                = "adTagURL";
+    private static final String AD_TAG_URL_KEY                = "adTagUrl";
     private static final String ENABLE_BG_PLAYBACK_KEY        = "enableBackgroundPlayback";
     private static final String AD_VIDEO_BITRATE_KEY          = "videoBitrate";
     private static final String AD_VIDEO_MIME_TYPES_KEY       = "videoMimeTypes";
@@ -55,7 +55,7 @@ public class IMAConfig {
     private static final String AD_ALWAYES_START_WITH_PREROLL = "alwaysStartWithPreroll";
 
     private String language;
-    private String adTagURL;
+    private String adTagUrl;
     private String adTagResponse;
     private AdTagType adTagType;
     private boolean enableBackgroundPlayback;
@@ -87,7 +87,7 @@ public class IMAConfig {
         this.alwaysStartWithPreroll   = false;
         this.videoMimeTypes           = new ArrayList<>();
         this.videoMimeTypes.add(PKMediaFormat.mp4.mimeType);
-        this.adTagURL = null;         //=> must be set via setter
+        this.adTagUrl = null;         //=> must be set via setter
         this.adTagResponse = null;
         this.playerType                = AD_PLAYER_TYPE;
         this.playerVersion             = AD_PLAYER_VERSION;
@@ -153,13 +153,13 @@ public class IMAConfig {
         return this;
     }
 
-    public String getAdTagURL() {
-        return adTagURL;
+    public String getAdTagUrl() {
+        return adTagUrl;
     }
 
     // set the adTag URL to be used
-    public IMAConfig setAdTagURL(String adTagURL) {
-        this.adTagURL = adTagURL;
+    public IMAConfig setAdTagUrl(String adTagUrl) {
+        this.adTagUrl = adTagUrl;
         return this;
     }
 
@@ -295,7 +295,7 @@ public class IMAConfig {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty(AD_TAG_LANGUAGE_KEY , language);
         jsonObject.addProperty(AD_TAG_TYPE_KEY , adTagType.name());
-        jsonObject.addProperty(AD_TAG_URL_KEY , adTagURL);
+        jsonObject.addProperty(AD_TAG_URL_KEY , adTagUrl);
         jsonObject.addProperty(ENABLE_BG_PLAYBACK_KEY , enableBackgroundPlayback);
         jsonObject.addProperty(AD_VIDEO_BITRATE_KEY , videoBitrate);
         jsonObject.addProperty(AD_ATTRIBUTION_UIELEMENT_KEY , adAttribution);
