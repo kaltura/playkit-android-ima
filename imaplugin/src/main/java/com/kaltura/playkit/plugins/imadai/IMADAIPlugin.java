@@ -1181,7 +1181,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             if (mediaConfig.getMediaEntry() != null && mediaConfig.getMediaEntry().getMediaType() == PKMediaEntry.MediaEntryType.DvrLive) {
                 return PKMediaEntry.MediaEntryType.DvrLive;
             } else {
-                return PKMediaEntry.MediaEntryType.Live;
+                return PKMediaEntry.MediaEntryType.DvrLive; // need to make it LiveDvr so resume will continue from lasr pos.
             }
         } else {
             return PKMediaEntry.MediaEntryType.Vod;
