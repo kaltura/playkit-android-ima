@@ -272,6 +272,13 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     private AdDisplayContainer createAdDisplayContainer() {
+        if (adDisplayContainer != null) {
+            log.d("adDisplayContainer != null return current adDisplayContainer");
+            adDisplayContainer.unregisterAllVideoControlsOverlays();
+            registerControlsOverlays();
+            return adDisplayContainer;
+        }
+
         adDisplayContainer = sdkFactory.createAdDisplayContainer();
 
         // Set up spots for companions.
@@ -284,14 +291,16 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             companionAdSlots.add(companionAdSlot);
             adDisplayContainer.setCompanionSlots(companionAdSlots);
         }
+        registerControlsOverlays();
+        return adDisplayContainer;
+    }
 
+    private void registerControlsOverlays() {
         if (adConfig.getControlsOverlayList() != null) {
             for (View controlView : adConfig.getControlsOverlayList()) {
                 adDisplayContainer.registerVideoControlsOverlay(controlView);
             }
         }
-
-        return adDisplayContainer;
     }
 
     @Override
@@ -488,6 +497,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         log.d("IMA Start onDestroy");
 
         destroyIMA();
+        if (adDisplayContainer != null) {
+            adDisplayContainer.destroy();
+            adDisplayContainer = null;
+        }
         if (videoPlayerWithAdPlayback != null) {
             videoPlayerWithAdPlayback.removeAdPlaybackEventListener();
             videoPlayerWithAdPlayback.releasePlayer();
@@ -507,6 +520,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         log.d("Start resetIMA");
         isAdError = false;
         isAdDisplayed = false;
+        isAdRequested = false;
         lastPlaybackPlayerState = null;
         lastAdEventReceived = null;
 
@@ -516,7 +530,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (adDisplayContainer != null) {
             adDisplayContainer.setPlayer(null);
             adDisplayContainer.unregisterAllVideoControlsOverlays();
-            adDisplayContainer.destroy();
         }
         if (adsManager != null) {
             adsManager.destroy();
@@ -548,8 +561,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         resetIMA();
 
         log.d("Do requestAdsFromIMA");
-        adDisplayContainer.setPlayer(videoPlayerWithAdPlayback.getVideoAdPlayer());
-        adDisplayContainer.setAdContainer(videoPlayerWithAdPlayback.getAdUiContainer());
+        if (adDisplayContainer != null) {
+            adDisplayContainer.setPlayer(videoPlayerWithAdPlayback.getVideoAdPlayer());
+            adDisplayContainer.setAdContainer(videoPlayerWithAdPlayback.getAdUiContainer());
+        }
 
         // Create the ads request.
         final AdsRequest request = sdkFactory.createAdsRequest();
