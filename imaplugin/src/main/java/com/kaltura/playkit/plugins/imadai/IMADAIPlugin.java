@@ -109,7 +109,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     public static final Factory factory = new Factory() {
         @Override
         public String getName() {
-            return "IMADAI";
+            return "imadai";
         }
 
         @Override

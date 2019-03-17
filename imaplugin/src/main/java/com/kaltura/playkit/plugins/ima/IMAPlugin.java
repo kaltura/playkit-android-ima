@@ -136,7 +136,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     public static final Factory factory = new Factory() {
         @Override
         public String getName() {
-            return "IMA";
+            return "ima";
         }
 
         @Override
