@@ -604,8 +604,6 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 break;
             case CLICKED: //Dispatched when the click element is clicked or tapped while an ad is being played.
                 log.d("AD CLICKED");
-                //messageBus.post(new AdEvent(AdEvent.Type.TAPPED));
-                //messageBus.post(new AdEvent(AdEvent.Type.CLICKED));
                 sendAdClickedEvent(adEvent);
                 break;
             case STARTED: //Fired when an ad starts.
