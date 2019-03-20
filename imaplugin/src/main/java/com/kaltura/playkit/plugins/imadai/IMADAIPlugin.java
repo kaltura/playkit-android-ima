@@ -538,8 +538,10 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             shouldPrepareOnResume = false;
             return;
         }
-        if ((adConfig != null && adConfig.isLiveDAI()) || (getPlayerEngine() != null && isAdShouldAutoPlayOnResume() && isAdDisplayed)) {
-            getPlayerEngine().play();
+        if (isAdShouldAutoPlayOnResume()) {
+            if ((adConfig != null && adConfig.isLiveDAI()) || (getPlayerEngine() != null && isAdDisplayed)) {
+                getPlayerEngine().play();
+            }
         }
     }
 
