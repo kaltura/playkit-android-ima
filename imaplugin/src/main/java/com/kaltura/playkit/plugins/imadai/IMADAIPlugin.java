@@ -803,8 +803,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             int cuePointIndex = 1;
             for (CuePoint cuePoint : pluginCuePoints) {
                 long cuePointVal = (long) streamManager.getContentTimeForStreamTime(cuePoint.getStartTime());
-
-                if (getPlayerEngine() != null && cuePointIndex == pluginCuePoints.size() && cuePointVal * Consts.MILLISECONDS_MULTIPLIER == getPlayerEngine().getDuration()) {
+                if (getPlayerEngine() != null && cuePointIndex == pluginCuePoints.size() && Math.floor(cuePoint.getEndTime()) == getPlayerEngine().getDuration() / Consts.MILLISECONDS_MULTIPLIER) {
                     cuePointBuilder.append(-1).append("|");
                     cuePointsList.add((-1L));
                 } else {
