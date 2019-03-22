@@ -107,6 +107,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private AdsLoader adsLoader;
     private AdsLoader.AdsLoadedListener adsLoadedListener;
 
+    // For lower end devices, don't prepare the content player when the Ad starts instead play it when content_resume_requested is called.
+    private boolean releaseContentPlayerIsRequiredForAds = true;
+
     private ImaSdkSettings imaSdkSettings;
     private AdsRenderingSettings renderingSettings;
     private AdCuePoints adTagCuePoints;
@@ -1056,6 +1059,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     displayAd();
                 }
 
+                if (releaseContentPlayerIsRequiredForAds && player != null && player.getCurrentPosition() > 0) {
+                    player.onApplicationPaused();
+                }
+
                 messageBus.post(new AdEvent(AdEvent.Type.CONTENT_PAUSE_REQUESTED));
                 break;
             case CONTENT_RESUME_REQUESTED:
@@ -1113,6 +1120,16 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     }
                 }
                 adPlaybackCancelled = false;
+
+                if (releaseContentPlayerIsRequiredForAds) {
+                    player.onApplicationResumed();
+                    player.play();
+                }
+
+                if (releaseContentPlayerIsRequiredForAds && videoPlayerWithAdPlayback != null) {
+                    videoPlayerWithAdPlayback.stop();
+                }
+
                 break;
             case ALL_ADS_COMPLETED:
                 log.d("AD_ALL_ADS_COMPLETED");
@@ -1143,7 +1160,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     return;
                 }
 
-                preparePlayer(false);
+                if (!releaseContentPlayerIsRequiredForAds) {
+                    preparePlayer(false);
+                }
 
                 if (adTagCuePoints == null) {
                     Handler handler = new Handler();
