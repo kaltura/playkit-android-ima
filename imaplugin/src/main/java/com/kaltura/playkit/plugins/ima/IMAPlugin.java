@@ -179,6 +179,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         player.getView().addView(videoPlayerWithAdPlayback.getExoPlayerView());
         this.context = context;
         this.messageBus = messageBus;
+        this.player.setReleasePlayersForLowerEndDevices(adConfig.isReleasePlayersForLowerEndDevices());
         addListeners(player);
     }
 
@@ -761,7 +762,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public void removeAdProviderListener() {
-        pkAdProviderListener = null;
+        log.d("removeAdProviderListener");
+        if (adConfig != null && !adConfig.isReleasePlayersForLowerEndDevices()) {
+            log.d("adConfig.isReleasePlayersForLowerEndDevices() = " + adConfig.isReleasePlayersForLowerEndDevices());
+            pkAdProviderListener = null;
+        }
     }
 
     @Override
@@ -965,6 +970,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     public void onEvent(PlayerEvent.DurationChanged event) {
                         log.d("IMA DURATION_CHANGE received calling play");
                         if (player != null && player.getView() != null && !IMAPlugin.this.isAdDisplayed()) {
+
+                            if (adConfig.isReleasePlayersForLowerEndDevices() && player.getDuration() > 0) {
+                                player.onApplicationResumed();
+                            }
+
                             IMAPlugin.this.displayContent();
                             if (IMAPlugin.this.getPlayerEngine() != null) {
                                 IMAPlugin.this.getPlayerEngine().play();
@@ -1056,7 +1066,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     displayAd();
                 }
 
-                if (adConfig.isReleaseContentPlayerIsRequiredForAds() && player != null && player.getCurrentPosition() > 0) {
+                if (adConfig.isReleasePlayersForLowerEndDevices() && player != null && player.getDuration() > 0) {
                     player.onApplicationPaused();
                 }
 
@@ -1118,12 +1128,13 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 }
                 adPlaybackCancelled = false;
 
-                if (adConfig.isReleaseContentPlayerIsRequiredForAds()) {
+                if (adConfig.isReleasePlayersForLowerEndDevices()) {
+                    displayContent();
                     player.onApplicationResumed();
                     player.play();
                 }
 
-                if (adConfig.isReleaseContentPlayerIsRequiredForAds() && videoPlayerWithAdPlayback != null) {
+                if (adConfig.isReleasePlayersForLowerEndDevices() && videoPlayerWithAdPlayback != null) {
                     videoPlayerWithAdPlayback.stop();
                 }
 
@@ -1157,7 +1168,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     return;
                 }
 
-                if (!adConfig.isReleaseContentPlayerIsRequiredForAds()) {
+                if (!adConfig.isReleasePlayersForLowerEndDevices()) {
                     preparePlayer(false);
                 }
 
