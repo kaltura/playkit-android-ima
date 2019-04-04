@@ -31,27 +31,28 @@ import java.util.List;
 
 public class IMAConfig {
 
-    public static final int DEFAULT_AD_LOAD_TIMEOUT = 8;
-    public static final int DEFAULT_CUE_POINTS_CHANGED_DELAY = 2000;
+    public  static final int DEFAULT_AD_LOAD_TIMEOUT = 8;
     public static final int DEFAULT_AD_LOAD_COUNT_DOWN_TICK = 250;
-    public static final String AD_PLAYER_TYPE = "kaltura-vp-android";
-    public static final String AD_PLAYER_VERSION = PlayKitManager.VERSION_STRING;
+    public static final int DEFAULT_CUE_POINTS_CHANGED_DELAY = 2000;
 
-    public static final String AD_TAG_LANGUAGE_KEY           = "language";
-    public static final String AD_TAG_TYPE_KEY               = "adTagType";
-    public static final String AD_TAG_URL_KEY                = "adTagURL";
-    public static final String ENABLE_BG_PLAYBACK_KEY        = "enableBackgroundPlayback";
-    public static final String AD_VIDEO_BITRATE_KEY          = "videoBitrate";
-    public static final String AD_VIDEO_MIME_TYPES_KEY       = "videoMimeTypes";
+    private static final String AD_PLAYER_TYPE = "kaltura-vp-android";
+    private static final String AD_PLAYER_VERSION = PlayKitManager.VERSION_STRING;
+
+    private static final String AD_TAG_LANGUAGE_KEY           = "language";
+    private static final String AD_TAG_TYPE_KEY               = "adTagType";
+    private static final String AD_TAG_URL_KEY                = "adTagURL";
+    private static final String ENABLE_BG_PLAYBACK_KEY        = "enableBackgroundPlayback";
+    private static final String AD_VIDEO_BITRATE_KEY          = "videoBitrate";
+    private static final String AD_VIDEO_MIME_TYPES_KEY       = "videoMimeTypes";
     //public static final String AD_TAG_TIMES_KEY            = "tagsTimes";
-    public static final String AD_ATTRIBUTION_UIELEMENT_KEY  = "adAttribution";
-    public static final String AD_COUNTDOWN_UIELEMENT_KEY    = "adCountDown";
-    public static final String AD_LOAD_TIMEOUT_KEY           = "adLoadTimeOut";
-    public static final String AD_MAX_REDIRECTS_KEY          = "adMaxRedirects";
-    public static final String AD_ENABLE_DEBUG_MODE_KEY      = "enableDebugMode";
-    public static final String AD_PLAYER_TYPE_KEY            = "playerType";
-    public static final String AD_PLAYER_VERSION_KEY         = "playerVersion";
-    public static final String AD_ALWAYES_START_WITH_PREROLL = "alwaysStartWithPreroll";
+    private static final String AD_ATTRIBUTION_UIELEMENT_KEY  = "adAttribution";
+    private static final String AD_COUNTDOWN_UIELEMENT_KEY    = "adCountDown";
+    private static final String AD_LOAD_TIMEOUT_KEY           = "adLoadTimeOut";
+    private static final String AD_MAX_REDIRECTS_KEY          = "adMaxRedirects";
+    private static final String AD_ENABLE_DEBUG_MODE_KEY      = "enableDebugMode";
+    private static final String AD_PLAYER_TYPE_KEY            = "playerType";
+    private static final String AD_PLAYER_VERSION_KEY         = "playerVersion";
+    private static final String AD_ALWAYES_START_WITH_PREROLL = "alwaysStartWithPreroll";
 
     private String language;
     private String adTagURL;
