@@ -275,7 +275,10 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 return new VideoProgressUpdate(position, duration);
             }
         };
-        adVideoPlayerView.getPlayer().addListener(this);
+
+        if (adVideoPlayerView.getPlayer() != null) {
+            adVideoPlayerView.getPlayer().addListener(this);
+        }
     }
 
     @NonNull
