@@ -2,6 +2,7 @@ package com.kaltura.playkit.plugins.ima;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
@@ -157,11 +158,11 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
             mediaDataSourceFactory = buildDataSourceFactory();
 
-            renderersFactory = new DefaultRenderersFactory(mContext);
+            renderersFactory = getRenderersFactory();
 
-            trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory());
+            trackSelector = getTrackSelector();
 
-            eventLogger = new EventLogger(trackSelector);
+            eventLogger = getEventLogger();
             initAdPlayer();
         }
 
@@ -220,7 +221,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 log.d("stopAd");
                 isPlayerReady = false;
                 mIsAdDisplayed = false;
-                if (mVideoPlayer != null && mVideoPlayer.getPlayer() != null) {
+                if (player != null && mVideoPlayer != null && mVideoPlayer.getPlayer() != null) {
                     mVideoPlayer.getPlayer().stop();
                 }
             }
@@ -276,6 +277,30 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             }
         };
         mVideoPlayer.getPlayer().addListener(this);
+    }
+
+    @NonNull
+    private EventLogger getEventLogger() {
+        if (eventLogger == null) {
+            eventLogger = new EventLogger(getTrackSelector());
+        }
+        return eventLogger;
+    }
+
+    @NonNull
+    private DefaultTrackSelector getTrackSelector() {
+        if (trackSelector == null) {
+            trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory());
+        }
+        return trackSelector;
+    }
+
+    @NonNull
+    private DefaultRenderersFactory getRenderersFactory() {
+        if (renderersFactory == null) {
+            renderersFactory = new DefaultRenderersFactory(mContext);
+        }
+        return renderersFactory;
     }
 
     private boolean isAdPlayerPlaying() {
@@ -532,12 +557,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             Log.setLogStackTraces(false);
         }
 
-        if (trackSelector != null) {
-            player = ExoPlayerFactory.newSimpleInstance(mContext, renderersFactory, trackSelector);
-
-            player.addAnalyticsListener(eventLogger);
-            mVideoPlayer.setPlayer(player);
-        }
+        player = ExoPlayerFactory.newSimpleInstance(mContext, getRenderersFactory(), getTrackSelector());
+        player.addAnalyticsListener(getEventLogger());
+        mVideoPlayer.setPlayer(player);
     }
 
     private MediaSource buildMediaSource(Uri uri) {
