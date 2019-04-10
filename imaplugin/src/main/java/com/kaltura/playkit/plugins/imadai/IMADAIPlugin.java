@@ -53,6 +53,8 @@ import com.kaltura.playkit.plugins.ads.AdInfo;
 import com.kaltura.playkit.plugins.ads.AdsProvider;
 import com.kaltura.playkit.utils.Consts;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -536,8 +538,10 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             shouldPrepareOnResume = false;
             return;
         }
-        if (getPlayerEngine() != null && isAdShouldAutoPlayOnResume() && isAdDisplayed) {
-            getPlayerEngine().play();
+        if (isAdShouldAutoPlayOnResume()) {
+            if ((adConfig != null && adConfig.isLiveDAI()) || (getPlayerEngine() != null && isAdDisplayed)) {
+                getPlayerEngine().play();
+            }
         }
     }
 
@@ -602,8 +606,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 break;
             case CLICKED: //Dispatched when the click element is clicked or tapped while an ad is being played.
                 log.d("AD CLICKED");
-                messageBus.post(new AdEvent(AdEvent.Type.TAPPED));
-                messageBus.post(new AdEvent(AdEvent.Type.CLICKED));
+                sendAdClickedEvent(adEvent);
                 break;
             case STARTED: //Fired when an ad starts.
                 log.d("AD STARTED");
@@ -660,6 +663,24 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             default:
                 break;
         }
+    }
+
+    private void sendAdClickedEvent(com.google.ads.interactivemedia.v3.api.AdEvent adEvent) {
+        String clickThruUrl;
+        Ad ad = adEvent.getAd();
+        try {
+            Method clickThroughMethod = ad.getClass().getMethod("getClickThruUrl");
+            clickThruUrl = (String) clickThroughMethod.invoke(ad);
+            messageBus.post(new AdEvent.AdClickedEvent(clickThruUrl));
+            return;
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        messageBus.post(new AdEvent.AdClickedEvent(null));
     }
 
     private void onAdBreakEnded() {
@@ -784,8 +805,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             int cuePointIndex = 1;
             for (CuePoint cuePoint : pluginCuePoints) {
                 long cuePointVal = (long) streamManager.getContentTimeForStreamTime(cuePoint.getStartTime());
-
-                if (getPlayerEngine() != null && cuePointIndex == pluginCuePoints.size() && cuePointVal * Consts.MILLISECONDS_MULTIPLIER == getPlayerEngine().getDuration()) {
+                if (getPlayerEngine() != null && cuePointIndex == pluginCuePoints.size() && Math.floor(cuePoint.getEndTime()) == getPlayerEngine().getDuration() / Consts.MILLISECONDS_MULTIPLIER) {
                     cuePointBuilder.append(-1).append("|");
                     cuePointsList.add((-1L));
                 } else {
