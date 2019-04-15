@@ -1024,6 +1024,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             log.i("EventData: " + adEvent.getAdData().toString());
         }
 
+        if (adConfig != null) {
+            log.i("isReleasePlayersForLowerEndDevices: " + adConfig.isReleasePlayersForLowerEndDevices());
+        }
+
         switch (adEvent.getType()) {
             case LOADED:
                 adInfo = createAdInfo(adEvent.getAd());
