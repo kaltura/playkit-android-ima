@@ -176,7 +176,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         videoPlayerWithAdPlayback = new ExoPlayerWithAdPlayback(context, adConfig.getAdLoadTimeOut(), adConfig.isDebugMode());
         videoPlayerWithAdPlayback.addAdPlaybackEventListener(this);
-        player.getView().addView(videoPlayerWithAdPlayback.getExoPlayerView());
+        player.getView().addView(videoPlayerWithAdPlayback.getAdPlayerView());
         this.context = context;
         this.messageBus = messageBus;
         this.player.setReleasePlayersForLowerEndDevices(adConfig.isReleasePlayersForLowerEndDevices());
@@ -935,8 +935,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private void displayAd() {
         log.d("displayAd");
-        if (videoPlayerWithAdPlayback != null && videoPlayerWithAdPlayback.getExoPlayerView() != null) {
-            videoPlayerWithAdPlayback.getExoPlayerView().setVisibility(View.VISIBLE);
+        if (videoPlayerWithAdPlayback != null && videoPlayerWithAdPlayback.getAdPlayerView() != null) {
+            videoPlayerWithAdPlayback.getAdPlayerView().setVisibility(View.VISIBLE);
         }
         if (player != null &&  player.getView() != null) {
             log.d("displayAd -> hideVideoSurface");
@@ -946,8 +946,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private void displayContent() {
         log.d("displayContent");
-        if (videoPlayerWithAdPlayback != null && videoPlayerWithAdPlayback.getExoPlayerView() != null) {
-            videoPlayerWithAdPlayback.getExoPlayerView().setVisibility(View.GONE);
+        if (videoPlayerWithAdPlayback != null && videoPlayerWithAdPlayback.getAdPlayerView() != null) {
+            videoPlayerWithAdPlayback.getAdPlayerView().setVisibility(View.GONE);
         }
         if (player != null && player.getView() != null) {
             log.d("displayContent -> showVideoSurface");
