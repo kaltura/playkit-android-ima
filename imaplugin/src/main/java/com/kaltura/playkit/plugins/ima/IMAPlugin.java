@@ -212,7 +212,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             log.d("Received:PlayerEvent:" + event.eventType().name() + " lastAdEventReceived = " + lastAdEventReceived);
             if (player != null && player.getView() != null) {
                 player.getView().hideVideoSurface(); // make sure video surface is set to GONE
-                player.getView().artworkViewVisibility(false);
+                player.getView().setArtworkViewVisibility(false);
             }
         });
 
@@ -937,7 +937,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (player != null &&  player.getView() != null) {
             log.d("displayAd -> hideVideoSurface");
             player.getView().hideVideoSurface();
-            player.getView().artworkViewVisibility(false);
+            player.getView().setArtworkViewVisibility(false);
         }
     }
 
@@ -949,7 +949,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (player != null && player.getView() != null) {
             log.d("displayContent -> showVideoSurface");
             player.getView().showVideoSurface();
-            player.getView().artworkViewVisibility(true);
+            player.getView().setArtworkViewVisibility(true);
         }
     }
 
@@ -1047,7 +1047,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 }
                 if (player != null && player.getView() != null) {
                     player.getView().hideVideoSurface();
-                    player.getView().artworkViewVisibility(false);
+                    player.getView().setArtworkViewVisibility(false);
                 }
                 if (appIsInBackground) {
                     log.d("CONTENT_PAUSE_REQUESTED isAdDisplayed = true");
