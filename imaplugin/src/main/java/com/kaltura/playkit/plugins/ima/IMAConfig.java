@@ -71,9 +71,6 @@ public class IMAConfig {
     private List<String> videoMimeTypes;
     private transient List<View> controlsOverlayList;
 
-    // For lower end devices, don't prepare the content player when the Ad starts instead play it when content_resume_requested is called.
-    private boolean releasePlayersForLowerEndDevices;
-
     //private Map<Double,String> tagsTimes; // <AdTime,URL_to_execute>
 
     //View companionView;
@@ -94,7 +91,6 @@ public class IMAConfig {
         this.adTagResponse                          = null;
         this.playerType                             = AD_PLAYER_TYPE;
         this.playerVersion                          = AD_PLAYER_VERSION;
-        this.releasePlayersForLowerEndDevices   = false; // No need to release content player unless app sets this boolean to True
 
         //if (tagTimes == null) {
         //    tagTimes = new HashMap<>();
@@ -265,15 +261,6 @@ public class IMAConfig {
         if (controlsOverlay != null) {
             this.controlsOverlayList.add(controlsOverlay);
         }
-        return this;
-    }
-
-    public boolean isReleasePlayersForLowerEndDevices() {
-        return releasePlayersForLowerEndDevices;
-    }
-
-    public IMAConfig setReleasePlayersForLowerEndDevices(boolean releasePlayersForLowerEndDevices) {
-        this.releasePlayersForLowerEndDevices = releasePlayersForLowerEndDevices;
         return this;
     }
 

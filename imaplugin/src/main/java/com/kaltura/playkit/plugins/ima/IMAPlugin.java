@@ -179,7 +179,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         player.getView().addView(videoPlayerWithAdPlayback.getAdPlayerView());
         this.context = context;
         this.messageBus = messageBus;
-        this.player.setReleasePlayersForLowerEndDevices(adConfig.isReleasePlayersForLowerEndDevices());
         addListeners(player);
     }
 
@@ -488,6 +487,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         return player.getSettings() instanceof PlayerSettings && ((PlayerSettings) player.getSettings()).isAdAutoPlayOnResume();
     }
 
+    private boolean isReleaseContentPlayerRequired() {
+        return player.getSettings() instanceof PlayerSettings && ((PlayerSettings) player.getSettings()).isSetPrepareAfterAd();
+    }
+
     private void clearAdLoadingInBackground() {
         appInBackgroundDuringAdLoad = false;
         adManagerInitDuringBackground = false;
@@ -763,8 +766,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     @Override
     public void removeAdProviderListener() {
         log.d("removeAdProviderListener");
-        if (adConfig != null && !adConfig.isReleasePlayersForLowerEndDevices()) {
-            log.d("adConfig.isReleasePlayersForLowerEndDevices() = " + adConfig.isReleasePlayersForLowerEndDevices());
+        if (adConfig != null && !isReleaseContentPlayerRequired()) {
+            log.d("adConfig.isReleasePlayersForLowerEndDevices() = " + isReleaseContentPlayerRequired());
             pkAdProviderListener = null;
         }
     }
@@ -971,7 +974,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                         log.d("IMA DURATION_CHANGE received calling play");
                         if (player != null && player.getView() != null && !IMAPlugin.this.isAdDisplayed()) {
 
-                            if (adConfig.isReleasePlayersForLowerEndDevices() && player.getDuration() > 0) {
+                            log.d("In IMA prepare player onEvent isReleaseContentPlayerRequired = " + isReleaseContentPlayerRequired());
+                            if (isReleaseContentPlayerRequired() && player.getDuration() > 0) {
                                 player.onApplicationResumed();
                             }
 
@@ -1024,8 +1028,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             log.i("EventData: " + adEvent.getAdData().toString());
         }
 
-        if (adConfig != null) {
-            log.i("isReleasePlayersForLowerEndDevices: " + adConfig.isReleasePlayersForLowerEndDevices());
+        if (isReleaseContentPlayerRequired()) {
+            log.i("onAdEvent isReleasePlayersForLowerEndDevices: " + isReleaseContentPlayerRequired());
         }
 
         switch (adEvent.getType()) {
@@ -1070,7 +1074,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     displayAd();
                 }
 
-                if (adConfig.isReleasePlayersForLowerEndDevices() && player != null && player.getDuration() > 0) {
+                log.d("CONTENT_PAUSE_REQUESTED isReleaseContentPlayerRequired = " + isReleaseContentPlayerRequired());
+                if (isReleaseContentPlayerRequired() && player != null && player.getDuration() > 0) {
                     player.onApplicationPaused();
                 }
 
@@ -1132,13 +1137,15 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 }
                 adPlaybackCancelled = false;
 
-                if (adConfig.isReleasePlayersForLowerEndDevices()) {
+                log.d("CONTENT_RESUME_REQUESTED isReleaseContentPlayerRequired = " + isReleaseContentPlayerRequired() + " videoPlayerWithAdPlayback = " + videoPlayerWithAdPlayback);
+
+                if (isReleaseContentPlayerRequired()) {
                     displayContent();
                     player.onApplicationResumed();
                     player.play();
                 }
 
-                if (adConfig.isReleasePlayersForLowerEndDevices() && videoPlayerWithAdPlayback != null) {
+                if (isReleaseContentPlayerRequired() && videoPlayerWithAdPlayback != null) {
                     videoPlayerWithAdPlayback.stop();
                 }
 
@@ -1172,7 +1179,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     return;
                 }
 
-                if (!adConfig.isReleasePlayersForLowerEndDevices()) {
+                log.d("STARTED isReleaseContentPlayerRequired = " + isReleaseContentPlayerRequired());
+
+                if (!isReleaseContentPlayerRequired()) {
                     preparePlayer(false);
                 }
 
