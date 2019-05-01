@@ -379,7 +379,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         imaSdkSettings.setLanguage(adConfig.getLanguage());
         imaSdkSettings.setDebugMode(adConfig.isDebugMode());
-        imaSdkSettings.setEnableOmidExperimentally(true); //should be alwayes true
     }
 
     @Override
@@ -1104,7 +1103,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     long position = getPlayerEngine().getCurrentPosition();
                     log.d("Content prepared.. lastPlaybackPlayerState = " + lastPlaybackPlayerState + ", time = " + position + "/" + duration);
                     if (duration < 0) {
-                        preparePlayer(true);
+                        preparePlayer(false);
+                        getPlayerEngine().play();
                     } else if (lastPlaybackPlayerState != PlayerEvent.Type.ENDED && position <= duration) {
                         if (adInfo == null || (adInfo.getAdPositionType() != AdPositionType.POST_ROLL)) {
                             log.d("Content prepared.. Play called.");

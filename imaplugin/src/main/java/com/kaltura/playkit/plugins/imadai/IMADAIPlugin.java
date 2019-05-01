@@ -281,7 +281,6 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         }
         imaSdkSettings.setLanguage(adConfig.getLanguage());
         imaSdkSettings.setDebugMode(adConfig.isDebugMode());
-        imaSdkSettings.setEnableOmidExperimentally(true);
     }
 
     private AdsLoader.AdsLoadedListener getAdsLoadedListener() {
