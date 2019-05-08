@@ -187,7 +187,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             log.d("Received:PlayerEvent:" + event.eventType().name() + " lastAdEventReceived = " + lastAdEventReceived);
             AdCuePoints adCuePoints = new AdCuePoints(getAdCuePointsList());
             adCuePoints.setAdPluginName(IMAPlugin.factory.getName());
-            if (!isContentPrepared) {
+            if (!isContentPrepared && !isReleaseContentPlayerRequired()) {
                 log.d("Event: ENDED ignored content is not prepared");
                 return;
             }
