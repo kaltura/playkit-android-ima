@@ -488,7 +488,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     private boolean isReleaseContentPlayerRequired() {
-        return player.getSettings() instanceof PlayerSettings && ((PlayerSettings) player.getSettings()).isSetPrepareAfterAd();
+        return player.getSettings() instanceof PlayerSettings && ((PlayerSettings) player.getSettings()).isContentPrepareAfterAdsPrepare();
     }
 
     private void clearAdLoadingInBackground() {
