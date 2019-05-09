@@ -767,7 +767,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     public void removeAdProviderListener() {
         log.d("removeAdProviderListener");
         if (adConfig != null && !isReleaseContentPlayerRequired()) {
-            log.d("adConfig.isReleasePlayersForLowerEndDevices() = " + isReleaseContentPlayerRequired());
             pkAdProviderListener = null;
         }
     }
@@ -1026,10 +1025,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         if (adEvent.getAdData() != null) {
             log.i("EventData: " + adEvent.getAdData().toString());
-        }
-
-        if (isReleaseContentPlayerRequired()) {
-            log.i("onAdEvent isReleasePlayersForLowerEndDevices: " + isReleaseContentPlayerRequired());
         }
 
         switch (adEvent.getType()) {
