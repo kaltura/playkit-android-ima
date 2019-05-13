@@ -418,7 +418,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             videoPlayerWithAdPlayback.setIsAppInBackground(false);
         }
         appIsInBackground = false;
-        if (isAdDisplayed && adsManager != null) {
+        if (isAdDisplayed) {
+            if (adsManager != null) {
+                return;
+            }
             displayAd();
             log.d("onApplicationResumed ad state = " + lastAdEventReceived);
 
