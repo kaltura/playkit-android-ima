@@ -419,7 +419,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         appIsInBackground = false;
         if (isAdDisplayed) {
-            if (adsManager != null) {
+            if (adsManager == null) {
                 return;
             }
             displayAd();
