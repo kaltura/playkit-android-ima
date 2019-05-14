@@ -419,6 +419,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         appIsInBackground = false;
         if (isAdDisplayed) {
+            if (adsManager == null) {
+                return;
+            }
             displayAd();
             log.d("onApplicationResumed ad state = " + lastAdEventReceived);
 
@@ -642,6 +645,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     @Override
     public void destroyAdsManager() {
         isAdRequested = false;
+        isAdDisplayed = false;
         if (adsManager == null) {
             return;
         }
