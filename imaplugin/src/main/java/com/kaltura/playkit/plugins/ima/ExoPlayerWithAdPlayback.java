@@ -2,12 +2,14 @@ package com.kaltura.playkit.plugins.ima;
 
 import android.content.Context;
 import android.net.Uri;
-import android.support.annotation.NonNull;
+
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
+
+import androidx.annotation.NonNull;
 
 import com.google.ads.interactivemedia.v3.api.player.ContentProgressProvider;
 import com.google.ads.interactivemedia.v3.api.player.VideoAdPlayer;
