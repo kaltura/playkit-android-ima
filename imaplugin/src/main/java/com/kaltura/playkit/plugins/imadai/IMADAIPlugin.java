@@ -1098,7 +1098,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         if (streamManager != null) {
             if (pluginCuePoints != null) {
                 CuePoint candidateCuePoint = streamManager.getPreviousCuePointForStreamTime(streamManager.getStreamTimeForContentTime(Math.floor(position / Consts.MILLISECONDS_MULTIPLIER)));
-                if (candidateCuePoint != null && !candidateCuePoint.isPlayed()) {
+                if (candidateCuePoint != null && !candidateCuePoint.isPlayed() && (position == 0 || getPlayerEngineWrapper() != null && position >= getPlayerEngineWrapper().getCurrentPosition())) {
                     newPositionToSeek = (long) Math.floor(candidateCuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER);
                     getPlayerEngine().seekTo(newPositionToSeek);
                     mSnapBackTime = streamManager.getStreamTimeForContentTime(Math.floor(position / Consts.MILLISECONDS_MULTIPLIER));
