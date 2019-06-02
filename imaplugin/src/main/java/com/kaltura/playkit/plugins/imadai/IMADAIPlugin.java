@@ -1263,11 +1263,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         if (mediaConfig != null && mediaConfig.getMediaEntry() != null) {
             PKMediaSource daiMediaSource = createDAIMediaSource(daiUrl);
             if (!TextUtils.isEmpty(daiMediaSource.getUrl())) {
-                if (mediaConfig.getMediaEntry() instanceof VRPKMediaEntry) {
-                    sourceConfig = new PKMediaSourceConfig(daiMediaSource, getDAIMediaType(), mediaConfig.getMediaEntry().getExternalSubtitleList(), (PlayerSettings) player.getSettings(), ((VRPKMediaEntry)mediaConfig.getMediaEntry()).getVrSettings());
-                } else {
-                    sourceConfig = new PKMediaSourceConfig(daiMediaSource, getDAIMediaType(), mediaConfig.getMediaEntry().getExternalSubtitleList(), (PlayerSettings) player.getSettings());
-                }
+                sourceConfig = new PKMediaSourceConfig(daiMediaSource, getDAIMediaType(), mediaConfig.getMediaEntry().getExternalSubtitleList(), (PlayerSettings) player.getSettings());
             }
         }
         return sourceConfig;
