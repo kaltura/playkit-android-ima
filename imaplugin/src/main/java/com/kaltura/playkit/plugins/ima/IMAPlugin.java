@@ -775,8 +775,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public void removeAdProviderListener() {
-        log.d("removeAdProviderListener");
         if (adConfig != null && !isReleaseContentPlayerRequired) {
+            log.d("removeAdProviderListener");
             pkAdProviderListener = null;
         }
     }
