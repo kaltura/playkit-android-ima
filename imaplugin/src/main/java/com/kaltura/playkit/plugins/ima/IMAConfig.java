@@ -68,7 +68,7 @@ public class IMAConfig {
     private int maxRedirects;
     private String playerType;
     private String playerVersion;
-    private List<String> videoMimeTypes;
+    private List<String> videoMimeTypes = new ArrayList<>();
     private transient List<View> controlsOverlayList;
 
     //private Map<Double,String> tagsTimes; // <AdTime,URL_to_execute>
@@ -85,12 +85,11 @@ public class IMAConfig {
         this.adLoadTimeOut                          = DEFAULT_AD_LOAD_TIMEOUT;
         this.enableDebugMode                        = false;
         this.alwaysStartWithPreroll                 = false;
-        this.videoMimeTypes                         = new ArrayList<>();
         this.videoMimeTypes.add(PKMediaFormat.mp4.mimeType);
-        this.adTagUrl                              = null;         //=> must be set via setter
-        this.adTagResponse                         = null;
-        this.playerType                            = AD_PLAYER_TYPE;
-        this.playerVersion                         = AD_PLAYER_VERSION;
+        this.adTagUrl                               = null;         //=> must be set via setter
+        this.adTagResponse                          = null;
+        this.playerType                             = AD_PLAYER_TYPE;
+        this.playerVersion                          = AD_PLAYER_VERSION;
 
         //if (tagTimes == null) {
         //    tagTimes = new HashMap<>();
