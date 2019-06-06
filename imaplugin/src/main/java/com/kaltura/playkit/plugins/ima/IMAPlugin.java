@@ -121,6 +121,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private boolean adPlaybackCancelled;
     private boolean appIsInBackground;
     private boolean isContentEndedBeforeMidroll;
+    private boolean isReleaseContentPlayerRequired;
 
     private boolean isContentPrepared;
     private boolean isAutoPlay;
@@ -165,6 +166,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     protected void onLoad(final Player player, Object config, final MessageBus messageBus, Context context) {
         log.d("onLoad");
         this.player = player;
+
         if (player == null) {
             log.e("Error, player instance is null.");
             return;
@@ -189,7 +191,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             log.d("Received:PlayerEvent:" + event.eventType().name() + " lastAdEventReceived = " + lastAdEventReceived);
             AdCuePoints adCuePoints = new AdCuePoints(getAdCuePointsList());
             adCuePoints.setAdPluginName(IMAPlugin.factory.getName());
-            if (!isContentPrepared) {
+            if (!isContentPrepared && !isReleaseContentPlayerRequired) {
                 log.d("Event: ENDED ignored content is not prepared");
                 return;
             }
@@ -243,6 +245,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     protected void onUpdateMedia(PKMediaConfig mediaConfig) {
         log.d("Start onUpdateMedia");
         this.mediaConfig = mediaConfig;
+
         if (mediaConfig != null) {
             playbackStartPosition = mediaConfig.getStartPosition();
             log.d("mediaConfig start pos = " + playbackStartPosition);
@@ -489,6 +492,14 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private boolean isAdShouldAutoPlayOnResume() {
         return player.getSettings() instanceof PlayerSettings && ((PlayerSettings) player.getSettings()).isAdAutoPlayOnResume();
+    }
+
+    /**
+     * Function to check if content player is not required during the AD playback
+     * once the AD finishes then only content player is prepared
+     */
+    private boolean isReleaseContentPlayerRequired() {
+        return player.getSettings() instanceof PlayerSettings && ((PlayerSettings) player.getSettings()).isUseSinglePlayerInstance();
     }
 
     private void clearAdLoadingInBackground() {
@@ -766,7 +777,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public void removeAdProviderListener() {
-        pkAdProviderListener = null;
+        if (adConfig != null && !isReleaseContentPlayerRequired) {
+            log.d("removeAdProviderListener");
+            pkAdProviderListener = null;
+        }
     }
 
     @Override
@@ -970,6 +984,12 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     public void onEvent(PlayerEvent.DurationChanged event) {
                         log.d("IMA DURATION_CHANGE received calling play");
                         if (player != null && player.getView() != null && !IMAPlugin.this.isAdDisplayed()) {
+
+                            log.d("In IMA prepare player onEvent isReleaseContentPlayerRequired = " + isReleaseContentPlayerRequired);
+                            if (isReleaseContentPlayerRequired && player.getDuration() > 0) {
+                                player.onApplicationResumed();
+                            }
+
                             IMAPlugin.this.displayContent();
                             if (IMAPlugin.this.getPlayerEngine() != null) {
                                 IMAPlugin.this.getPlayerEngine().play();
@@ -1002,6 +1022,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             log.w("WARNING, adsManager == null");
             return;
         }
+
+        isReleaseContentPlayerRequired = isReleaseContentPlayerRequired();
 
         if(adEventsMap == null){
             log.e("ERROR, adEventsMap == null");
@@ -1061,6 +1083,12 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     displayAd();
                 }
 
+                log.d("CONTENT_PAUSE_REQUESTED isReleaseContentPlayerRequired = " + isReleaseContentPlayerRequired);
+
+                if (isReleaseContentPlayerRequired && player != null && player.getDuration() > 0) {
+                    player.onApplicationPaused();
+                }
+
                 messageBus.post(new AdEvent(AdEvent.Type.CONTENT_PAUSE_REQUESTED));
                 break;
             case CONTENT_RESUME_REQUESTED:
@@ -1118,6 +1146,19 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     }
                 }
                 adPlaybackCancelled = false;
+
+                log.d("CONTENT_RESUME_REQUESTED isReleaseContentPlayerRequired = " + isReleaseContentPlayerRequired);
+
+                if (isReleaseContentPlayerRequired) {
+                    displayContent();
+                    player.onApplicationResumed();
+                    player.play();
+                }
+
+                if (isReleaseContentPlayerRequired && videoPlayerWithAdPlayback != null) {
+                    videoPlayerWithAdPlayback.stop();
+                }
+
                 break;
             case ALL_ADS_COMPLETED:
                 log.d("AD_ALL_ADS_COMPLETED");
@@ -1135,7 +1176,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 adInfo = createAdInfo(adEvent.getAd());
                 if (adInfo.getAdPositionType() != AdPositionType.PRE_ROLL && !playerPlayingBeforeAdArrived) {
                     pause();
-                    playerPlayingBeforeAdArrived = false;
+                    playerPlayingBeforeAdArrived = true;
                 } else {
                     isAdIsPaused = false;
                 }
@@ -1148,7 +1189,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     return;
                 }
 
-                preparePlayer(false);
+                log.d("STARTED isReleaseContentPlayerRequired = " + isReleaseContentPlayerRequired);
+
+                if (!isReleaseContentPlayerRequired) {
+                    preparePlayer(false);
+                }
 
                 if (adTagCuePoints == null) {
                     Handler handler = new Handler();
