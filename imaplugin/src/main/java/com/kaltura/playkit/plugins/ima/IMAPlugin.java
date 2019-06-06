@@ -1145,7 +1145,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 }
                 adPlaybackCancelled = false;
 
-                log.d("CONTENT_RESUME_REQUESTED isReleaseContentPlayerRequired = " + isReleaseContentPlayerRequired + " videoPlayerWithAdPlayback = " + videoPlayerWithAdPlayback);
+                log.d("CONTENT_RESUME_REQUESTED isReleaseContentPlayerRequired = " + isReleaseContentPlayerRequired);
 
                 if (isReleaseContentPlayerRequired) {
                     displayContent();
