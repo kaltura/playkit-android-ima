@@ -41,7 +41,6 @@ import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdPluginType;
 import com.kaltura.playkit.player.PKMediaSourceConfig;
 import com.kaltura.playkit.player.PlayerEngine;
-import com.kaltura.playkit.player.vr.VRPKMediaEntry;
 import com.kaltura.playkit.plugins.ads.AdCuePoints;
 import com.kaltura.playkit.plugins.ads.AdEvent;
 import com.kaltura.playkit.ads.PKAdProviderListener;
