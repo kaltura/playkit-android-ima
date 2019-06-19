@@ -29,7 +29,7 @@ dependencies {
 
     // TODO: when playkit without plugins is released, replace this.
     //implementation 'com.kaltura:playkit-android:dev-SNAPSHOT'
-    implementation 'com.github.kaltura:playkit-android:a3f0ba13e6d57958a37e944971e9fa27b5a52312'
+    implementation 'com.github.kaltura:playkit-android:a6b338689490ac1edbaeab3bf3f24d958c634e21'
     //implementation project(":playkit")
 
     //Ads libraries.
@@ -40,6 +40,7 @@ dependencies {
     }
 
     testImplementation 'junit:junit:4.12'
+    implementation 'com.android.support:support-annotations:28.0.0'
 }
 
 repositories {
