@@ -39,7 +39,6 @@ public class IMADAIConfig {
     private String licenseUrl;
 
     private String language;
-    //private int videoBitrate; // in KB
     private boolean adAttribution;
     private boolean adCountDown;
     private boolean enableDebugMode;
@@ -51,7 +50,9 @@ public class IMADAIConfig {
     // Map adTagParameters = new HashMap();
     private boolean disablePersonalizedAds; // adTagParameters.put("npa", 1);
     private boolean enableAgeRestriction; // adTagParameters.put("tfua", 1);
-    // request.setAdTagParameters(adTagParameters);
+
+    //should not be used needed for reflection in kaltura player
+    public IMADAIConfig() {}
 
     private IMADAIConfig(String assetTitle,
                          String assetKey, // null for VOD
@@ -69,7 +70,6 @@ public class IMADAIConfig {
         this.streamFormat = streamFormat;
         this.licenseUrl = licenseUrl;
         this.language                  = "en";
-        //this.videoBitrate              = -1;
         this.adAttribution             = true;
         this.adCountDown               = true;
         this.adLoadTimeOut             = DEFAULT_AD_LOAD_TIMEOUT;
@@ -146,18 +146,6 @@ public class IMADAIConfig {
         this.language = language;
         return this;
     }
-
-//    public int getVideoBitrate() {
-//        return videoBitrate;
-//    }
-
-    // Maximum recommended bitrate. The value is in kbit/s.
-    // The IMA SDK will pick media with bitrate below the specified max, or the closest bitrate if there is no media with lower bitrate found.
-    // Default value, -1, means the bitrate will be selected by the IMA SDK.
-//    public IMADAIConfig setVideoBitrate(int videoBitrate) {
-//        this.videoBitrate = videoBitrate;
-//        return this;
-//    }
 
     public int getMaxRedirects() {
         return maxRedirects;
