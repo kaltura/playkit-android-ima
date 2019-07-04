@@ -137,7 +137,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     public static final Factory factory = new Factory() {
         @Override
         public String getName() {
-            return "IMA";
+            return "ima";
         }
 
         @Override
@@ -270,8 +270,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         clearAdsLoader();
         imaSetup();
-        log.d("adtag = " + adConfig.getAdTagURL());
-        requestAdsFromIMA(adConfig.getAdTagURL());
+        log.d("adtag = " + adConfig.getAdTagUrl());
+        requestAdsFromIMA(adConfig.getAdTagUrl());
     }
 
     private AdDisplayContainer createAdDisplayContainer() {
@@ -313,7 +313,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         adConfig = parseConfig(config);
         if (adConfig == null) {
             log.e("Error adConfig Incorrect or null");
-            adConfig = new IMAConfig().setAdTagURL("");
+            adConfig = new IMAConfig().setAdTagUrl("");
         }
     }
 
@@ -939,7 +939,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             }
         }
         if (adConfig != null) {
-            messageBus.post(new AdEvent.AdRequestedEvent(!TextUtils.isEmpty(adConfig.getAdTagURL()) ? adConfig.getAdTagURL() : adConfig.getAdTagResponse()));
+            messageBus.post(new AdEvent.AdRequestedEvent(!TextUtils.isEmpty(adConfig.getAdTagUrl()) ? adConfig.getAdTagUrl() : adConfig.getAdTagResponse()));
         }
         sendError(errorType, errorMessage, adException);
         preparePlayer(isAutoPlay);
@@ -1135,7 +1135,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     long position = getPlayerEngine().getCurrentPosition();
                     log.d("Content prepared.. lastPlaybackPlayerState = " + lastPlaybackPlayerState + ", time = " + position + "/" + duration);
                     if (duration < 0) {
-                        preparePlayer(true);
+                        preparePlayer(false);
+                        getPlayerEngine().play();
                     } else if (lastPlaybackPlayerState != PlayerEvent.Type.ENDED && position <= duration) {
                         if (adInfo == null || (adInfo.getAdPositionType() != AdPositionType.POST_ROLL)) {
                             log.d("Content prepared.. Play called.");
@@ -1341,7 +1342,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         adsLoadedListener = adsManagerLoadedEvent -> {
             log.d("AdsManager loaded");
-            messageBus.post(new AdEvent.AdRequestedEvent(!TextUtils.isEmpty(adConfig.getAdTagURL()) ? adConfig.getAdTagURL() : adConfig.getAdTagResponse()));
+            messageBus.post(new AdEvent.AdRequestedEvent(!TextUtils.isEmpty(adConfig.getAdTagUrl()) ? adConfig.getAdTagUrl() : adConfig.getAdTagResponse()));
             cancelAdManagerTimer();
             // Ads were successfully loaded, so get the AdsManager instance. AdsManager has
             // events for ad playback and errors.
