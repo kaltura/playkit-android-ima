@@ -41,7 +41,6 @@ import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdPluginType;
 import com.kaltura.playkit.player.PKMediaSourceConfig;
 import com.kaltura.playkit.player.PlayerEngine;
-import com.kaltura.playkit.player.vr.VRPKMediaEntry;
 import com.kaltura.playkit.plugins.ads.AdCuePoints;
 import com.kaltura.playkit.plugins.ads.AdEvent;
 import com.kaltura.playkit.ads.PKAdProviderListener;
@@ -111,7 +110,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     public static final Factory factory = new Factory() {
         @Override
         public String getName() {
-            return "IMADAI";
+            return "imadai";
         }
 
         @Override
@@ -1263,11 +1262,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         if (mediaConfig != null && mediaConfig.getMediaEntry() != null) {
             PKMediaSource daiMediaSource = createDAIMediaSource(daiUrl);
             if (!TextUtils.isEmpty(daiMediaSource.getUrl())) {
-                if (mediaConfig.getMediaEntry() instanceof VRPKMediaEntry) {
-                    sourceConfig = new PKMediaSourceConfig(daiMediaSource, getDAIMediaType(), mediaConfig.getMediaEntry().getExternalSubtitleList(), (PlayerSettings) player.getSettings(), ((VRPKMediaEntry)mediaConfig.getMediaEntry()).getVrSettings());
-                } else {
-                    sourceConfig = new PKMediaSourceConfig(daiMediaSource, getDAIMediaType(), mediaConfig.getMediaEntry().getExternalSubtitleList(), (PlayerSettings) player.getSettings());
-                }
+                sourceConfig = new PKMediaSourceConfig(daiMediaSource, getDAIMediaType(), mediaConfig.getMediaEntry().getExternalSubtitleList(), (PlayerSettings) player.getSettings());
             }
         }
         return sourceConfig;
