@@ -14,8 +14,6 @@ script:
   - ./gradlew imaplugin:build
 after_failure:
   - cat imaplugin/build/outputs/lint-results-debug.xml
-after_success:
-  - ./travis-push-to-bintray.sh
 notifications:
   email:
     recipients:
