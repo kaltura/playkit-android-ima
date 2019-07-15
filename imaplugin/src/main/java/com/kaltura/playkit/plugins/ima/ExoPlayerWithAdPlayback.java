@@ -2,12 +2,14 @@ package com.kaltura.playkit.plugins.ima;
 
 import android.content.Context;
 import android.net.Uri;
-import android.support.annotation.NonNull;
+
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
+
+import androidx.annotation.NonNull;
 
 import com.google.ads.interactivemedia.v3.api.player.ContentProgressProvider;
 import com.google.ads.interactivemedia.v3.api.player.VideoAdPlayer;
@@ -22,8 +24,8 @@ import com.google.android.exoplayer2.PlaybackPreparer;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
@@ -576,7 +578,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 return new HlsMediaSource.Factory(mediaDataSourceFactory)
                         .createMediaSource(uri);
             case C.TYPE_OTHER:
-                return new ExtractorMediaSource.Factory(mediaDataSourceFactory)
+                return new ProgressiveMediaSource.Factory(mediaDataSourceFactory)
                         .createMediaSource(uri);
             default: {
                 throw new IllegalStateException("Unsupported type: " + Util.inferContentType(uri));
