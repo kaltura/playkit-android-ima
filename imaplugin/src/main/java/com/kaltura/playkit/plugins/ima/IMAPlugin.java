@@ -498,7 +498,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         destroyIMA();
         if (adDisplayContainer != null) {
-            adDisplayContainer.destroy();
+            // TEMP FIX to prevent crash on IMA SDK side
+            //adDisplayContainer.destroy();
             adDisplayContainer = null;
         }
         if (videoPlayerWithAdPlayback != null) {
