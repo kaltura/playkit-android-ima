@@ -208,6 +208,12 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             @Override
             public void loadAd(String url) {
                 log.d("loadAd = " + url);
+
+                if (adVideoPlayerView == null) {   // FEM-2600
+                    log.d("IMA Plugin destroyed; avoiding Ad Playback");
+                    return;
+                }
+
                 lastKnownAdPosition = 0;
                 lastKnownAdURL = url;
                 isPlayerReady = false;
@@ -520,6 +526,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     }
 
     private void initializePlayer(String adUrl, boolean adShouldAutoPlay) {
+        log.d("ExoPlayerWithAdPlayback initializePlayer");
         if (TextUtils.isEmpty(adUrl)) {
             sendSourceError(new IllegalArgumentException("Error, Ad playback url cannot be empty or null"));
             return;
@@ -561,7 +568,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
         adPlayer = ExoPlayerFactory.newSimpleInstance(mContext, getRenderersFactory(), getTrackSelector());
         adPlayer.addAnalyticsListener(getEventLogger());
-        adVideoPlayerView.setPlayer(adPlayer);
+        if (adVideoPlayerView != null) {  // FEM-2600
+            adVideoPlayerView.setPlayer(adPlayer);
+        }
     }
 
     private MediaSource buildMediaSource(Uri uri) {
