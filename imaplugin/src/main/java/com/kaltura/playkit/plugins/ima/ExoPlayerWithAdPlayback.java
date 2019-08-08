@@ -22,6 +22,7 @@ import com.kaltura.android.exoplayer2.Format;
 import com.kaltura.android.exoplayer2.PlaybackParameters;
 import com.kaltura.android.exoplayer2.PlaybackPreparer;
 import com.kaltura.android.exoplayer2.Player;
+import com.kaltura.android.exoplayer2.RenderersFactory;
 import com.kaltura.android.exoplayer2.SimpleExoPlayer;
 import com.kaltura.android.exoplayer2.Timeline;
 import com.kaltura.android.exoplayer2.source.MediaSource;
@@ -301,6 +302,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     private DefaultTrackSelector getTrackSelector() {
         if (trackSelector == null) {
             trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory());
+            trackSelector.setParameters(new DefaultTrackSelector.ParametersBuilder().build());
         }
         return trackSelector;
     }
@@ -308,9 +310,15 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     @NonNull
     private DefaultRenderersFactory getRenderersFactory() {
         if (renderersFactory == null) {
-            renderersFactory = new DefaultRenderersFactory(mContext);
+            renderersFactory = buildRenderersFactory(true, true);
         }
         return renderersFactory;
+    }
+
+    private DefaultRenderersFactory buildRenderersFactory(boolean allowClearLead, boolean enableDecoderFallback) {
+        return new DefaultRenderersFactory(mContext)
+                .setPlayClearSamplesWithoutKeys(allowClearLead)
+                .setEnableDecoderFallback(enableDecoderFallback);
     }
 
     private boolean isAdPlayerPlaying() {
