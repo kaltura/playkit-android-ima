@@ -22,7 +22,6 @@ import com.kaltura.android.exoplayer2.Format;
 import com.kaltura.android.exoplayer2.PlaybackParameters;
 import com.kaltura.android.exoplayer2.PlaybackPreparer;
 import com.kaltura.android.exoplayer2.Player;
-import com.kaltura.android.exoplayer2.RenderersFactory;
 import com.kaltura.android.exoplayer2.SimpleExoPlayer;
 import com.kaltura.android.exoplayer2.Timeline;
 import com.kaltura.android.exoplayer2.source.MediaSource;
