@@ -301,6 +301,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     private DefaultTrackSelector getTrackSelector() {
         if (trackSelector == null) {
             trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory());
+            trackSelector.setParameters(new DefaultTrackSelector.ParametersBuilder().build());
         }
         return trackSelector;
     }
