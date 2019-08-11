@@ -310,15 +310,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     @NonNull
     private DefaultRenderersFactory getRenderersFactory() {
         if (renderersFactory == null) {
-            renderersFactory = buildRenderersFactory(true, true);
+            renderersFactory = new DefaultRenderersFactory(mContext);
         }
         return renderersFactory;
-    }
-
-    private DefaultRenderersFactory buildRenderersFactory(boolean allowClearLead, boolean enableDecoderFallback) {
-        return new DefaultRenderersFactory(mContext)
-                .setPlayClearSamplesWithoutKeys(allowClearLead)
-                .setEnableDecoderFallback(enableDecoderFallback);
     }
 
     private boolean isAdPlayerPlaying() {
