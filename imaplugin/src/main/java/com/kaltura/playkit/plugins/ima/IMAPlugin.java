@@ -134,6 +134,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private Long playbackStartPosition;
     private PlayerEngineWrapper adsPlayerEngineWrapper;
     private Boolean playerPlayingBeforeAdArrived;
+
     private Map<com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType, AdEvent.Type> adEventsMap;
 
     public static final Factory factory = new Factory() {
@@ -509,8 +510,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     protected void onDestroy() {
-        log.d("IMA Start onDestroy lastAdEventReceived = " + lastAdEventReceived);
-        boolean adManagerInitialized = (adsManager != null || lastAdEventReceived != null); // FEM-2600
+        boolean adManagerInitialized = (adsManager != null); // FEM-2600
         log.d("IMA onDestroy adManagerInitialized = " + adManagerInitialized);
         destroyIMA();
         if (adDisplayContainer != null && adManagerInitialized) {
@@ -667,7 +667,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         videoPlayerWithAdPlayback.stop();
         adsManager.destroy();
         contentCompleted();
-        adsManager = null;
         isAdDisplayed = false;
         adPlaybackCancelled = false;
     }
