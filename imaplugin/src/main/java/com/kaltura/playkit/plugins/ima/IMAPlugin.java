@@ -496,8 +496,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     protected void onDestroy() {
-        log.d("IMA Start onDestroy lastAdEventReceived = " + lastAdEventReceived);
         boolean adManagerInitialized = (adsManager != null); // FEM-2600
+        log.d("IMA Start onDestroy adManagerInitialized = " + adManagerInitialized);
+
         destroyIMA();
         if (adDisplayContainer != null && adManagerInitialized) {
             adDisplayContainer.destroy();
