@@ -497,8 +497,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     @Override
     protected void onDestroy() {
         log.d("IMA Start onDestroy lastAdEventReceived = " + lastAdEventReceived);
-        boolean adManagerInitialized = (adsManager != null || lastAdEventReceived != null); // FEM-2600
-
+        boolean adManagerInitialized = (adsManager != null); // FEM-2600
         destroyIMA();
         if (adDisplayContainer != null && adManagerInitialized) {
             adDisplayContainer.destroy();
@@ -654,7 +653,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         videoPlayerWithAdPlayback.stop();
         adsManager.destroy();
         contentCompleted();
-        adsManager = null;
         isAdDisplayed = false;
         adPlaybackCancelled = false;
     }
