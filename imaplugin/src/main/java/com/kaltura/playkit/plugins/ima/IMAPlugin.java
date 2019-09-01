@@ -712,6 +712,16 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     @Override
+    public Long getPlaybackStartPosition() {
+        return playbackStartPosition;
+    }
+
+    @Override
+    public boolean isAlwaysStartWithPreroll() {
+        return (adConfig == null) ? false : adConfig.isAlwaysStartWithPreroll();
+    }
+
+    @Override
     public PKAdPluginType getAdPluginType() {
         return PKAdPluginType.client;
     }
