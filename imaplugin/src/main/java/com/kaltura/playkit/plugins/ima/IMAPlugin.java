@@ -752,6 +752,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public long getDuration() {
+        if (videoPlayerWithAdPlayback == null) {
+            return Consts.TIME_UNSET;
+        }
+
         long duration = (long) Math.ceil(videoPlayerWithAdPlayback.getVideoAdPlayer().getAdProgress().getDuration());
         //log.d("getDuration: " + duration);
         return duration;
@@ -759,6 +763,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public long getCurrentPosition() {
+        if (videoPlayerWithAdPlayback == null) {
+            return Consts.POSITION_UNSET;
+        }
+
         long currPos = (long) Math.ceil(videoPlayerWithAdPlayback.getVideoAdPlayer().getAdProgress().getCurrentTime());
         //log.d("IMA Add getCurrentPosition: " + currPos);
         messageBus.post(new AdEvent.AdPlayHeadEvent(currPos));
@@ -1118,7 +1126,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
                 messageBus.post(new AdEvent(AdEvent.Type.CONTENT_RESUME_REQUESTED));
                 isAdDisplayed = false;
-                videoPlayerWithAdPlayback.resumeContentAfterAdPlayback();
+                if (videoPlayerWithAdPlayback != null) {
+                    videoPlayerWithAdPlayback.resumeContentAfterAdPlayback();
+                }
                 if (!isContentPrepared) {
                     log.d("Content not prepared.. Preparing and calling play.");
                     if (!appIsInBackground) {
@@ -1315,7 +1325,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         adTagCuePoints = new AdCuePoints(getAdCuePointsList());
         adTagCuePoints.setAdPluginName(IMAPlugin.factory.getName());
         logCuePointsData();
-        videoPlayerWithAdPlayback.setAdCuePoints(adTagCuePoints);
+        if (videoPlayerWithAdPlayback != null) {
+            videoPlayerWithAdPlayback.setAdCuePoints(adTagCuePoints);
+        }
         messageBus.post(new AdEvent.AdCuePointsUpdateEvent(adTagCuePoints));
     }
 
