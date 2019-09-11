@@ -17,11 +17,11 @@ try {
 
     publish {
         artifactId = 'imaplugin'
-        description = 'PlayKit IMA Plugin'
+        desc = 'PlayKit IMA Plugin'
         repoName = 'android'
         userOrg = 'kaltura'
         groupId = 'com.kaltura.playkit'
-        version = libVersion
+        publishVersion = libVersion
         autoPublish = true
         licences = ['AGPL-3.0']
     }
