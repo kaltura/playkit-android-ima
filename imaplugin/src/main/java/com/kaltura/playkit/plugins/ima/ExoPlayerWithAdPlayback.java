@@ -2,7 +2,6 @@ package com.kaltura.playkit.plugins.ima;
 
 import android.content.Context;
 import android.net.Uri;
-
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
@@ -11,6 +10,8 @@ import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 
+import com.google.ads.interactivemedia.v3.api.AdPodInfo;
+import com.google.ads.interactivemedia.v3.api.player.AdMediaInfo;
 import com.google.ads.interactivemedia.v3.api.player.ContentProgressProvider;
 import com.google.ads.interactivemedia.v3.api.player.VideoAdPlayer;
 import com.google.ads.interactivemedia.v3.api.player.VideoProgressUpdate;
@@ -90,6 +91,10 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
     // ContentProgressProvider interface implementation for the SDK to check content progress.
     private ContentProgressProvider contentProgressProvider;
+
+    // Track the currently playing media file. If doing preloading, this will need to be an
+    // array or other data structure.
+    private AdMediaInfo adMediaInfo;
 
     private boolean isAdFirstPlay;
 
@@ -180,12 +185,12 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             }
 
             @Override
-            public void playAd() {
+            public void playAd(AdMediaInfo info) {
                 log.d("playAd isAdDisplayed = " + isAdDisplayed);
                 if (isAdDisplayed && isPlayerReady) {
                     for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
                         log.d("playAd->onResume");
-                        callback.onResume();
+                        callback.onResume(adMediaInfo);
                         if (isAdPlayerPlaying()) {
                             play();
                         }
@@ -195,7 +200,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                     isAdDisplayed = true;
                     for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
                         log.d("playAd->onPlay");
-                        callback.onPlay();
+                        callback.onPlay(adMediaInfo);
                         isAdFirstPlay = true;
                         return;
                     }
@@ -203,12 +208,14 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
                 //Make sure events will be fired after pause
                 for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                    callback.onPlay();
+                    callback.onPlay(adMediaInfo);
                 }
             }
 
             @Override
-            public void loadAd(String url) {
+            public void loadAd(AdMediaInfo info, AdPodInfo adPodInfo) {
+                adMediaInfo = info;
+                String url = adMediaInfo.getUrl();
                 log.d("loadAd = " + url);
 
                 if (adVideoPlayerView == null) {   // FEM-2600
@@ -224,7 +231,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             }
 
             @Override
-            public void stopAd() {
+            public void stopAd(AdMediaInfo info) {
                 log.d("stopAd");
                 isPlayerReady = false;
                 isAdDisplayed = false;
@@ -234,13 +241,13 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             }
 
             @Override
-            public void pauseAd() {
+            public void pauseAd(AdMediaInfo info) {
                 log.d("pauseAd");
                 if (isAdPlayerPlaying()) {
                     return;
                 }
                 for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                    callback.onPause();
+                    callback.onPause(adMediaInfo);
                 }
                 if (adVideoPlayerView != null && adVideoPlayerView.getPlayer() != null) {
                     adVideoPlayerView.getPlayer().setPlayWhenReady(false);
@@ -248,10 +255,8 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             }
 
             @Override
-            public void resumeAd() {
-                log.d("resumeAd");
-                //playAd(); --> resumeAd method is deprecated in IMA so nothing should be called.
-
+            public void release() {
+                // Need to check if any clean up that needs to be done
             }
 
             @Override
@@ -377,16 +382,16 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 if (playWhenReady) {
                     if (adVideoPlayerView.getPlayer().getDuration() > 0) {
                         for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                            callback.onResume();
+                            callback.onResume(adMediaInfo);
                         }
                     } else {
                         for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                            callback.onPlay();
+                            callback.onPlay(adMediaInfo);
                         }
                     }
                 } else {
                     for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                        callback.onPause();
+                        callback.onPause(adMediaInfo);
                     }
                 }
                 break;
@@ -395,7 +400,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 isPlayerReady = false;
                 if (isAdDisplayed) {
                     for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                        callback.onEnded();
+                        callback.onEnded(adMediaInfo);
                     }
                 }
                 break;
@@ -512,6 +517,14 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     }
 
     /**
+     * Returns the currently playing media file
+     * @return adMediaInfo
+     */
+    public AdMediaInfo getAdMediaInfo() {
+        return adMediaInfo;
+    }
+
+    /**
      * Returns if an ad is displayed.
      *
      * @return the isAdDisplayed
@@ -555,7 +568,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
         for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
             log.d("onPlayerError calling callback.onError()");
-            callback.onError();
+            callback.onError(adMediaInfo);
         }
 
     }
