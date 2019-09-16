@@ -952,7 +952,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     public boolean isAllAdsCompleted() {
         if (pluginCuePoints != null && !pluginCuePoints.isEmpty()) {
             CuePoint cuePoint = pluginCuePoints.get(pluginCuePoints.size() -1);
-            return cuePoint.isPlayed();
+            return cuePoint.isPlayed() && !isAdDisplayed;
         }
         return false;
     }
