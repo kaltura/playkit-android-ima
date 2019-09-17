@@ -282,8 +282,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
 
         adDisplayContainer = sdkFactory.createAdDisplayContainer();
-        adDisplayContainer.setPlayer(videoPlayerWithAdPlayback.getVideoAdPlayer());
-        adDisplayContainer.setAdContainer(videoPlayerWithAdPlayback.getAdUiContainer());
 
         // Set up spots for companions.
         ViewGroup adCompanionViewGroup = null;
@@ -577,6 +575,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         resetIMA();
 
         log.d("Do requestAdsFromIMA");
+
+        adDisplayContainer.setPlayer(videoPlayerWithAdPlayback.getVideoAdPlayer());
+        adDisplayContainer.setAdContainer(videoPlayerWithAdPlayback.getAdUiContainer());
 
         // Create the ads request.
         final AdsRequest request = sdkFactory.createAdsRequest();
