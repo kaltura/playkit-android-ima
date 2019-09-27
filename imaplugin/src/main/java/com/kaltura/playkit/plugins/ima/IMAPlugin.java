@@ -115,7 +115,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private AdsLoader.AdsLoadedListener adsLoadedListener;
 
     private ImaSdkSettings imaSdkSettings;
-    private AdsRenderingSettings renderingSettings;
     @Nullable
     private AdCuePoints adTagCuePoints;
     private boolean isAdDisplayed;
@@ -278,7 +277,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             videoPlayerWithAdPlayback = new ExoPlayerWithAdPlayback(context, adConfig.getAdLoadTimeOut(), adConfig.isDebugMode());
             videoPlayerWithAdPlayback.addAdPlaybackEventListener(this);
         }
-        videoPlayerWithAdPlayback.setContentProgressProvider(player);
+        if (player != null) {
+            videoPlayerWithAdPlayback.setContentProgressProvider(player);
+        }
 
         clearAdsLoader();
         imaSetup();
@@ -357,7 +358,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private AdsRenderingSettings getRenderingSettings() {
 
-        renderingSettings = ImaSdkFactory.getInstance().createAdsRenderingSettings();
+        AdsRenderingSettings renderingSettings = ImaSdkFactory.getInstance().createAdsRenderingSettings();
 
         if (!adConfig.isAlwaysStartWithPreroll() && playbackStartPosition != null && playbackStartPosition > 0) {
             renderingSettings.setPlayAdsAfterTime(playbackStartPosition);

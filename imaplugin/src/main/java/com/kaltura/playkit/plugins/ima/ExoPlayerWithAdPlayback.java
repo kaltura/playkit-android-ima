@@ -61,9 +61,12 @@ import static com.google.android.exoplayer2.util.Log.LOG_LEVEL_OFF;
 public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackPreparer, Player.EventListener {
     private static final PKLog log = PKLog.get("ExoPlayerWithAdPlayback");
 
+    @Nullable
     private DefaultTrackSelector trackSelector;
+    @Nullable
     private EventLogger eventLogger;
     private DefaultRenderersFactory renderersFactory;
+    @Nullable
     private SimpleExoPlayer adPlayer;
     private PlayerState lastPlayerState;
 
@@ -80,6 +83,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     private PlayerView adVideoPlayerView;
 
     // The SDK will render ad playback UI elements into this ViewGroup.
+    @Nullable
     private ViewGroup adUiContainer;
 
     // Used to track if the current video is an ad (as opposed to a content video).
@@ -90,6 +94,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     private VideoAdPlayer imaVideoAdPlayer;
 
     // ContentProgressProvider interface implementation for the SDK to check content progress.
+    @Nullable
     private ContentProgressProvider contentProgressProvider;
 
     private boolean isAdFirstPlay;
@@ -99,6 +104,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
     private final List<VideoAdPlayer.VideoAdPlayerCallback> adCallbacks = new ArrayList<>();
 
+    @Nullable
     private ExoPlayerWithAdPlayback.OnAdPlayBackListener onAdPlayBackListener;
 
     public interface OnAdPlayBackListener {
@@ -132,6 +138,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         init();
     }
 
+    @Nullable
     public ViewGroup getAdUiContainer() {
         return adUiContainer;
     }
@@ -141,6 +148,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         return adVideoPlayerView;
     }
 
+    @NonNull
     private DeferredDrmSessionManager.DrmSessionListener initDrmSessionListener() {
         return error -> {
             if (error != null) {
@@ -330,7 +338,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     }
 
     @Override
-    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+    public void onTracksChanged(TrackGroupArray trackGroups, @Nullable TrackSelectionArray trackSelections) {
         log.d("onLoadingChanged");
         if (trackSelections != null && trackSelections.length > 0) {
             TrackSelection trackSelection = trackSelections.get(Consts.TRACK_TYPE_VIDEO);
@@ -338,7 +346,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 log.d("onLoadingChanged trackSelection.getSelectionReason() = " + trackSelection.getSelectionReason());
                 if (trackSelection.getSelectionReason() == SELECTION_REASON_INITIAL || trackSelection.getSelectionReason() == SELECTION_REASON_ADAPTIVE) {
                     Format trackFormat = trackSelection.getFormat(trackSelection.getSelectedIndex());
-                    onAdPlayBackListener.adPlaybackInfoUpdated(trackFormat.width, trackFormat.height, trackFormat.bitrate);
+                    if (onAdPlayBackListener != null) {
+                        onAdPlayBackListener.adPlaybackInfoUpdated(trackFormat.width, trackFormat.height, trackFormat.bitrate);
+                    }
                 }
             }
         }
@@ -416,7 +426,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     }
 
     @Override
-    public void onPlayerError(ExoPlaybackException error) {
+    public void onPlayerError(@NonNull ExoPlaybackException error) {
         log.d("onPlayerError error = " + error.getMessage());
         sendSourceError(error);
     }
@@ -437,7 +447,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         log.d("onSeekProcessed");
     }
 
-    public void setContentProgressProvider(final com.kaltura.playkit.Player contentPlayer) {
+    public void setContentProgressProvider(@NonNull final com.kaltura.playkit.Player contentPlayer) {
         this.contentPlayer = contentPlayer;
         contentProgressProvider = () -> {
 
@@ -522,6 +532,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         return isAdDisplayed;
     }
 
+    @Nullable
     public ContentProgressProvider getContentProgressProvider() {
         return contentProgressProvider;
     }
@@ -578,7 +589,8 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         }
     }
 
-    private MediaSource buildMediaSource(Uri uri) {
+    @NonNull
+    private MediaSource buildMediaSource(@NonNull Uri uri) {
 
         switch (Util.inferContentType(uri)) {
             case C.TYPE_DASH:
@@ -611,7 +623,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 if (lastKnownAdURL != null) {
                     initializePlayer(lastKnownAdURL, false);
                     isPlayerReady = true;
-                    adPlayer.seekTo(lastKnownAdPosition);
+                    if (adPlayer != null) {
+                        adPlayer.seekTo(lastKnownAdPosition);
+                    }
                 }
             }
         }
@@ -644,11 +658,13 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         }
     }
 
+    @NonNull
     private DataSource.Factory buildDataSourceFactory() {
         return new DefaultDataSourceFactory(getContext(),
                 buildHttpDataSourceFactory());
     }
 
+    @NonNull
     private HttpDataSource.Factory buildHttpDataSourceFactory() {
         return new DefaultHttpDataSourceFactory(Util.getUserAgent(getContext(), "AdPlayKit"),
                 adLoadTimeout,
