@@ -747,22 +747,24 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public long getDuration() {
-        if (videoPlayerWithAdPlayback == null || videoPlayerWithAdPlayback.getVideoAdPlayer() == null) {
+        VideoAdPlayer adPlayer = videoPlayerWithAdPlayback != null ? videoPlayerWithAdPlayback.getVideoAdPlayer() : null;
+        if (adPlayer == null) {
             return Consts.TIME_UNSET;
         }
 
-        long duration = (long) Math.ceil(videoPlayerWithAdPlayback.getVideoAdPlayer().getAdProgress().getDuration());
+        long duration = (long) Math.ceil(adPlayer.getAdProgress().getDuration());
         //log.d("getDuration: " + duration);
         return duration;
     }
 
     @Override
     public long getCurrentPosition() {
-        if (videoPlayerWithAdPlayback == null || videoPlayerWithAdPlayback.getVideoAdPlayer() == null) {
+        VideoAdPlayer adPlayer = videoPlayerWithAdPlayback != null ? videoPlayerWithAdPlayback.getVideoAdPlayer() : null;
+        if (adPlayer == null) {
             return Consts.POSITION_UNSET;
         }
 
-        long currPos = (long) Math.ceil(videoPlayerWithAdPlayback.getVideoAdPlayer().getAdProgress().getCurrentTime());
+        long currPos = (long) Math.ceil(adPlayer.getAdProgress().getCurrentTime());
         //log.d("IMA Add getCurrentPosition: " + currPos);
         messageBus.post(new AdEvent.AdPlayHeadEvent(currPos));
         return currPos;

@@ -376,7 +376,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 lastPlayerState = PlayerState.READY;
                 isPlayerReady = true;
                 if (playWhenReady) {
-                    if (adVideoPlayerView != null && adVideoPlayerView.getPlayer().getDuration() > 0) {
+                    if (adVideoPlayerView != null && adVideoPlayerView.getPlayer() != null && adVideoPlayerView.getPlayer().getDuration() > 0) {
                         for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
                             callback.onResume();
                         }
