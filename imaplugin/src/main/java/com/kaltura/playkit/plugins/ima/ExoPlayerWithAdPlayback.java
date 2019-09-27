@@ -3,6 +3,7 @@ package com.kaltura.playkit.plugins.ima;
 import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
@@ -75,6 +76,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     private boolean debugEnabled;
 
     // The wrapped video adPlayerView.
+    @Nullable
     private PlayerView adVideoPlayerView;
 
     // The SDK will render ad playback UI elements into this ViewGroup.
@@ -84,6 +86,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     private boolean isAdDisplayed;
 
     // VideoAdPlayer interface implementation for the SDK to send ad play/pause type events.
+    @Nullable
     private VideoAdPlayer imaVideoAdPlayer;
 
     // ContentProgressProvider interface implementation for the SDK to check content progress.
@@ -133,6 +136,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         return adUiContainer;
     }
 
+    @Nullable
     public PlayerView getAdPlayerView() {
         return adVideoPlayerView;
     }
@@ -372,7 +376,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 lastPlayerState = PlayerState.READY;
                 isPlayerReady = true;
                 if (playWhenReady) {
-                    if (adVideoPlayerView.getPlayer().getDuration() > 0) {
+                    if (adVideoPlayerView != null && adVideoPlayerView.getPlayer().getDuration() > 0) {
                         for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
                             callback.onResume();
                         }
@@ -504,6 +508,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
      *
      * @return the videoAdPlayer
      */
+    @Nullable
     public VideoAdPlayer getVideoAdPlayer() {
         return imaVideoAdPlayer;
     }
