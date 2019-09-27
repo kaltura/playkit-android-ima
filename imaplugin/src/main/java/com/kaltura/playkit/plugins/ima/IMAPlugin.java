@@ -16,6 +16,7 @@ import android.content.Context;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -77,36 +78,45 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private static final PKLog log = PKLog.get("IMAPlugin");
     private static final int KB_MULTIPLIER = 1024;
 
+    @Nullable
     private Player player;
     private Context context;
     private MessageBus messageBus;
     private AdInfo adInfo;
     private IMAConfig adConfig;
+    @Nullable
     private PKMediaConfig mediaConfig;
     //////////////////////
 
     // Container with references to video player and ad UI ViewGroup.
+    @Nullable
     private AdDisplayContainer adDisplayContainer;
 
     // AdsManager exposes methods to control ad playback and listen to ad events.
+    @Nullable
     private AdsManager adsManager;
+    @Nullable
     private CountDownTimer adManagerTimer;
 
     // Factory class for creating SDK objects.
     private ImaSdkFactory sdkFactory;
 
     // Ad-enabled video player.
+    @Nullable
     private ExoPlayerWithAdPlayback videoPlayerWithAdPlayback;
 
     // ViewGroup to render an associated companion ad into.
     private ViewGroup mCompanionViewGroup;
 
     // The AdsLoader instance exposes the requestAds method.
+    @Nullable
     private AdsLoader adsLoader;
+    @Nullable
     private AdsLoader.AdsLoadedListener adsLoadedListener;
 
     private ImaSdkSettings imaSdkSettings;
     private AdsRenderingSettings renderingSettings;
+    @Nullable
     private AdCuePoints adTagCuePoints;
     private boolean isAdDisplayed;
     private boolean isAdIsPaused;
@@ -122,9 +132,12 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private boolean isAutoPlay;
     private boolean appInBackgroundDuringAdLoad;
     private long playerLastPositionForBG = -1;
+    @Nullable
     private PlayerEvent.Type lastPlaybackPlayerState;
+    @Nullable
     private AdEvent.Type lastAdEventReceived;
     private boolean adManagerInitDuringBackground;
+    @Nullable
     private PKAdProviderListener pkAdProviderListener;
     private Long playbackStartPosition;
     private PlayerEngineWrapper adsPlayerEngineWrapper;
@@ -158,7 +171,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     ///////////END PKPlugin
     @Override
-    protected void onLoad(final Player player, Object config, final MessageBus messageBus, Context context) {
+    protected void onLoad(@Nullable final Player player, Object config, final MessageBus messageBus, Context context) {
         log.d("onLoad");
         this.player = player;
         if (player == null) {
@@ -183,7 +196,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         addListeners(player);
     }
 
-    private void addListeners(Player player) {
+    private void addListeners(@Nullable Player player) {
         messageBus.addListener(this, PlayerEvent.ended, event -> {
             log.d("Received:PlayerEvent:" + event.eventType().name() + " lastAdEventReceived = " + lastAdEventReceived);
             AdCuePoints adCuePoints = new AdCuePoints(getAdCuePointsList());
@@ -228,6 +241,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         });
     }
 
+    @Nullable
     private static IMAConfig parseConfig(Object config) {
         if (config instanceof IMAConfig) {
             return ((IMAConfig) config);
@@ -239,7 +253,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     @Override
-    protected void onUpdateMedia(PKMediaConfig mediaConfig) {
+    protected void onUpdateMedia(@Nullable PKMediaConfig mediaConfig) {
         log.d("Start onUpdateMedia");
         this.mediaConfig = mediaConfig;
         if (mediaConfig != null) {
@@ -272,6 +286,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         requestAdsFromIMA(adConfig.getAdTagURL());
     }
 
+    @Nullable
     private AdDisplayContainer createAdDisplayContainer() {
         if (adDisplayContainer != null) {
             log.d("adDisplayContainer != null return current adDisplayContainer");
@@ -297,7 +312,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     private void registerControlsOverlays() {
-        if (adConfig.getControlsOverlayList() != null) {
+        if (adConfig.getControlsOverlayList() != null && adDisplayContainer != null) {
             for (View controlView : adConfig.getControlsOverlayList()) {
                 adDisplayContainer.registerVideoControlsOverlay(controlView);
             }
@@ -490,7 +505,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     private boolean isAdShouldAutoPlayOnResume() {
-        return player.getSettings() instanceof PlayerSettings && ((PlayerSettings) player.getSettings()).isAdAutoPlayOnResume();
+        return player != null && player.getSettings() instanceof PlayerSettings && ((PlayerSettings) player.getSettings()).isAdAutoPlayOnResume();
     }
 
     private void clearAdLoadingInBackground() {
@@ -590,7 +605,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         // Request the ad. After the ad is loaded, onAdsManagerLoaded() will be called.
         adManagerTimer = getCountDownTimer();
-        adsLoader.requestAds(request);
+        if (adsLoader != null) {
+            adsLoader.requestAds(request);
+        }
         adManagerTimer.start();
     }
 
@@ -797,11 +814,13 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         log.v("seekTo not supported");
     }
 
+    @Nullable
     @Override
     public AdCuePoints getCuePoints() {
         return adTagCuePoints;
     }
 
+    @NonNull
     private List<Long> getAdCuePointsList() {
         List<Long> adCuePoints = new ArrayList<>();
         if (adsManager != null && adsManager.getAdCuePoints() != null) {
@@ -819,7 +838,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         return adCuePoints;
     }
 
-    private AdInfo createAdInfo(Ad ad) {
+    @NonNull
+    private AdInfo createAdInfo(@NonNull Ad ad) {
 
         String adDescription = ad.getDescription();
         long adDuration = (long) ad.getDuration() * Consts.MILLISECONDS_MULTIPLIER;
@@ -869,7 +889,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     @Override
-    public void onAdError(AdErrorEvent adErrorEvent) {
+    public void onAdError(@NonNull AdErrorEvent adErrorEvent) {
         log.e("Event: onAdError" + adErrorEvent.getError().getErrorCode());
         resetFlagsOnError();
 
@@ -1006,14 +1026,14 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         cancelAdManagerTimer();
     }
 
-    private void sendError(Enum errorType, String message, Throwable exception) {
+    private void sendError(@NonNull Enum errorType, String message, Throwable exception) {
         log.e("Ad Error: " + errorType.name() + " with message " + message);
         AdEvent errorEvent = new AdEvent.Error(new PKError(errorType, message, exception));
         messageBus.post(errorEvent);
     }
 
     @Override
-    public void onAdEvent(com.google.ads.interactivemedia.v3.api.AdEvent adEvent) {
+    public void onAdEvent(@NonNull com.google.ads.interactivemedia.v3.api.AdEvent adEvent) {
         if (adsManager == null) {
             log.w("WARNING, adsManager == null");
             return;
@@ -1059,7 +1079,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             case CONTENT_PAUSE_REQUESTED:
                 log.d("CONTENT_PAUSE_REQUESTED appIsInBackground = " + appIsInBackground);
-                playerPlayingBeforeAdArrived = getPlayerEngine().isPlaying() || lastPlaybackPlayerState == PlayerEvent.Type.ENDED;
+                playerPlayingBeforeAdArrived = (getPlayerEngine() != null && getPlayerEngine().isPlaying()) || lastPlaybackPlayerState == PlayerEvent.Type.ENDED;
                 if (getPlayerEngine() != null) {
                     getPlayerEngine().pause();
                 }
@@ -1082,12 +1102,14 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             case CONTENT_RESUME_REQUESTED:
                 log.d("AD REQUEST AD_CONTENT_RESUME_REQUESTED");
                 if (checkIfDiscardAdRequired()) {
-                    for (Long cuePoint : adTagCuePoints.getAdCuePoints()) {
-                        if (cuePoint != 0 && cuePoint != -1 && ((cuePoint / Consts.MILLISECONDS_MULTIPLIER_FLOAT) < playbackStartPosition)) {
-                            log.d("discardAdBreak");
-                            adsManager.discardAdBreak();
-                            playbackStartPosition = null; // making sure it will nu be done again.
-                            break;
+                    if (adTagCuePoints != null) {
+                        for (Long cuePoint : adTagCuePoints.getAdCuePoints()) {
+                            if (cuePoint != 0 && cuePoint != -1 && ((cuePoint / Consts.MILLISECONDS_MULTIPLIER_FLOAT) < playbackStartPosition)) {
+                                log.d("discardAdBreak");
+                                adsManager.discardAdBreak();
+                                playbackStartPosition = null; // making sure it will nu be done again.
+                                break;
+                            }
                         }
                     }
                 }
@@ -1265,7 +1287,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
     }
 
-    private void sendAdClickedEvent(com.google.ads.interactivemedia.v3.api.AdEvent adEvent) {
+    private void sendAdClickedEvent(@NonNull com.google.ads.interactivemedia.v3.api.AdEvent adEvent) {
         String clickThruUrl;
         Ad ad = adEvent.getAd();
         try {
@@ -1312,6 +1334,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         return adInfo.getAdPositionType() == AdPositionType.PRE_ROLL && playbackStartPosition > 0;
     }
 
+    @NonNull
     private AdsLoader.AdsLoadedListener getAdsLoadedListener() {
         if (adsLoadedListener != null) {
             return adsLoadedListener;
@@ -1367,7 +1390,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     @Override
-    public void onSourceError(Exception exoPlayerException) {
+    public void onSourceError(@NonNull Exception exoPlayerException) {
         log.d(" onSourceError " + ", message = " + exoPlayerException.getMessage());
         if (lastAdEventReceived == AdEvent.Type.AD_BUFFER_START) { // in case there is ad playback error need to remove the buffer started since buffer end is not fired
             onBufferEnd();
@@ -1435,6 +1458,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         return adsPlayerEngineWrapper;
     }
 
+    @Nullable
     private PlayerEngine getPlayerEngine() {
         return adsPlayerEngineWrapper.getPlayerEngine();
     }
