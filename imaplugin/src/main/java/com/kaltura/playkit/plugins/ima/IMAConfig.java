@@ -13,6 +13,7 @@
 package com.kaltura.playkit.plugins.ima;
 
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -70,6 +71,7 @@ public class IMAConfig {
     private String playerVersion;
     private List<String> videoMimeTypes = new ArrayList<>();
     private transient List<View> controlsOverlayList;
+    private transient CompanionAdConfig companionAdConfig;
 
     //private Map<Double,String> tagsTimes; // <AdTime,URL_to_execute>
 
@@ -171,7 +173,7 @@ public class IMAConfig {
         this.adTagResponse = adTagResponse;
         return this;
     }
-    
+
     public boolean getAdAttribution() {
         return adAttribution;
     }
@@ -253,6 +255,15 @@ public class IMAConfig {
         return this;
     }
 
+    public CompanionAdConfig getCompanionAdConfig() {
+        return companionAdConfig;
+    }
+
+    public IMAConfig setCompanionAdConfig(ViewGroup companionAdView, int companionAdWidth, int companionAdHeight) {
+        this.companionAdConfig = new CompanionAdConfig(companionAdView, companionAdWidth, companionAdHeight);
+        return this;
+    }
+
     public IMAConfig addControlsOverlay(View controlsOverlay) {
         if (this.controlsOverlayList == null) {
             this.controlsOverlayList = new ArrayList<>();
@@ -267,22 +278,13 @@ public class IMAConfig {
         return controlsOverlayList;
     }
 
-    //    public Map<Double, String> getTagsTimes() {
+//    public Map<Double, String> getTagsTimes() {
 //        return tagsTimes;
 //    }
 //
 //    public void setTagsTimes(Map<Double, String> tagsTimes) {
 //        this.tagsTimes = tagsTimes;
 //    }
-
-//    public View getCompanionView() {
-//        return companionView;
-//    }
-//
-//    public void setCompanionView(View companionView) {
-//        this.companionView = companionView;
-//    }
-//
 
     /**
      * Due to Views required for setControlsOverlayList()

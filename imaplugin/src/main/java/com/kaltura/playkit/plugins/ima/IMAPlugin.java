@@ -92,7 +92,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     // Container with references to video player and ad UI ViewGroup.
     private AdDisplayContainer adDisplayContainer;
-
+    private CompanionAdSlot companionAdSlot;
+    private ViewGroup adCompanionViewGroup;
     // AdsManager exposes methods to control ad playback and listen to ad events.
     private AdsManager adsManager;
     private CountDownTimer adManagerTimer;
@@ -112,6 +113,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private ImaSdkSettings imaSdkSettings;
     private AdsRenderingSettings renderingSettings;
+
     private AdCuePoints adTagCuePoints;
     private boolean isAdDisplayed;
     private boolean isAdIsPaused;
@@ -256,6 +258,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (adsManager != null) {
             adsManager.destroy();
         }
+
         contentCompleted();
         isContentPrepared = false;
         isAutoPlay = false;
@@ -279,27 +282,52 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     private AdDisplayContainer createAdDisplayContainer() {
+        if (adCompanionViewGroup != null) {
+            adCompanionViewGroup.removeAllViews();
+        }
+
+
+        adCompanionViewGroup = (adConfig.getCompanionAdConfig() != null && adConfig.getCompanionAdConfig().getCompanionAdView() != null) ? adConfig.getCompanionAdConfig().getCompanionAdView() : null;
+
         if (adDisplayContainer != null) {
             log.d("adDisplayContainer != null return current adDisplayContainer");
             adDisplayContainer.unregisterAllVideoControlsOverlays();
             registerControlsOverlays();
+            if (adConfig.getCompanionAdConfig() != null && adCompanionViewGroup != null) {
+                populateCompanionSlots(adConfig.getCompanionAdConfig().getCompanionAdWidth(), adConfig.getCompanionAdConfig().getCompanionAdHeight());
+            } else {
+                if (adDisplayContainer.getCompanionSlots() != null && !adDisplayContainer.getCompanionSlots().isEmpty()) {
+                    clearCompanionSlots();
+                }
+            }
             return adDisplayContainer;
         }
 
         adDisplayContainer = sdkFactory.createAdDisplayContainer();
 
         // Set up spots for companions.
-        ViewGroup adCompanionViewGroup = null;
-        if (adCompanionViewGroup != null) {
-            CompanionAdSlot companionAdSlot = sdkFactory.createCompanionAdSlot();
-            companionAdSlot.setContainer(adCompanionViewGroup);
-            companionAdSlot.setSize(728, 90);
-            ArrayList<CompanionAdSlot> companionAdSlots = new ArrayList<>();
-            companionAdSlots.add(companionAdSlot);
-            adDisplayContainer.setCompanionSlots(companionAdSlots);
+
+        if (adConfig.getCompanionAdConfig() != null && adCompanionViewGroup != null) {
+            populateCompanionSlots(adConfig.getCompanionAdConfig().getCompanionAdWidth(), adConfig.getCompanionAdConfig().getCompanionAdHeight());
         }
         registerControlsOverlays();
         return adDisplayContainer;
+    }
+
+    private void clearCompanionSlots() {
+        adDisplayContainer.getCompanionSlots().clear();
+        companionAdSlot.setContainer(null);
+        companionAdSlot = null;
+        adDisplayContainer.setCompanionSlots(null);
+    }
+
+    private void populateCompanionSlots(int companionAdWidth, int companionAdHeight) {
+        companionAdSlot = sdkFactory.createCompanionAdSlot();
+        companionAdSlot.setContainer(adCompanionViewGroup);
+        companionAdSlot.setSize(companionAdWidth, companionAdHeight);
+        ArrayList<CompanionAdSlot> companionAdSlots = new ArrayList<>();
+        companionAdSlots.add(companionAdSlot);
+        adDisplayContainer.setCompanionSlots(companionAdSlots);
     }
 
     private void registerControlsOverlays() {
@@ -550,6 +578,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             adDisplayContainer.setPlayer(null);
             adDisplayContainer.unregisterAllVideoControlsOverlays();
         }
+
         if (adsManager != null) {
             adsManager.destroy();
             adsManager = null;
@@ -963,6 +992,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             messageBus.post(new AdEvent.AdRequestedEvent(!TextUtils.isEmpty(adConfig.getAdTagUrl()) ? adConfig.getAdTagUrl() : adConfig.getAdTagResponse()));
         }
         sendError(errorType, errorMessage, adException);
+        if (PKAdErrorType.COMPANION_AD_LOADING_FAILED.equals(errorType)) {
+            return;
+        }
         preparePlayer(isAutoPlay);
     }
 
