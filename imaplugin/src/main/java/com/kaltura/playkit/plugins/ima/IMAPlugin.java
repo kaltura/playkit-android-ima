@@ -1218,28 +1218,15 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             case LOG:
                 isAdRequested = true;
-                //for this case no AD ERROR is fired need to show view {type=adLoadError, errorCode=1009, errorMessage=The response does not contain any valid ads.}
-                preparePlayer(false);
-                Ad adInfo = adEvent.getAd();
-                if (adInfo != null) {
-                    //in case one ad in the pod fails to play we want next one to be played
-                    AdPodInfo adPodInfo = adInfo.getAdPodInfo();
-                    log.d("adPodInfo.getAdPosition() = " + adPodInfo.getAdPosition() + " adPodInfo.getTotalAds() = " + adPodInfo.getTotalAds());
-                    if (adPodInfo.getTotalAds() > 1 && adPodInfo.getAdPosition() < adPodInfo.getTotalAds()) {
-                        log.d("LOG Error but continue to next ad in pod");
-                        return;
-                    } else {
-                        adsManager.discardAdBreak();
-                    }
-                }
+                resetFlagsOnError();
                 String error = "Non-fatal Error";
                 if (adEvent.getAdData() != null) {
                     if (adEvent.getAdData().containsKey("errorMessage")) {
                         error = adEvent.getAdData().get("errorMessage");
                     }
                 }
-
                 sendError(PKAdErrorType.QUIET_LOG_ERROR, error, null);
+                preparePlayer(isAutoPlay);
             default:
                 break;
         }
