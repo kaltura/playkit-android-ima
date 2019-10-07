@@ -1225,6 +1225,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                         error = adEvent.getAdData().get("errorMessage");
                     }
                 }
+                if (adsManager != null) {
+                    adsManager.discardAdBreak();
+                }
                 sendError(PKAdErrorType.QUIET_LOG_ERROR, error, null);
                 preparePlayer(isAutoPlay);
             default:
