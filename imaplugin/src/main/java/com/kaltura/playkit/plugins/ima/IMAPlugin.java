@@ -1084,12 +1084,13 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (adEventsMap.containsKey(adEvent.getType())) {
             lastAdEventReceived = adEventsMap.get(adEvent.getType());
         }
+
         if (lastAdEventReceived != AdEvent.Type.AD_PROGRESS) {
             log.d("onAdEvent EventName: " + lastAdEventReceived);
         }
 
         if (adEvent.getAdData() != null) {
-            log.i("EventData: " + adEvent.getAdData().toString());
+            log.i("EventData: " + adEvent.getAdData().toString() + " EventType: " + adEvent.getType().toString());
         }
 
         switch (adEvent.getType()) {
@@ -1505,6 +1506,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_READY, AdEvent.Type.AD_BREAK_READY);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.TAPPED, AdEvent.Type.TAPPED);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.ICON_TAPPED, AdEvent.Type.ICON_TAPPED);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.SKIPPABLE_STATE_CHANGED, AdEvent.Type.SKIPPABLE_STATE_CHANGED);
         return adEventsMap;
     }
 
