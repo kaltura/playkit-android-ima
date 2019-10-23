@@ -285,20 +285,23 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (adCompanionViewGroup != null) {
             adCompanionViewGroup.removeAllViews();
         }
+
+        CompanionAdConfig companionAdConfig = null;
         Integer adCompanionAdWidth = null;
         Integer adCompanionAdHeight = null;
         if (adConfig != null && adConfig.getCompanionAdConfig() != null) {
-            CompanionAdConfig companionAdConfig = adConfig.getCompanionAdConfig();
+            companionAdConfig = adConfig.getCompanionAdConfig();
             adCompanionViewGroup = companionAdConfig.getCompanionAdView();
             adCompanionAdWidth   = companionAdConfig.getCompanionAdWidth();
             adCompanionAdHeight  = companionAdConfig.getCompanionAdHeight();
         }
+
         if (adDisplayContainer != null) {
             log.d("adDisplayContainer != null return current adDisplayContainer");
             adDisplayContainer.unregisterAllVideoControlsOverlays();
             registerControlsOverlays();
-            if (adConfig.getCompanionAdConfig() != null && adCompanionViewGroup != null &&  adCompanionAdWidth != null &&  adCompanionAdHeight != null) {
-                populateCompanionSlots(adConfig.getCompanionAdConfig().getCompanionAdWidth(), adConfig.getCompanionAdConfig().getCompanionAdHeight());
+            if (isValidCompanionAdsSettings(companionAdConfig, adCompanionAdWidth, adCompanionAdHeight)) {
+                populateCompanionSlots(adCompanionAdWidth, adCompanionAdHeight);
             } else {
                 if (adDisplayContainer.getCompanionSlots() != null && !adDisplayContainer.getCompanionSlots().isEmpty()) {
                     clearCompanionSlots();
@@ -311,11 +314,15 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         // Set up spots for companions.
 
-        if (adConfig.getCompanionAdConfig() != null && adCompanionViewGroup != null) {
-            populateCompanionSlots(adConfig.getCompanionAdConfig().getCompanionAdWidth(), adConfig.getCompanionAdConfig().getCompanionAdHeight());
+        if (isValidCompanionAdsSettings(companionAdConfig, adCompanionAdWidth, adCompanionAdHeight)) {
+            populateCompanionSlots(adCompanionAdWidth, adCompanionAdHeight);
         }
         registerControlsOverlays();
         return adDisplayContainer;
+    }
+
+    private boolean isValidCompanionAdsSettings(CompanionAdConfig companionAdConfig, Integer adCompanionAdWidth, Integer adCompanionAdHeight) {
+        return companionAdConfig != null && adCompanionViewGroup != null && adCompanionAdWidth != null && adCompanionAdHeight != null;
     }
 
     private void clearCompanionSlots() {
