@@ -259,7 +259,7 @@ public class IMAConfig {
         return companionAdConfig;
     }
 
-    public IMAConfig setCompanionAdConfig(ViewGroup companionAdView, int companionAdWidth, int companionAdHeight) {
+    public IMAConfig setCompanionAdConfig(ViewGroup companionAdView, Integer companionAdWidth, Integer companionAdHeight) {
         this.companionAdConfig = new CompanionAdConfig(companionAdView, companionAdWidth, companionAdHeight);
         return this;
     }
