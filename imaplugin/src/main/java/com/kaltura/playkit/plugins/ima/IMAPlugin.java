@@ -92,7 +92,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     // Container with references to video player and ad UI ViewGroup.
     private AdDisplayContainer adDisplayContainer;
-
+    private CompanionAdSlot companionAdSlot;
+    private ViewGroup adCompanionViewGroup;
     // AdsManager exposes methods to control ad playback and listen to ad events.
     private AdsManager adsManager;
     private CountDownTimer adManagerTimer;
@@ -112,6 +113,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private ImaSdkSettings imaSdkSettings;
     private AdsRenderingSettings renderingSettings;
+
     private AdCuePoints adTagCuePoints;
     private boolean isAdDisplayed;
     private boolean isAdIsPaused;
@@ -256,6 +258,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (adsManager != null) {
             adsManager.destroy();
         }
+
         contentCompleted();
         isContentPrepared = false;
         isAutoPlay = false;
@@ -279,27 +282,63 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     private AdDisplayContainer createAdDisplayContainer() {
+        if (adCompanionViewGroup != null) {
+            adCompanionViewGroup.removeAllViews();
+        }
+
+        CompanionAdConfig companionAdConfig = null;
+        Integer adCompanionAdWidth = null;
+        Integer adCompanionAdHeight = null;
+        if (adConfig != null && adConfig.getCompanionAdConfig() != null) {
+            companionAdConfig = adConfig.getCompanionAdConfig();
+            adCompanionViewGroup = companionAdConfig.getCompanionAdView();
+            adCompanionAdWidth   = companionAdConfig.getCompanionAdWidth();
+            adCompanionAdHeight  = companionAdConfig.getCompanionAdHeight();
+        }
+
         if (adDisplayContainer != null) {
             log.d("adDisplayContainer != null return current adDisplayContainer");
             adDisplayContainer.unregisterAllVideoControlsOverlays();
             registerControlsOverlays();
+            if (isValidCompanionAdsSettings(companionAdConfig, adCompanionAdWidth, adCompanionAdHeight)) {
+                populateCompanionSlots(adCompanionAdWidth, adCompanionAdHeight);
+            } else {
+                if (adDisplayContainer.getCompanionSlots() != null && !adDisplayContainer.getCompanionSlots().isEmpty()) {
+                    clearCompanionSlots();
+                }
+            }
             return adDisplayContainer;
         }
 
         adDisplayContainer = sdkFactory.createAdDisplayContainer();
 
         // Set up spots for companions.
-        ViewGroup adCompanionViewGroup = null;
-        if (adCompanionViewGroup != null) {
-            CompanionAdSlot companionAdSlot = sdkFactory.createCompanionAdSlot();
-            companionAdSlot.setContainer(adCompanionViewGroup);
-            companionAdSlot.setSize(728, 90);
-            ArrayList<CompanionAdSlot> companionAdSlots = new ArrayList<>();
-            companionAdSlots.add(companionAdSlot);
-            adDisplayContainer.setCompanionSlots(companionAdSlots);
+
+        if (isValidCompanionAdsSettings(companionAdConfig, adCompanionAdWidth, adCompanionAdHeight)) {
+            populateCompanionSlots(adCompanionAdWidth, adCompanionAdHeight);
         }
         registerControlsOverlays();
         return adDisplayContainer;
+    }
+
+    private boolean isValidCompanionAdsSettings(CompanionAdConfig companionAdConfig, Integer adCompanionAdWidth, Integer adCompanionAdHeight) {
+        return companionAdConfig != null && adCompanionViewGroup != null && adCompanionAdWidth != null && adCompanionAdHeight != null;
+    }
+
+    private void clearCompanionSlots() {
+        adDisplayContainer.getCompanionSlots().clear();
+        companionAdSlot.setContainer(null);
+        companionAdSlot = null;
+        adDisplayContainer.setCompanionSlots(null);
+    }
+
+    private void populateCompanionSlots(int companionAdWidth, int companionAdHeight) {
+        companionAdSlot = sdkFactory.createCompanionAdSlot();
+        companionAdSlot.setContainer(adCompanionViewGroup);
+        companionAdSlot.setSize(companionAdWidth, companionAdHeight);
+        ArrayList<CompanionAdSlot> companionAdSlots = new ArrayList<>();
+        companionAdSlots.add(companionAdSlot);
+        adDisplayContainer.setCompanionSlots(companionAdSlots);
     }
 
     private void registerControlsOverlays() {
@@ -550,6 +589,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             adDisplayContainer.setPlayer(null);
             adDisplayContainer.unregisterAllVideoControlsOverlays();
         }
+
         if (adsManager != null) {
             adsManager.destroy();
             adsManager = null;
@@ -963,6 +1003,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             messageBus.post(new AdEvent.AdRequestedEvent(!TextUtils.isEmpty(adConfig.getAdTagUrl()) ? adConfig.getAdTagUrl() : adConfig.getAdTagResponse()));
         }
         sendError(errorType, errorMessage, adException);
+        if (PKAdErrorType.COMPANION_AD_LOADING_FAILED.equals(errorType)) {
+            return;
+        }
         preparePlayer(isAutoPlay);
     }
 
@@ -1031,7 +1074,12 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private void sendError(Enum errorType, String message, Throwable exception) {
         log.e("Ad Error: " + errorType.name() + " with message " + message);
-        AdEvent errorEvent = new AdEvent.Error(new PKError(errorType, message, exception));
+
+        PKError.Severity adErrorSeverity = PKError.Severity.Fatal;
+        if (PKAdErrorType.COMPANION_AD_LOADING_FAILED.equals(errorType)) {
+            adErrorSeverity = PKError.Severity.Recoverable;
+        }
+        AdEvent errorEvent = new AdEvent.Error(new PKError(errorType, adErrorSeverity, message, exception));
         messageBus.post(errorEvent);
     }
 
