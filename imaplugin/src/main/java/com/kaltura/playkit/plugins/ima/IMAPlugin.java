@@ -285,15 +285,19 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (adCompanionViewGroup != null) {
             adCompanionViewGroup.removeAllViews();
         }
-
-
-        adCompanionViewGroup = (adConfig.getCompanionAdConfig() != null && adConfig.getCompanionAdConfig().getCompanionAdView() != null) ? adConfig.getCompanionAdConfig().getCompanionAdView() : null;
-
+        Integer adCompanionAdWidth = null;
+        Integer adCompanionAdHeight = null;
+        if (adConfig != null && adConfig.getCompanionAdConfig() != null) {
+            CompanionAdConfig companionAdConfig = adConfig.getCompanionAdConfig();
+            adCompanionViewGroup = companionAdConfig.getCompanionAdView();
+            adCompanionAdWidth   = companionAdConfig.getCompanionAdWidth();
+            adCompanionAdHeight  = companionAdConfig.getCompanionAdHeight();
+        }
         if (adDisplayContainer != null) {
             log.d("adDisplayContainer != null return current adDisplayContainer");
             adDisplayContainer.unregisterAllVideoControlsOverlays();
             registerControlsOverlays();
-            if (adConfig.getCompanionAdConfig() != null && adCompanionViewGroup != null) {
+            if (adConfig.getCompanionAdConfig() != null && adCompanionViewGroup != null &&  adCompanionAdWidth != null &&  adCompanionAdHeight != null) {
                 populateCompanionSlots(adConfig.getCompanionAdConfig().getCompanionAdWidth(), adConfig.getCompanionAdConfig().getCompanionAdHeight());
             } else {
                 if (adDisplayContainer.getCompanionSlots() != null && !adDisplayContainer.getCompanionSlots().isEmpty()) {
@@ -814,6 +818,32 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     @Override
+    public Long getPlaybackStartPosition() {
+        if (mediaConfig != null) {
+            return mediaConfig.getStartPosition();
+        }
+        return 0L;
+    }
+
+    @Override
+    public boolean isAlwaysStartWithPreroll() {
+        if (adConfig != null) {
+            return adConfig.isAlwaysStartWithPreroll();
+        }
+        return false;
+    }
+
+    @Override
+    public long getFakePlayerPosition(long realPlayerPosition) {
+        return 0;
+    }
+
+    @Override
+    public long getFakePlayerDuration(long duration) {
+        return 0;
+    }
+
+    @Override
     public void setAdProviderListener(PKAdProviderListener adProviderListener) {
         pkAdProviderListener = adProviderListener;
     }
@@ -1063,7 +1093,12 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private void sendError(Enum errorType, String message, Throwable exception) {
         log.e("Ad Error: " + errorType.name() + " with message " + message);
-        AdEvent errorEvent = new AdEvent.Error(new PKError(errorType, message, exception));
+
+        PKError.Severity adErrorSeverity = PKError.Severity.Fatal;
+        if (PKAdErrorType.COMPANION_AD_LOADING_FAILED.equals(errorType)) {
+            adErrorSeverity = PKError.Severity.Recoverable;
+        }
+        AdEvent errorEvent = new AdEvent.Error(new PKError(errorType, adErrorSeverity, message, exception));
         messageBus.post(errorEvent);
     }
 

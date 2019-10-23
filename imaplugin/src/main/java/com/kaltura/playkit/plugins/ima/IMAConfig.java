@@ -278,14 +278,6 @@ public class IMAConfig {
         return controlsOverlayList;
     }
 
-//    public Map<Double, String> getTagsTimes() {
-//        return tagsTimes;
-//    }
-//
-//    public void setTagsTimes(Map<Double, String> tagsTimes) {
-//        this.tagsTimes = tagsTimes;
-//    }
-
     /**
      * Due to Views required for setControlsOverlayList()
      *

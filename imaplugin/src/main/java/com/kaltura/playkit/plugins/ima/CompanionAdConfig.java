@@ -4,10 +4,10 @@ import android.view.ViewGroup;
 
 public class CompanionAdConfig {
     private transient ViewGroup companionAdView;
-    private int companionAdWidth = 728;
-    private int companionAdHeight = 90;
+    private Integer companionAdWidth;
+    private Integer companionAdHeight;
 
-    public CompanionAdConfig(ViewGroup companionAdView, int companionAdWidth, int companionAdHeight) {
+    public CompanionAdConfig(ViewGroup companionAdView, Integer companionAdWidth, Integer companionAdHeight) {
         this.companionAdView = companionAdView;
         this.companionAdWidth = companionAdWidth;
         this.companionAdHeight = companionAdHeight;
@@ -17,11 +17,11 @@ public class CompanionAdConfig {
         return companionAdView;
     }
 
-    public int getCompanionAdWidth() {
+    public Integer getCompanionAdWidth() {
         return companionAdWidth;
     }
 
-    public int getCompanionAdHeight() {
+    public Integer getCompanionAdHeight() {
         return companionAdHeight;
     }
 }
