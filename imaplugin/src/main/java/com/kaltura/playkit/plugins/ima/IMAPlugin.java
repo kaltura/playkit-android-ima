@@ -296,24 +296,25 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             adCompanionAdHeight  = companionAdConfig.getCompanionAdHeight();
         }
 
-        if (adDisplayContainer != null) {
+        //clean up and reuse adDisplayContainer for change media without companion ads
+        if (adDisplayContainer != null && adCompanionViewGroup == null) {
             log.d("adDisplayContainer != null return current adDisplayContainer");
             adDisplayContainer.unregisterAllVideoControlsOverlays();
             registerControlsOverlays();
-            if (isValidCompanionAdsSettings(companionAdConfig, adCompanionAdWidth, adCompanionAdHeight)) {
-                populateCompanionSlots(adCompanionAdWidth, adCompanionAdHeight);
-            } else {
-                if (adDisplayContainer.getCompanionSlots() != null && !adDisplayContainer.getCompanionSlots().isEmpty()) {
-                    clearCompanionSlots();
-                }
-            }
+            clearCompanionSlots();
             return adDisplayContainer;
         }
 
+        //clean up for change media with companion ads
+        if (adDisplayContainer != null) {
+            log.d("adDisplayContainer != null return current adDisplayContainer");
+            adDisplayContainer.unregisterAllVideoControlsOverlays();
+            clearCompanionSlots();
+            adDisplayContainer = null;
+        }
+
         adDisplayContainer = sdkFactory.createAdDisplayContainer();
-
         // Set up spots for companions.
-
         if (isValidCompanionAdsSettings(companionAdConfig, adCompanionAdWidth, adCompanionAdHeight)) {
             populateCompanionSlots(adCompanionAdWidth, adCompanionAdHeight);
         }
@@ -326,10 +327,14 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     private void clearCompanionSlots() {
-        adDisplayContainer.getCompanionSlots().clear();
-        companionAdSlot.setContainer(null);
-        companionAdSlot = null;
-        adDisplayContainer.setCompanionSlots(null);
+        if (adDisplayContainer != null && adDisplayContainer.getCompanionSlots() != null) {
+            adDisplayContainer.getCompanionSlots().clear();
+            adDisplayContainer.setCompanionSlots(null);
+        }
+        if (companionAdSlot != null) {
+            companionAdSlot.setContainer(null);
+            companionAdSlot = null;
+        }
     }
 
     private void populateCompanionSlots(int companionAdWidth, int companionAdHeight) {
