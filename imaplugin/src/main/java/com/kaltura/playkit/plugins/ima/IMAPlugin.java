@@ -1166,6 +1166,12 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             case CONTENT_RESUME_REQUESTED:
                 log.d("AD REQUEST AD_CONTENT_RESUME_REQUESTED");
+                
+                // Added due to an Async call coming from IMA ad player which send buffer start and end events
+                if (videoPlayerWithAdPlayback != null) {
+                    videoPlayerWithAdPlayback.stop();
+                }
+
                 if (checkIfDiscardAdRequired()) {
                     for (Long cuePoint : adTagCuePoints.getAdCuePoints()) {
                         if (cuePoint != 0 && cuePoint != -1 && ((cuePoint / Consts.MILLISECONDS_MULTIPLIER_FLOAT) < playbackStartPosition)) {
@@ -1443,6 +1449,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public void onBufferStart() {
+        if (lastAdEventReceived == AdEvent.Type.CONTENT_RESUME_REQUESTED) {
+            return;
+        }
+
         isAdDisplayed = true;
         if (lastAdEventReceived == AdEvent.Type.AD_BUFFER_START) {
             return;
@@ -1455,6 +1465,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public void onBufferEnd() {
+        if (lastAdEventReceived == AdEvent.Type.CONTENT_RESUME_REQUESTED) {
+            return;
+        }
+
         isAdDisplayed = true;
         if (lastAdEventReceived == AdEvent.Type.AD_BUFFER_END) {
             return;
