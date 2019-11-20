@@ -715,7 +715,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         log.d("IMA Start destroyAdsManager");
         if (videoPlayerWithAdPlayback != null) {
-            videoPlayerWithAdPlayback.stop();
+            videoPlayerWithAdPlayback.stop(true);
         }
         adsManager.destroy();
         contentCompleted();
@@ -1168,8 +1168,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 log.d("AD REQUEST AD_CONTENT_RESUME_REQUESTED");
                 
                 // Added due to an Async call coming from IMA ad player which send buffer start and end events
-                if (videoPlayerWithAdPlayback != null) {
-                    videoPlayerWithAdPlayback.stop();
+                if (adsManager != null) {
+                    videoPlayerWithAdPlayback.stop(false);
                 }
 
                 if (checkIfDiscardAdRequired()) {
@@ -1238,7 +1238,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 }
 
                 if (isReleaseContentPlayerRequired && videoPlayerWithAdPlayback != null) {
-                    videoPlayerWithAdPlayback.stop();
+                    videoPlayerWithAdPlayback.stop(true);
                 }
 
                 break;
