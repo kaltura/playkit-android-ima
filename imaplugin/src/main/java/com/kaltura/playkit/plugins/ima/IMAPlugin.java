@@ -1162,7 +1162,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             case CONTENT_RESUME_REQUESTED:
                 log.d("AD REQUEST AD_CONTENT_RESUME_REQUESTED");
-
                 if (checkIfDiscardAdRequired()) {
                     for (Long cuePoint : adTagCuePoints.getAdCuePoints()) {
                         if (cuePoint != 0 && cuePoint != -1 && ((cuePoint / Consts.MILLISECONDS_MULTIPLIER_FLOAT) < playbackStartPosition)) {
