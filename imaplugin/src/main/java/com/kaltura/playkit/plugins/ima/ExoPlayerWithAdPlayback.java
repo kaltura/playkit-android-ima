@@ -467,11 +467,11 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         }
     }
 
-    public void stop() {
+    public void stop(boolean isResetRequired) {
         isPlayerReady = false;
         if (adVideoPlayerView != null && adVideoPlayerView.getPlayer() != null) {
             adVideoPlayerView.getPlayer().setPlayWhenReady(false);
-            adVideoPlayerView.getPlayer().stop(true);
+            adVideoPlayerView.getPlayer().stop(isResetRequired);
         }
     }
 
@@ -597,7 +597,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         if (isAppInBackground) {
             lastKnownAdPosition = getAdPosition();
             if (deviceRequiresDecoderRelease()) {
-                stop();
+                stop(true);
             } else {
                 pause();
             }

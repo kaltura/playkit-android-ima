@@ -654,7 +654,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         log.d("IMA Start destroyAdsManager");
         if (videoPlayerWithAdPlayback != null) {
-            videoPlayerWithAdPlayback.stop();
+            videoPlayerWithAdPlayback.stop(true);
         }
         adsManager.destroy();
         contentCompleted();
@@ -1084,8 +1084,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 if (checkIfDiscardAdRequired()) {
                     for (Long cuePoint : adTagCuePoints.getAdCuePoints()) {
                         if (cuePoint != 0 && cuePoint != -1 && ((cuePoint / Consts.MILLISECONDS_MULTIPLIER_FLOAT) < playbackStartPosition)) {
-                            log.d("discardAdBreak");
-                            adsManager.discardAdBreak();
+                            log.d("discardAdBreak"); // Discards current ad break and resumes content. If there is no current ad then the next ad break is discarded.                            adsManager.discardAdBreak();
                             playbackStartPosition = null; // making sure it will nu be done again.
                             break;
                         }
@@ -1249,7 +1248,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                         log.d("LOG Error but continue to next ad in pod");
                         return;
                     } else {
-                        adsManager.discardAdBreak();
+                        isAdRequested = false;
+                        if (videoPlayerWithAdPlayback != null) {
+                            videoPlayerWithAdPlayback.stop(false);
+                        }
                     }
                 }
                 String error = "Non-fatal Error";
@@ -1340,6 +1342,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public void onBufferStart() {
+        if (lastAdEventReceived == AdEvent.Type.CONTENT_RESUME_REQUESTED) {
+            return;
+        }
+
         isAdDisplayed = true;
         if (lastAdEventReceived == AdEvent.Type.AD_BUFFER_START) {
             return;
@@ -1352,6 +1358,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public void onBufferEnd() {
+        if (lastAdEventReceived == AdEvent.Type.CONTENT_RESUME_REQUESTED) {
+            return;
+        }
+
         isAdDisplayed = true;
         if (lastAdEventReceived == AdEvent.Type.AD_BUFFER_END) {
             return;
