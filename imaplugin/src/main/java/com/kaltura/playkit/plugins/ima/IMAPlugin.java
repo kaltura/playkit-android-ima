@@ -1165,8 +1165,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 if (checkIfDiscardAdRequired()) {
                     for (Long cuePoint : adTagCuePoints.getAdCuePoints()) {
                         if (cuePoint != 0 && cuePoint != -1 && ((cuePoint / Consts.MILLISECONDS_MULTIPLIER_FLOAT) < playbackStartPosition)) {
-                            log.d("discardAdBreak");
-                            // Discards current ad break and resumes content. If there is no current ad then the next ad break is discarded.
+                            log.d("discardAdBreak"); // Discards current ad break and resumes content. If there is no current ad then the next ad break is discarded.
                             adsManager.discardAdBreak();
                             playbackStartPosition = null; // making sure it will nu be done again.
                             break;
