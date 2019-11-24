@@ -15,7 +15,6 @@ package com.kaltura.playkit.plugins.ima;
 import android.content.Context;
 import android.os.CountDownTimer;
 import android.os.Handler;
-
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,17 +44,14 @@ import com.kaltura.playkit.PKMediaConfig;
 import com.kaltura.playkit.PKMediaFormat;
 import com.kaltura.playkit.PKPlugin;
 import com.kaltura.playkit.Player;
-
 import com.kaltura.playkit.PlayerEngineWrapper;
 import com.kaltura.playkit.PlayerEvent;
-
 import com.kaltura.playkit.ads.AdTagType;
 import com.kaltura.playkit.ads.AdsPlayerEngineWrapper;
 import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdPluginType;
 import com.kaltura.playkit.ads.PKAdProviderListener;
-
 import com.kaltura.playkit.player.PlayerEngine;
 import com.kaltura.playkit.player.PlayerSettings;
 import com.kaltura.playkit.plugin.ima.BuildConfig;
@@ -1166,16 +1162,12 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             case CONTENT_RESUME_REQUESTED:
                 log.d("AD REQUEST AD_CONTENT_RESUME_REQUESTED");
-                
-                // Added due to an Async call coming from IMA ad player which send buffer start and end events
-                if (adsManager != null) {
-                    videoPlayerWithAdPlayback.stop(false);
-                }
 
                 if (checkIfDiscardAdRequired()) {
                     for (Long cuePoint : adTagCuePoints.getAdCuePoints()) {
                         if (cuePoint != 0 && cuePoint != -1 && ((cuePoint / Consts.MILLISECONDS_MULTIPLIER_FLOAT) < playbackStartPosition)) {
                             log.d("discardAdBreak");
+                            // Discards current ad break and resumes content. If there is no current ad then the next ad break is discarded.
                             adsManager.discardAdBreak();
                             playbackStartPosition = null; // making sure it will nu be done again.
                             break;
@@ -1358,7 +1350,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                         log.d("LOG Error but continue to next ad in pod");
                         return;
                     } else {
-                        adsManager.discardAdBreak();
+                        isAdRequested = false;
+                        if (videoPlayerWithAdPlayback != null) {
+                            videoPlayerWithAdPlayback.stop(false);
+                        }
                     }
                 }
                 String error = "Non-fatal Error";
