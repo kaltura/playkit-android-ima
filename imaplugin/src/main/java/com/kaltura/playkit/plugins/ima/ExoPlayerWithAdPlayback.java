@@ -470,11 +470,11 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         }
     }
 
-    public void stop(boolean isPlayerReset) {
+    public void stop(boolean isResetRequired) {
         isPlayerReady = false;
         if (adVideoPlayerView != null && adVideoPlayerView.getPlayer() != null) {
             adVideoPlayerView.getPlayer().setPlayWhenReady(false);
-            adVideoPlayerView.getPlayer().stop(isPlayerReset);
+            adVideoPlayerView.getPlayer().stop(isResetRequired);
         }
     }
 
