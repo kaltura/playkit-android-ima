@@ -618,6 +618,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (TextUtils.isEmpty(adTagUrl) && TextUtils.isEmpty(adTagResponse)) {
             log.d("AdTag is empty avoiding ad request");
             isAdRequested = true;
+            if (adTagCuePoints != null && adTagCuePoints.getAdCuePoints() != null) {
+                adTagCuePoints.getAdCuePoints().clear();
+                adTagCuePoints = null;
+            }
             displayContent();
             preparePlayer(false);
             return;
@@ -761,6 +765,16 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     @Override
     public PKAdInfo getAdInfo() {
         return adInfo;
+    }
+
+    @Override
+    public Long getPlaybackStartPosition() {
+        return playbackStartPosition;
+    }
+
+    @Override
+    public boolean isAlwaysStartWithPreroll() {
+        return (adConfig == null) ? false : adConfig.isAlwaysStartWithPreroll();
     }
 
     @Override
@@ -1432,7 +1446,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             adsManager = adsManagerLoadedEvent.getAdsManager();
 
             //Attach event and error event listeners.
-
             adsManager.addAdErrorListener(IMAPlugin.this);
             adsManager.addAdEventListener(IMAPlugin.this);
             sendCuePointsUpdateEvent();
