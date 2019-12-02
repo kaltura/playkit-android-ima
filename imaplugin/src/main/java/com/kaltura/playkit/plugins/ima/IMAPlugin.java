@@ -327,7 +327,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     private void clearCompanionSlots() {
-        if (adDisplayContainer != null && adDisplayContainer.getCompanionSlots() != null) {
+        if (adDisplayContainer != null && adDisplayContainer.getCompanionSlots() != null && !adDisplayContainer.getCompanionSlots().isEmpty()) {
             adDisplayContainer.getCompanionSlots().clear();
             adDisplayContainer.setCompanionSlots(null);
         }
