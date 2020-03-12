@@ -572,7 +572,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 onAdBreakStarted();
                 break;
             case AD_BREAK_STARTED: //Fired when an ad break starts.
-                if (adConfig.isLiveDAI()) {
+                if (adConfig != null && adConfig.isLiveDAI()) {
                     return;
                 }
                 log.d("AD AD_BREAK_STARTED");
@@ -583,7 +583,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 onAdBreakEnded();
                 break;
             case AD_BREAK_ENDED: //Fired when an ad break ends.
-                if (adConfig.isLiveDAI()) {
+                if (adConfig != null && adConfig.isLiveDAI()) {
                     return;
                 }
                 log.d("AD AD_BREAK_ENDED");
@@ -699,7 +699,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                     }
                 }
             }
-            if (!adConfig.isLiveDAI()) {
+            if (adConfig != null && !adConfig.isLiveDAI()) {
                 if (allAdsPlayed || lastAdPlayed && getPlayerEngine() != null && getPlayerEngine().getCurrentPosition() >= getPlayerEngine().getDuration()) {
                     messageBus.post(new AdEvent(AdEvent.Type.ALL_ADS_COMPLETED));
                 }
@@ -932,7 +932,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     @Override
     public AdCuePoints getCuePoints() {
         //in change media it might take some time to populate cuepoints so if playkitAdCuePoints.getAdCuePoints().isEmpty() we may try again to create the cuepoints
-        if (playkitAdCuePoints != null && playkitAdCuePoints.getAdCuePoints() != null && (!playkitAdCuePoints.getAdCuePoints().isEmpty() || isAdError || adConfig.isLiveDAI())) {
+        if (playkitAdCuePoints != null && playkitAdCuePoints.getAdCuePoints() != null && (!playkitAdCuePoints.getAdCuePoints().isEmpty() || isAdError || (adConfig != null && adConfig.isLiveDAI()))) {
             return playkitAdCuePoints;
         }
 
