@@ -155,7 +155,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         @Override
         public void warmUp(Context context) {
             log.d("warmUp started");
-            ImaSdkFactory.getInstance().createAdsLoader(context);
+            //ImaSdkFactory.getInstance().createAdsLoader(context);
         }
     };
 
@@ -295,7 +295,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         //clean up and reuse adDisplayContainer for change media without companion ads
         if (adDisplayContainer != null && adCompanionViewGroup == null) {
             log.d("adDisplayContainer != null return current adDisplayContainer");
-            adDisplayContainer.unregisterAllVideoControlsOverlays();
+           // adDisplayContainer.unregisterAllVideoControlsOverlays();
             registerControlsOverlays();
             clearCompanionSlots();
             return adDisplayContainer;
@@ -304,12 +304,14 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         //clean up for change media with companion ads
         if (adDisplayContainer != null) {
             log.d("adDisplayContainer != null return current adDisplayContainer");
-            adDisplayContainer.unregisterAllVideoControlsOverlays();
+          //  adDisplayContainer.unregisterAllVideoControlsOverlays();
             clearCompanionSlots();
             adDisplayContainer = null;
         }
 
-        adDisplayContainer = sdkFactory.createAdDisplayContainer();
+        adDisplayContainer = ImaSdkFactory.createAdDisplayContainer(
+                videoPlayerWithAdPlayback.getAdUiContainer(),
+                videoPlayerWithAdPlayback.getVideoAdPlayer());
         // Set up spots for companions.
         if (isValidCompanionAdsSettings(companionAdConfig, adCompanionAdWidth, adCompanionAdHeight)) {
             populateCompanionSlots(adCompanionAdWidth, adCompanionAdHeight);
@@ -345,7 +347,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private void registerControlsOverlays() {
         if (adConfig.getControlsOverlayList() != null && adDisplayContainer != null) {
             for (View controlView : adConfig.getControlsOverlayList()) {
-                adDisplayContainer.registerVideoControlsOverlay(controlView);
+               // adDisplayContainer.registerVideoControlsOverlay(controlView);
             }
         }
     }
@@ -586,10 +588,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         cancelAdManagerTimer();
         adTagCuePoints = null;
         adPlaybackCancelled = false;
-        if (adDisplayContainer != null) {
+        /*if (adDisplayContainer != null) {
             adDisplayContainer.setPlayer(null);
             adDisplayContainer.unregisterAllVideoControlsOverlays();
-        }
+        }*/
 
         if (adsManager != null) {
             adsManager.destroy();
@@ -626,8 +628,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         log.d("Do requestAdsFromIMA");
         
-        adDisplayContainer.setPlayer(videoPlayerWithAdPlayback.getVideoAdPlayer());
-        adDisplayContainer.setAdContainer(videoPlayerWithAdPlayback.getAdUiContainer());
+        //adDisplayContainer.setPlayer(videoPlayerWithAdPlayback.getVideoAdPlayer());
+        //adDisplayContainer.setAdContainer(videoPlayerWithAdPlayback.getAdUiContainer());
 
         // Create the ads request.
         final AdsRequest request = sdkFactory.createAdsRequest();
