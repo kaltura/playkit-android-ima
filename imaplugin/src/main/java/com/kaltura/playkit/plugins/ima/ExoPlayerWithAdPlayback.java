@@ -30,7 +30,6 @@ import com.kaltura.android.exoplayer2.source.TrackGroupArray;
 import com.kaltura.android.exoplayer2.source.dash.DashMediaSource;
 import com.kaltura.android.exoplayer2.source.dash.DefaultDashChunkSource;
 import com.kaltura.android.exoplayer2.source.hls.HlsMediaSource;
-import com.kaltura.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.kaltura.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.kaltura.android.exoplayer2.trackselection.TrackSelection;
 import com.kaltura.android.exoplayer2.trackselection.TrackSelectionArray;
@@ -44,7 +43,6 @@ import com.kaltura.android.exoplayer2.util.Log;
 import com.kaltura.android.exoplayer2.util.Util;
 import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PlayerState;
-import com.kaltura.playkit.drm.DeferredDrmSessionManager;
 import com.kaltura.playkit.player.MediaSupport;
 import com.kaltura.playkit.plugins.ads.AdCuePoints;
 import com.kaltura.playkit.utils.Consts;
@@ -137,14 +135,6 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
     public PlayerView getAdPlayerView() {
         return adVideoPlayerView;
-    }
-
-    private DeferredDrmSessionManager.DrmSessionListener initDrmSessionListener() {
-        return error -> {
-            if (error != null) {
-                log.e("Error :" + error.message);
-            }
-        };
     }
 
     private void init() {
@@ -300,8 +290,8 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     @NonNull
     private DefaultTrackSelector getTrackSelector() {
         if (trackSelector == null) {
-            trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory());
-            trackSelector.setParameters(new DefaultTrackSelector.ParametersBuilder().build());
+            trackSelector = new DefaultTrackSelector(mContext);
+            trackSelector.setParameters(new DefaultTrackSelector.ParametersBuilder(mContext).build());
         }
         return trackSelector;
     }
