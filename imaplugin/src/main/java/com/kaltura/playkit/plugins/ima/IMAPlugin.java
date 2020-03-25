@@ -1389,17 +1389,22 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private void sendAdClickedEvent(com.google.ads.interactivemedia.v3.api.AdEvent adEvent) {
         String clickThruUrl;
         Ad ad = adEvent.getAd();
-        try {
-            Method clickThroughMethod = ad.getClass().getMethod("getClickThruUrl");
-            clickThruUrl = (String) clickThroughMethod.invoke(ad);
-            messageBus.post(new AdEvent.AdClickedEvent(clickThruUrl));
-            return;
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+
+        if (ad != null) {
+            try {
+                Method clickThroughMethod = ad.getClass().getMethod("getClickThruUrl");
+                if (clickThroughMethod != null) {
+                    clickThruUrl = (String) clickThroughMethod.invoke(ad);
+                    messageBus.post(new AdEvent.AdClickedEvent(clickThruUrl));
+                }
+                return;
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
         }
         messageBus.post(new AdEvent.AdClickedEvent(null));
     }
