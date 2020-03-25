@@ -301,6 +301,4 @@ public class IMADAIConfig {
     public boolean isLiveDAI() {
         return !TextUtils.isEmpty(assetKey);
     }
-
-
 }
