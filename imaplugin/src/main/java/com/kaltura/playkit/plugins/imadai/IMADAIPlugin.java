@@ -126,7 +126,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         @Override
         public void warmUp(Context context) {
             log.d("warmUp started");
-          //  ImaSdkFactory.getInstance().createAdsLoader(context);
+            ImaSdkFactory.getInstance().createAdsLoader(context);
         }
     };
 
@@ -429,16 +429,6 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 } else {
                     shouldPrepareOnResume = true;
                 }
-            }
-
-            @Override
-            public void pause() {
-
-            }
-
-            @Override
-            public void resume() {
-
             }
 
             @Override
