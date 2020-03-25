@@ -64,10 +64,7 @@ public class IMADAIConfig {
                          String videoId, // null for Live
                          String apiKey, // seems to be always null in demos
                          StreamRequest.StreamFormat streamFormat,
-                         String licenseUrl,
-                         HashMap<String, String> adTagParams,
-                         String streamActivityMonitorId,
-                         String authToken) {
+                         String licenseUrl) {
 
         this.assetKey = assetKey;
         this.contentSourceId = contentSourceId;
@@ -82,9 +79,6 @@ public class IMADAIConfig {
         this.adLoadTimeOut             = DEFAULT_AD_LOAD_TIMEOUT;
         this.enableDebugMode           = false;
         this.alwaysStartWithPreroll   = false;
-        this.adTagParams = adTagParams;
-        this.streamActivityMonitorId = streamActivityMonitorId;
-        this.authToken = authToken;
     }
 
     //VOD Factory
@@ -93,10 +87,7 @@ public class IMADAIConfig {
                                                   String videoId,
                                                   String apiKey,
                                                   StreamRequest.StreamFormat streamFormat,
-                                                  String licenseUrl,
-                                                  HashMap<String, String> adTagParams,
-                                                  String streamActivityMonitorId,
-                                                  String authToken) {
+                                                  String licenseUrl) {
 
         return new IMADAIConfig(assetTitle,
                 null,
@@ -104,10 +95,7 @@ public class IMADAIConfig {
                 videoId ,
                 apiKey,
                 streamFormat,
-                licenseUrl,
-                adTagParams,
-                streamActivityMonitorId,
-                authToken);
+                licenseUrl);
     }
 
     //Live Factory
@@ -115,20 +103,14 @@ public class IMADAIConfig {
                                                    String assetKey,
                                                    String apiKey,
                                                    StreamRequest.StreamFormat streamFormat,
-                                                   String licenseUrl,
-                                                   HashMap<String, String> adTagParams,
-                                                   String streamActivityMonitorId,
-                                                   String authToken) {
+                                                   String licenseUrl) {
         return new IMADAIConfig(assetTitle,
                 assetKey,
                 null,
                 null,
                 apiKey,
                 streamFormat,
-                licenseUrl,
-                adTagParams,
-                streamActivityMonitorId,
-                authToken);
+                licenseUrl);
     }
 
     public String getAssetTitle() {
