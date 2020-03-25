@@ -666,6 +666,10 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private void sendAdClickedEvent(com.google.ads.interactivemedia.v3.api.AdEvent adEvent) {
         String clickThruUrl;
         Ad ad = adEvent.getAd();
+        if (ad == null) {
+            return;
+        }
+        
         try {
             Method clickThroughMethod = ad.getClass().getMethod("getClickThruUrl");
             clickThruUrl = (String) clickThroughMethod.invoke(ad);
