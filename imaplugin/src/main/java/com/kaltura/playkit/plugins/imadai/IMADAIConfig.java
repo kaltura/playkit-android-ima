@@ -18,8 +18,8 @@ import android.view.View;
 import com.google.ads.interactivemedia.v3.api.StreamRequest;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by gilad.nadav on 17/11/2016.
@@ -38,7 +38,7 @@ public class IMADAIConfig {
     private String videoId;
     private StreamRequest.StreamFormat streamFormat;
     private String licenseUrl;
-    private HashMap<String, String> adTagParams;
+    private Map<String, String> adTagParams;
     private String streamActivityMonitorId;
     private String authToken;
 
@@ -181,7 +181,7 @@ public class IMADAIConfig {
         return adLoadTimeOut;
     }
 
-    public HashMap<String, String> getAdTagParams() {
+    public Map<String, String> getAdTagParams() {
         return adTagParams;
     }
 
@@ -229,7 +229,7 @@ public class IMADAIConfig {
      * @param adTagParams optional ad tag params
      * @return IMADAIConfig
      */
-    public IMADAIConfig setAdTagParams(HashMap<String, String> adTagParams) {
+    public IMADAIConfig setAdTagParams(Map<String, String> adTagParams) {
         this.adTagParams = adTagParams;
         return this;
     }
