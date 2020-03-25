@@ -18,6 +18,7 @@ import android.view.View;
 import com.google.ads.interactivemedia.v3.api.StreamRequest;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -37,6 +38,9 @@ public class IMADAIConfig {
     private String videoId;
     private StreamRequest.StreamFormat streamFormat;
     private String licenseUrl;
+    private HashMap<String, String> adTagParams;
+    private String streamActivityMonitorId;
+    private String authToken;
 
     private String language;
     private boolean adAttribution;
@@ -60,7 +64,10 @@ public class IMADAIConfig {
                          String videoId, // null for Live
                          String apiKey, // seems to be always null in demos
                          StreamRequest.StreamFormat streamFormat,
-                         String licenseUrl) {
+                         String licenseUrl,
+                         HashMap<String, String> adTagParams,
+                         String streamActivityMonitorId,
+                         String authToken) {
 
         this.assetKey = assetKey;
         this.contentSourceId = contentSourceId;
@@ -75,6 +82,9 @@ public class IMADAIConfig {
         this.adLoadTimeOut             = DEFAULT_AD_LOAD_TIMEOUT;
         this.enableDebugMode           = false;
         this.alwaysStartWithPreroll   = false;
+        this.adTagParams = adTagParams;
+        this.streamActivityMonitorId = streamActivityMonitorId;
+        this.authToken = authToken;
     }
 
     //VOD Factory
@@ -83,7 +93,10 @@ public class IMADAIConfig {
                                                   String videoId,
                                                   String apiKey,
                                                   StreamRequest.StreamFormat streamFormat,
-                                                  String licenseUrl) {
+                                                  String licenseUrl,
+                                                  HashMap<String, String> adTagParams,
+                                                  String streamActivityMonitorId,
+                                                  String authToken) {
 
         return new IMADAIConfig(assetTitle,
                 null,
@@ -91,22 +104,31 @@ public class IMADAIConfig {
                 videoId ,
                 apiKey,
                 streamFormat,
-                licenseUrl);
+                licenseUrl,
+                adTagParams,
+                streamActivityMonitorId,
+                authToken);
     }
 
     //Live Factory
     public static IMADAIConfig getLiveIMADAIConfig(String assetTitle,
-                                                  String assetKey,
-                                                  String apiKey,
-                                                  StreamRequest.StreamFormat streamFormat,
-                                                  String licenseUrl) {
+                                                   String assetKey,
+                                                   String apiKey,
+                                                   StreamRequest.StreamFormat streamFormat,
+                                                   String licenseUrl,
+                                                   HashMap<String, String> adTagParams,
+                                                   String streamActivityMonitorId,
+                                                   String authToken) {
         return new IMADAIConfig(assetTitle,
                 assetKey,
                 null,
                 null,
                 apiKey,
                 streamFormat,
-                licenseUrl);
+                licenseUrl,
+                adTagParams,
+                streamActivityMonitorId,
+                authToken);
     }
 
     public String getAssetTitle() {
@@ -177,6 +199,18 @@ public class IMADAIConfig {
         return adLoadTimeOut;
     }
 
+    public HashMap<String, String> getAdTagParams() {
+        return adTagParams;
+    }
+
+    public String getStreamActivityMonitorId() {
+        return streamActivityMonitorId;
+    }
+
+    public String getAuthToken() {
+        return authToken;
+    }
+
     public IMADAIConfig setAdLoadTimeOut(int adLoadTimeOut) {
         this.adLoadTimeOut = adLoadTimeOut;
         return this;
@@ -199,6 +233,46 @@ public class IMADAIConfig {
 
     public IMADAIConfig setControlsOverlayList(List<View> controlsOverlayList) {
         this.controlsOverlayList = controlsOverlayList;
+        return this;
+    }
+
+    /**
+     * Sets the overridable ad tag parameters on the stream request.
+     * @see <a href="https://support.google.com/admanager/answer/7320899">Supply targeting parameters to your stream</a>
+     * provides more information.
+     * You can use the dai-ot and dai-ov parameters for stream variant preference
+     * @see <a href="https://support.google.com/admanager/answer/7320899">See Override Stream Variant Parameters </a>
+     * for more information.
+     *
+     * @param adTagParams optional ad tag params
+     * @return IMADAIConfig
+     */
+    public IMADAIConfig setAdTagParams(HashMap<String, String> adTagParams) {
+        this.adTagParams = adTagParams;
+        return this;
+    }
+
+    /**
+     * Sets the ID to be used to debug the stream with the stream activity monitor.
+     * This is used to provide a convenient way to allow publishers to find a stream
+     * log in the stream activity monitor tool.
+     *
+     * @param streamActivityMonitorId monitorId
+     * @return IMADAIConfig
+     */
+    public IMADAIConfig setStreamActivityMonitorId(String streamActivityMonitorId) {
+        this.streamActivityMonitorId = streamActivityMonitorId;
+        return this;
+    }
+
+    /**
+     * Sets the stream request authorization token. Used in place of the API key for stricter content authorization.
+     * The publisher can control individual content streams authorizations based on this token.
+     * @param authToken authToken
+     * @return IMADAIConfig
+     */
+    public IMADAIConfig setAuthToken(String authToken) {
+        this.authToken = authToken;
         return this;
     }
 
@@ -227,4 +301,6 @@ public class IMADAIConfig {
     public boolean isLiveDAI() {
         return !TextUtils.isEmpty(assetKey);
     }
+
+
 }
