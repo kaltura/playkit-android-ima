@@ -283,4 +283,12 @@ public class IMADAIConfig {
     public boolean isLiveDAI() {
         return !TextUtils.isEmpty(assetKey);
     }
+
+    public boolean isVodDAI() {
+        return !TextUtils.isEmpty(contentSourceId) || !TextUtils.isEmpty(videoId);
+    }
+
+    public boolean isEmpty() {
+        return !this.isLiveDAI() && !this.isVodDAI();
+    }
 }
