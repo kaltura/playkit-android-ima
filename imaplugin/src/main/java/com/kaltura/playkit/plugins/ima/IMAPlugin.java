@@ -608,8 +608,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             adManagerTimer = null;
         }
     }
-
-
+    
     private void requestAdsFromIMA(String adTagUrl) {
         String adTagResponse = null;
         if (adConfig != null) {
