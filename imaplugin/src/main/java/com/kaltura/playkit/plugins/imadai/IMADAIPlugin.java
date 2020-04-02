@@ -249,8 +249,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
     private void requestAdFromIMADAI() {
 
-        if (adConfig == null ||
-                (TextUtils.isEmpty(adConfig.getAssetKey()) && TextUtils.isEmpty(adConfig.getContentSourceId()) && TextUtils.isEmpty(adConfig.getVideoId()))) {
+        if (adConfig == null || adConfig.isEmpty()) {
             log.d("adConfig is null or empty DAI config. Calling prepare");
             isAdRequested = true;
             preparePlayer(true);
@@ -522,9 +521,12 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     protected void onUpdateConfig(Object config) {
         log.d("Start onUpdateConfig");
         adConfig = parseConfig(config);
-        if (adConfig == null) {
+        if (adConfig == null || adConfig.isEmpty()) {
             log.e("Error adConfig Incorrect or null");
-            adConfig = new IMADAIConfig();
+            isAdError = true;
+            if (adConfig == null) {
+                adConfig = new IMADAIConfig();
+            }
         }
     }
 
