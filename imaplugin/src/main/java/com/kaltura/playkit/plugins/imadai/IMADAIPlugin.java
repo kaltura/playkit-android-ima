@@ -368,10 +368,18 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                     adConfig.getVideoId(), adConfig.getApiKey());
         }
         // Set the stream format (HLS or DASH).
-        request.setFormat(adConfig.getStreamFormat());
-        request.setAdTagParameters(adConfig.getAdTagParams());
-        request.setStreamActivityMonitorId(adConfig.getStreamActivityMonitorId());
-        request.setAuthToken(adConfig.getAuthToken());
+        if (adConfig.getStreamFormat() != null) {
+            request.setFormat(adConfig.getStreamFormat());
+        }
+        if (adConfig.getAdTagParams() != null) {
+            request.setAdTagParameters(adConfig.getAdTagParams());
+        }
+        if (!TextUtils.isEmpty(adConfig.getStreamActivityMonitorId())) {
+            request.setStreamActivityMonitorId(adConfig.getStreamActivityMonitorId());
+        }
+        if (!TextUtils.isEmpty(adConfig.getAuthToken())) {
+            request.setAuthToken(adConfig.getAuthToken());
+        }
 
         return request;
     }
