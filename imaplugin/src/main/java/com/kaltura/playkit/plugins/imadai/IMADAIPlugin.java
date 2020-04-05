@@ -39,15 +39,15 @@ import com.kaltura.playkit.ads.AdsDAIPlayerEngineWrapper;
 import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdPluginType;
+import com.kaltura.playkit.ads.PKAdProviderListener;
 import com.kaltura.playkit.player.PKMediaSourceConfig;
 import com.kaltura.playkit.player.PlayerEngine;
-import com.kaltura.playkit.plugins.ads.AdCuePoints;
-import com.kaltura.playkit.plugins.ads.AdEvent;
-import com.kaltura.playkit.ads.PKAdProviderListener;
 import com.kaltura.playkit.player.PlayerSettings;
 import com.kaltura.playkit.player.metadata.PKMetadata;
 import com.kaltura.playkit.player.metadata.PKTextInformationFrame;
 import com.kaltura.playkit.plugin.ima.BuildConfig;
+import com.kaltura.playkit.plugins.ads.AdCuePoints;
+import com.kaltura.playkit.plugins.ads.AdEvent;
 import com.kaltura.playkit.plugins.ads.AdInfo;
 import com.kaltura.playkit.plugins.ads.AdsProvider;
 import com.kaltura.playkit.utils.Consts;
@@ -248,10 +248,20 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     }
 
     private void requestAdFromIMADAI() {
+
+        if (adConfig == null || adConfig.isEmpty()) {
+            log.d("adConfig is null or empty DAI config. Calling prepare");
+            isAdRequested = true;
+            preparePlayer(true);
+            return;
+        }
+
         String adRequestInfo = adConfig.getAssetKey();
+
         if (adConfig.getAssetKey() == null) {
             adRequestInfo = adConfig.getContentSourceId() + "/" + adConfig.getVideoId();
         }
+
         adsLoader.requestStream(buildStreamRequest());
         messageBus.post(new AdEvent.AdRequestedEvent(adRequestInfo));
     }
@@ -358,7 +368,18 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                     adConfig.getVideoId(), adConfig.getApiKey());
         }
         // Set the stream format (HLS or DASH).
-        request.setFormat(adConfig.getStreamFormat());
+        if (adConfig.getStreamFormat() != null) {
+            request.setFormat(adConfig.getStreamFormat());
+        }
+        if (adConfig.getAdTagParams() != null) {
+            request.setAdTagParameters(adConfig.getAdTagParams());
+        }
+        if (!TextUtils.isEmpty(adConfig.getStreamActivityMonitorId())) {
+            request.setStreamActivityMonitorId(adConfig.getStreamActivityMonitorId());
+        }
+        if (!TextUtils.isEmpty(adConfig.getAuthToken())) {
+            request.setAuthToken(adConfig.getAuthToken());
+        }
 
         return request;
     }
@@ -486,7 +507,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                     return VideoProgressUpdate.VIDEO_TIME_NOT_READY;
                 }
                 long position = (long) streamManager.getStreamTimeForContentTime(getPlayerEngine().getCurrentPosition());
-                if (getPlayerEngine().isLive()) {
+                boolean isLiveDAI = adConfig.isLiveDAI();
+                if (isLiveDAI) {
                     long pos = getPlayerEngine().getCurrentPosition();
                     pos -= getPlayerEngine().getPositionInWindowMs();
                     position = Math.round(streamManager.getStreamTimeForContentTime(pos));
@@ -495,7 +517,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 if (position < 0 || duration < 0) {
                     return VideoProgressUpdate.VIDEO_TIME_NOT_READY;
                 }
-                if (getPlayerEngine().isLive()) {
+                if (isLiveDAI) {
                     return new VideoProgressUpdate(position, duration);
                 }
                 return new VideoProgressUpdate(getPlayerEngine().getCurrentPosition(), getPlayerEngine().getDuration());
@@ -507,6 +529,13 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     protected void onUpdateConfig(Object config) {
         log.d("Start onUpdateConfig");
         adConfig = parseConfig(config);
+        if (adConfig == null || adConfig.isEmpty()) {
+            log.e("Error adConfig Incorrect or null");
+            isAdError = true;
+            if (adConfig == null) {
+                adConfig = new IMADAIConfig();
+            }
+        }
     }
 
     @Override
@@ -935,7 +964,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     @Override
     public AdCuePoints getCuePoints() {
         //in change media it might take some time to populate cuepoints so if playkitAdCuePoints.getAdCuePoints().isEmpty() we may try again to create the cuepoints
-        if (playkitAdCuePoints != null && playkitAdCuePoints.getAdCuePoints() != null && (!playkitAdCuePoints.getAdCuePoints().isEmpty() || isAdError || (adConfig != null && adConfig.isLiveDAI()))) {
+        if (playkitAdCuePoints != null && playkitAdCuePoints.getAdCuePoints() != null && (!playkitAdCuePoints.getAdCuePoints().isEmpty() || isAdError || (adConfig != null && (adConfig.isLiveDAI() || adConfig.isEmpty())))) {
             return playkitAdCuePoints;
         }
 
