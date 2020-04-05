@@ -1324,7 +1324,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
                 messageBus.post(new AdEvent.AdSkippedEvent(adInfo));
                 Ad adInfoSkip = adEvent.getAd();
-                if (adInfoSkip != null) {
+                if (adInfoSkip != null && adInfoSkip.getAdPodInfo() != null) {
                     AdPodInfo adPodInfoSkip = adInfoSkip.getAdPodInfo();
                     log.d("adPodInfo.getAdPosition() Skipped = " + adPodInfoSkip.getAdPosition() + " adPodInfo.getTotalAds()adPodInfo.getAdPosition() Skipped  = " + adPodInfoSkip.getTotalAds());
                     if (adPodInfoSkip.getTotalAds() >= 1 && adPodInfoSkip.getAdPosition() == adPodInfoSkip.getTotalAds()) {
