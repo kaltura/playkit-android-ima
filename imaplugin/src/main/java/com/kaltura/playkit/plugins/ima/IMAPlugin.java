@@ -414,6 +414,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (adConfig.getVideoBitrate() != -1) {
             renderingSettings.setBitrateKbps(adConfig.getVideoBitrate());
         }
+        renderingSettings.setFocusSkipButtonWhenAvailable(true);
         return renderingSettings;
     }
 
