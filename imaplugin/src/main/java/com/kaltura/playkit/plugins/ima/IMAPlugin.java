@@ -606,8 +606,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             adManagerTimer = null;
         }
     }
-
-
+    
     private void requestAdsFromIMA(String adTagUrl) {
         String adTagResponse = null;
         if (adConfig != null) {
@@ -1018,7 +1017,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (adConfig != null) {
             messageBus.post(new AdEvent.AdRequestedEvent(!TextUtils.isEmpty(adConfig.getAdTagUrl()) ? adConfig.getAdTagUrl() : adConfig.getAdTagResponse()));
         }
-        sendError(errorType, errorMessage, adException);
+        sendError(errorType, errorMessage + " adTagUrl=" + adConfig.getAdTagUrl(), adException);
         if (PKAdErrorType.COMPANION_AD_LOADING_FAILED.equals(errorType)) {
             return;
         }
@@ -1320,7 +1319,14 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             case SKIPPED:
                 adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
                 messageBus.post(new AdEvent.AdSkippedEvent(adInfo));
-                isAdDisplayed = false;
+                Ad adInfoSkip = adEvent.getAd();
+                if (adInfoSkip != null && adInfoSkip.getAdPodInfo() != null) {
+                    AdPodInfo adPodInfoSkip = adInfoSkip.getAdPodInfo();
+                    log.d("adPodInfo.getAdPosition() Skipped = " + adPodInfoSkip.getAdPosition() + " adPodInfo.getTotalAds()adPodInfo.getAdPosition() Skipped  = " + adPodInfoSkip.getTotalAds());
+                    if (adPodInfoSkip.getTotalAds() >= 1 && adPodInfoSkip.getAdPosition() == adPodInfoSkip.getTotalAds()) {
+                        isAdDisplayed = false;
+                    }
+                }
                 break;
             case SKIPPABLE_STATE_CHANGED:
                 messageBus.post(new AdEvent(AdEvent.Type.SKIPPABLE_STATE_CHANGED));
@@ -1386,17 +1392,22 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private void sendAdClickedEvent(com.google.ads.interactivemedia.v3.api.AdEvent adEvent) {
         String clickThruUrl;
         Ad ad = adEvent.getAd();
-        try {
-            Method clickThroughMethod = ad.getClass().getMethod("getClickThruUrl");
-            clickThruUrl = (String) clickThroughMethod.invoke(ad);
-            messageBus.post(new AdEvent.AdClickedEvent(clickThruUrl));
-            return;
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+
+        if (ad != null) {
+            try {
+                Method clickThroughMethod = ad.getClass().getMethod("getClickThruUrl");
+                if (clickThroughMethod != null) {
+                    clickThruUrl = (String) clickThroughMethod.invoke(ad);
+                    messageBus.post(new AdEvent.AdClickedEvent(clickThruUrl));
+                }
+                return;
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
         }
         messageBus.post(new AdEvent.AdClickedEvent(null));
     }

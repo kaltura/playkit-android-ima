@@ -144,14 +144,6 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         return adVideoPlayerView;
     }
 
-    private DeferredDrmSessionManager.DrmSessionListener initDrmSessionListener() {
-        return error -> {
-            if (error != null) {
-                log.e("Error :" + error.message);
-            }
-        };
-    }
-
     private void init() {
         isAdDisplayed = false;
         lastKnownAdPosition = 0;
@@ -305,8 +297,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     @NonNull
     private DefaultTrackSelector getTrackSelector() {
         if (trackSelector == null) {
-            trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory());
-            trackSelector.setParameters(new DefaultTrackSelector.ParametersBuilder().build());
+            trackSelector = new DefaultTrackSelector(mContext, new AdaptiveTrackSelection.Factory());
+            DefaultTrackSelector.ParametersBuilder builder = new DefaultTrackSelector.ParametersBuilder(mContext);
+            trackSelector.setParameters(builder.build());
         }
         return trackSelector;
     }
@@ -329,7 +322,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     }
 
     @Override
-    public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
+    public void onTimelineChanged(Timeline timeline, int reason) {
         log.d("onTimelineChanged");
     }
 
