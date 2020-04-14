@@ -1078,6 +1078,16 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     }
 
     @Override
+    public void setAdError(boolean isAdError) {
+        this.isAdError = isAdError;
+    }
+
+    @Override
+    public void setAllAdsCompleted(boolean isAllAdsCompleted) {
+        // Do Nothing
+    }
+
+    @Override
     public long getFakePlayerPosition(long realPlayerPosition) {
 
         if (realPlayerPosition < 0 || realPlayerPosition == C.POSITION_UNSET) {

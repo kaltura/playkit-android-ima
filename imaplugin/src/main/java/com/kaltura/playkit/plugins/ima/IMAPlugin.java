@@ -357,7 +357,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     @Override
     protected void onUpdateConfig(Object config) {
         log.d("Start onUpdateConfig");
-        resetAdFlagsOnUpdateConfig();
         adConfig = parseConfig(config);
         if (adConfig == null) {
             log.e("Error adConfig Incorrect or null");
@@ -577,14 +576,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private void destroyIMA() {
         clearAdsLoader();
         resetIMA();
-    }
-
-    private void resetAdFlagsOnUpdateConfig() {
-        log.d("resetAdFlagsOnUpdateConfig");
-        isAdError = false;
-        isAdRequested = false;
-        isAdDisplayed = false;
-        isAllAdsCompleted = false;
     }
 
     protected void resetIMA() {
@@ -820,6 +811,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public boolean isAdError() {
+        log.d("isAdError: " + isAdError);
         return isAdError;
     }
 
@@ -858,6 +850,16 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     @Override
     public void setAdRequested(boolean isAdRequested) {
         this.isAdRequested = isAdRequested;
+    }
+
+    @Override
+    public void setAdError(boolean isAdError) {
+        this.isAdError = isAdError;
+    }
+
+    @Override
+    public void setAllAdsCompleted(boolean isAllAdsCompleted) {
+        this.isAllAdsCompleted = isAllAdsCompleted;
     }
 
     @Override
