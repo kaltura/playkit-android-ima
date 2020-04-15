@@ -65,6 +65,7 @@ public class IMAConfig {
     private boolean adCountDown;
     private boolean enableDebugMode;
     private boolean alwaysStartWithPreroll;
+    private boolean enableFocusSkipButton;
     private int adLoadTimeOut; // in sec
     private int maxRedirects;
     private String playerType;
@@ -87,6 +88,7 @@ public class IMAConfig {
         this.adLoadTimeOut                          = DEFAULT_AD_LOAD_TIMEOUT;
         this.enableDebugMode                        = false;
         this.alwaysStartWithPreroll                 = false;
+        this.enableFocusSkipButton                  = true;
         this.videoMimeTypes.add(PKMediaFormat.mp4.mimeType);
         this.adTagUrl                               = null;         //=> must be set via setter
         this.adTagResponse                          = null;
@@ -221,6 +223,17 @@ public class IMAConfig {
 
     public boolean isAlwaysStartWithPreroll() {
         return alwaysStartWithPreroll;
+    }
+
+    // Set whether to focus on the skip button when the skippable ad can be skipped on Android TV. Default true
+    // This is a no-op on non-Android TV devices.
+    public IMAConfig setEnableFocusSkipButton(boolean enableFocusSkipButton) {
+        this.enableFocusSkipButton = enableFocusSkipButton;
+        return this;
+    }
+
+    public boolean isEnableFocusSkipButton() {
+        return enableFocusSkipButton;
     }
 
     public IMAConfig enableDebugMode(boolean enableDebugMode) {
