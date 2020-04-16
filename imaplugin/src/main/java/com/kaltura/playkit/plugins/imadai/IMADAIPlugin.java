@@ -1078,13 +1078,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     }
 
     @Override
-    public void setAdError(boolean isAdError) {
-        this.isAdError = isAdError;
-    }
-
-    @Override
-    public void setAllAdsCompleted(boolean isAllAdsCompleted) {
-        // Do Nothing
+    public void resetPluginFlags() {
+        this.isAdError = false;
     }
 
     @Override
