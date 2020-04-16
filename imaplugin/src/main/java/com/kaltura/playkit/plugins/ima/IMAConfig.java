@@ -65,7 +65,7 @@ public class IMAConfig {
     private boolean adCountDown;
     private boolean enableDebugMode;
     private boolean alwaysStartWithPreroll;
-    private boolean enableFocusSkipButton;
+    private Boolean enableFocusSkipButton;
     private int adLoadTimeOut; // in sec
     private int maxRedirects;
     private String playerType;
@@ -227,12 +227,12 @@ public class IMAConfig {
 
     // Set whether to focus on the skip button when the skippable ad can be skipped on Android TV. Default true
     // This is a no-op on non-Android TV devices.
-    public IMAConfig setEnableFocusSkipButton(boolean enableFocusSkipButton) {
+    public IMAConfig setEnableFocusSkipButton(Boolean enableFocusSkipButton) {
         this.enableFocusSkipButton = enableFocusSkipButton;
         return this;
     }
 
-    public boolean isEnableFocusSkipButton() {
+    public Boolean isEnableFocusSkipButton() {
         return enableFocusSkipButton;
     }
 

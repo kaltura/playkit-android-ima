@@ -402,7 +402,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             renderingSettings.setPlayAdsAfterTime(playbackStartPosition);
         }
 
-        renderingSettings.setFocusSkipButtonWhenAvailable(adConfig.isEnableFocusSkipButton());
+        if (adConfig.isEnableFocusSkipButton() != null) {
+            renderingSettings.setFocusSkipButtonWhenAvailable(adConfig.isEnableFocusSkipButton());
+        }
 
         if (adConfig.getVideoMimeTypes() != null && adConfig.getVideoMimeTypes().size() > 0) {
             renderingSettings.setMimeTypes(adConfig.getVideoMimeTypes());
