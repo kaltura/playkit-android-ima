@@ -221,7 +221,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         log.d("Start onUpdateMedia");
         if (mediaConfig != null && mediaConfig.getMediaEntry() != null &&
                 mediaConfig.getMediaEntry().hasSources() &&
-                mediaConfig.getMediaEntry().getSources().get(0).getUrl().contains("dai.google.com")) {
+                (mediaConfig.getMediaEntry().getSources().get(0).getUrl().contains("dai.google.com") ||
+                        mediaConfig.getMediaEntry().getSources().get(0).getUrl().contains("pubads.g.doubleclick.net"))) {
             return;
         }
 
@@ -921,6 +922,9 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         destroyStreamManager();
         contentCompleted();
         isAdDisplayed = false;
+        isAdError = false;
+        isContentPrepared = false;
+        pluginCuePoints = null;
     }
 
     @Override
@@ -1079,7 +1083,9 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
     @Override
     public void resetPluginFlags() {
-        this.isAdError = false;
+        isAdError = false;
+        isAdDisplayed = false;
+        pluginCuePoints = null;
     }
 
     @Override
@@ -1253,13 +1259,16 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         }
     }
 
-    private PKMediaSource createDAIMediaSource(String url) {
+    private PKMediaSource createDAIMediaSource(String url, String mediaSourceId) {
         PKMediaSource mediaSource = new PKMediaSource();
-        mediaSource.setId(adConfig.getContentSourceId());
+        String id = (adConfig.getContentSourceId() != null) ? adConfig.getContentSourceId() : adConfig.getAssetKey();
+        if (id == null) {
+            id = (mediaSourceId != null) ? mediaSourceId : "";
+        }
+        mediaSource.setId(id);
         mediaSource.setUrl(url);
         mediaSource.setMediaFormat(PKMediaFormat.valueOfUrl(url));
-
-        if (adConfig.getLicenseUrl() !=null) {
+        if (adConfig.getLicenseUrl() != null) {
             List<PKDrmParams> drmData = new ArrayList<>();
             PKDrmParams pkDrmParams = new PKDrmParams(adConfig.getLicenseUrl(), PKDrmParams.Scheme.WidevineCENC);
             drmData.add(pkDrmParams);
@@ -1307,7 +1316,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private PKMediaSourceConfig toPKMediaSourceConfig(String daiUrl) {
         PKMediaSourceConfig sourceConfig = null;
         if (mediaConfig != null && mediaConfig.getMediaEntry() != null) {
-            PKMediaSource daiMediaSource = createDAIMediaSource(daiUrl);
+            PKMediaSource daiMediaSource = createDAIMediaSource(daiUrl, mediaConfig.getMediaEntry().getId());
             if (!TextUtils.isEmpty(daiMediaSource.getUrl())) {
                 sourceConfig = new PKMediaSourceConfig(daiMediaSource, getDAIMediaType(), mediaConfig.getMediaEntry().getExternalSubtitleList(), (PlayerSettings) player.getSettings());
             }
