@@ -72,7 +72,7 @@ public class IMADAIConfig {
                          String contentSourceId, // null for Live
                          String videoId, // null for Live
                          String apiKey, // seems to be always null in demos
-                         StreamRequest.StreamFormat streamFormat,
+                         StreamRequest.StreamFormat streamFormat, // DASH or HLS
                          String licenseUrl) {
 
         this.assetKey = assetKey;
