@@ -16,6 +16,7 @@ import android.text.TextUtils;
 import android.view.View;
 
 import com.google.ads.interactivemedia.v3.api.StreamRequest;
+import com.kaltura.playkit.PlayKitManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,9 @@ public class IMADAIConfig {
     private static final int DEFAULT_AD_LOAD_TIMEOUT = 8;
     private static final int DEFAULT_CUE_POINTS_CHANGED_DELAY = 2000;
     private static final int DEFAULT_AD_LOAD_COUNT_DOWN_TICK = 250;
+
+    private static final String AD_PLAYER_TYPE = "kaltura-vp-android";
+    private static final String AD_PLAYER_VERSION = PlayKitManager.VERSION_STRING;
 
     private String assetTitle;
     private String assetKey;
@@ -47,8 +51,11 @@ public class IMADAIConfig {
     private boolean adCountDown;
     private boolean enableDebugMode;
     private boolean alwaysStartWithPreroll;
+    private boolean enableFocusSkipButton;
     private int adLoadTimeOut; // in sec
     private int maxRedirects;
+    private String playerType;
+    private String playerVersion;
     private transient List<View> controlsOverlayList;
 
     // Map adTagParameters = new HashMap();
@@ -56,7 +63,9 @@ public class IMADAIConfig {
     private boolean enableAgeRestriction; // adTagParameters.put("tfua", 1);
 
     //should not be used needed for reflection in kaltura player
-    public IMADAIConfig() {}
+    public IMADAIConfig() {
+        enableFocusSkipButton = true;
+    }
 
     private IMADAIConfig(String assetTitle,
                          String assetKey, // null for VOD
@@ -78,7 +87,10 @@ public class IMADAIConfig {
         this.adCountDown               = true;
         this.adLoadTimeOut             = DEFAULT_AD_LOAD_TIMEOUT;
         this.enableDebugMode           = false;
-        this.alwaysStartWithPreroll   = false;
+        this.alwaysStartWithPreroll    = false;
+        this.enableFocusSkipButton     = true;
+        this.playerType                = AD_PLAYER_TYPE;
+        this.playerVersion             = AD_PLAYER_VERSION;
     }
 
     //VOD Factory
@@ -213,6 +225,21 @@ public class IMADAIConfig {
         return this;
     }
 
+    public IMADAIConfig setEnableFocusSkipButton(boolean enableFocusSkipButton) {
+        this.enableFocusSkipButton = enableFocusSkipButton;
+        return this;
+    }
+
+    public IMADAIConfig setPlayerType(String playerType) {
+        this.playerType = playerType;
+        return this;
+    }
+
+    public IMADAIConfig setPlayerVersion(String playerVersion) {
+        this.playerVersion = playerVersion;
+        return this;
+    }
+
     public IMADAIConfig setControlsOverlayList(List<View> controlsOverlayList) {
         this.controlsOverlayList = controlsOverlayList;
         return this;
@@ -278,6 +305,18 @@ public class IMADAIConfig {
 
     public boolean isAlwaysStartWithPreroll() {
         return alwaysStartWithPreroll;
+    }
+
+    public boolean isEnableFocusSkipButton() {
+        return enableFocusSkipButton;
+    }
+
+    public String getPlayerType() {
+        return playerType;
+    }
+
+    public String getPlayerVersion() {
+        return playerVersion;
     }
 
     public boolean isLiveDAI() {

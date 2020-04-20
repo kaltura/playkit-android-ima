@@ -54,6 +54,7 @@ public class IMAConfig {
     private static final String AD_PLAYER_TYPE_KEY            = "playerType";
     private static final String AD_PLAYER_VERSION_KEY         = "playerVersion";
     private static final String AD_ALWAYES_START_WITH_PREROLL = "alwaysStartWithPreroll";
+    private static final String AD_ENABLE_FOCUS_SKIP_BUTTON   = "enableFocusSkipButton";
 
     private String language;
     private String adTagUrl;
@@ -65,7 +66,7 @@ public class IMAConfig {
     private boolean adCountDown;
     private boolean enableDebugMode;
     private boolean alwaysStartWithPreroll;
-    private Boolean enableFocusSkipButton;
+    private boolean enableFocusSkipButton;
     private int adLoadTimeOut; // in sec
     private int maxRedirects;
     private String playerType;
@@ -227,12 +228,12 @@ public class IMAConfig {
 
     // Set whether to focus on the skip button when the skippable ad can be skipped on Android TV. Default true
     // This is a no-op on non-Android TV devices.
-    public IMAConfig setEnableFocusSkipButton(Boolean enableFocusSkipButton) {
+    public IMAConfig setEnableFocusSkipButton(boolean enableFocusSkipButton) {
         this.enableFocusSkipButton = enableFocusSkipButton;
         return this;
     }
 
-    public Boolean isEnableFocusSkipButton() {
+    public boolean isEnableFocusSkipButton() {
         return enableFocusSkipButton;
     }
 
@@ -299,20 +300,20 @@ public class IMAConfig {
     @Deprecated
     public JsonObject toJSONObject() {
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty(AD_TAG_LANGUAGE_KEY , language);
-        jsonObject.addProperty(AD_TAG_TYPE_KEY , adTagType.name());
-        jsonObject.addProperty(AD_TAG_URL_KEY , adTagUrl);
-        jsonObject.addProperty(ENABLE_BG_PLAYBACK_KEY , enableBackgroundPlayback);
-        jsonObject.addProperty(AD_VIDEO_BITRATE_KEY , videoBitrate);
-        jsonObject.addProperty(AD_ATTRIBUTION_UIELEMENT_KEY , adAttribution);
-        jsonObject.addProperty(AD_COUNTDOWN_UIELEMENT_KEY , adCountDown);
-        jsonObject.addProperty(AD_LOAD_TIMEOUT_KEY , adLoadTimeOut);
-        jsonObject.addProperty(AD_ENABLE_DEBUG_MODE_KEY , enableDebugMode);
-        jsonObject.addProperty(AD_MAX_REDIRECTS_KEY , maxRedirects);
-        jsonObject.addProperty(AD_PLAYER_TYPE_KEY , playerType);
-        jsonObject.addProperty(AD_PLAYER_VERSION_KEY , playerVersion);
-        jsonObject.addProperty(AD_ALWAYES_START_WITH_PREROLL , alwaysStartWithPreroll);
-
+        jsonObject.addProperty(AD_TAG_LANGUAGE_KEY, language);
+        jsonObject.addProperty(AD_TAG_TYPE_KEY, adTagType.name());
+        jsonObject.addProperty(AD_TAG_URL_KEY, adTagUrl);
+        jsonObject.addProperty(ENABLE_BG_PLAYBACK_KEY, enableBackgroundPlayback);
+        jsonObject.addProperty(AD_VIDEO_BITRATE_KEY, videoBitrate);
+        jsonObject.addProperty(AD_ATTRIBUTION_UIELEMENT_KEY, adAttribution);
+        jsonObject.addProperty(AD_COUNTDOWN_UIELEMENT_KEY, adCountDown);
+        jsonObject.addProperty(AD_LOAD_TIMEOUT_KEY, adLoadTimeOut);
+        jsonObject.addProperty(AD_ENABLE_DEBUG_MODE_KEY, enableDebugMode);
+        jsonObject.addProperty(AD_MAX_REDIRECTS_KEY, maxRedirects);
+        jsonObject.addProperty(AD_PLAYER_TYPE_KEY, playerType);
+        jsonObject.addProperty(AD_PLAYER_VERSION_KEY, playerVersion);
+        jsonObject.addProperty(AD_ALWAYES_START_WITH_PREROLL, alwaysStartWithPreroll);
+        jsonObject.addProperty(AD_ENABLE_FOCUS_SKIP_BUTTON, enableFocusSkipButton);
 
         Gson gson = new Gson();
         JsonArray jArray = new JsonArray();

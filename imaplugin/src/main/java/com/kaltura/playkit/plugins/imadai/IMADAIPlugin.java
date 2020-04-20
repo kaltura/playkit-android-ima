@@ -288,8 +288,11 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         if (adConfig.getMaxRedirects() > 0) {
             imaSdkSettings.setMaxRedirects(adConfig.getMaxRedirects());
         }
+
         imaSdkSettings.setLanguage(adConfig.getLanguage());
         imaSdkSettings.setDebugMode(adConfig.isDebugMode());
+        imaSdkSettings.setPlayerType(adConfig.getPlayerType());
+        imaSdkSettings.setPlayerVersion(adConfig.getPlayerVersion());
     }
 
     private AdsLoader.AdsLoadedListener getAdsLoadedListener() {
@@ -345,7 +348,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private AdsRenderingSettings getRenderingSettings() {
 
         renderingSettings = ImaSdkFactory.getInstance().createAdsRenderingSettings();
-
+        renderingSettings.setFocusSkipButtonWhenAvailable(adConfig.isEnableFocusSkipButton());
         if (playbackStartPosition != null && playbackStartPosition > 0) {
             renderingSettings.setPlayAdsAfterTime(playbackStartPosition);
         }
