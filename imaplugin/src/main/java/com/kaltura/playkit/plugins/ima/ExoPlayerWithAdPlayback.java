@@ -11,6 +11,8 @@ import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 
+import com.google.ads.interactivemedia.v3.api.AdPodInfo;
+import com.google.ads.interactivemedia.v3.api.player.AdMediaInfo;
 import com.google.ads.interactivemedia.v3.api.player.ContentProgressProvider;
 import com.google.ads.interactivemedia.v3.api.player.VideoAdPlayer;
 import com.google.ads.interactivemedia.v3.api.player.VideoProgressUpdate;
@@ -99,6 +101,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     private final List<VideoAdPlayer.VideoAdPlayerCallback> adCallbacks = new ArrayList<>();
 
     private ExoPlayerWithAdPlayback.OnAdPlayBackListener onAdPlayBackListener;
+    private AdMediaInfo lastAdMediaInfo;
 
     public interface OnAdPlayBackListener {
         void onBufferStart();
@@ -171,13 +174,34 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 return 0;
             }
 
+
             @Override
-            public void playAd() {
+            public void loadAd(AdMediaInfo adMediaInfo, AdPodInfo adPodInfo) {
+
+                lastAdMediaInfo = adMediaInfo;
+
+                String adUrl = adMediaInfo.getUrl();
+                log.d("loadAd = " + adUrl);
+
+                if (adVideoPlayerView == null) {   // FEM-2600
+                    log.d("IMA Plugin destroyed; avoiding Ad Playback");
+                    return;
+                }
+
+                lastKnownAdPosition = 0;
+                lastKnownAdURL = adUrl;
+                isPlayerReady = false;
+                isAdFirstPlay = false;
+                initializePlayer(lastKnownAdURL, true);
+            }
+
+            @Override
+            public void playAd(AdMediaInfo adMediaInfo) {
                 log.d("playAd isAdDisplayed = " + isAdDisplayed);
                 if (isAdDisplayed && isPlayerReady) {
                     for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
                         log.d("playAd->onResume");
-                        callback.onResume();
+                        callback.onResume(adMediaInfo);
                         if (isAdPlayerPlaying()) {
                             play();
                         }
@@ -187,7 +211,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                     isAdDisplayed = true;
                     for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
                         log.d("playAd->onPlay");
-                        callback.onPlay();
+                        callback.onPlay(adMediaInfo);
                         isAdFirstPlay = true;
                         return;
                     }
@@ -195,28 +219,27 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
                 //Make sure events will be fired after pause
                 for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                    callback.onPlay();
+                    callback.onPlay(adMediaInfo);
                 }
             }
 
             @Override
-            public void loadAd(String url) {
-                log.d("loadAd = " + url);
-
-                if (adVideoPlayerView == null) {   // FEM-2600
-                    log.d("IMA Plugin destroyed; avoiding Ad Playback");
+            public void pauseAd(AdMediaInfo adMediaInfo) {
+                log.d("pauseAd");
+                if (isAdPlayerPlaying()) {
                     return;
                 }
-
-                lastKnownAdPosition = 0;
-                lastKnownAdURL = url;
-                isPlayerReady = false;
-                isAdFirstPlay = false;
-                initializePlayer(lastKnownAdURL, true);
+                for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
+                    callback.onPause(adMediaInfo);
+                }
+                if (adVideoPlayerView != null && adVideoPlayerView.getPlayer() != null) {
+                    adVideoPlayerView.getPlayer().setPlayWhenReady(false);
+                }
             }
 
             @Override
-            public void stopAd() {
+            public void stopAd(AdMediaInfo adMediaInfo) {
+
                 log.d("stopAd");
                 isPlayerReady = false;
                 isAdDisplayed = false;
@@ -226,24 +249,11 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             }
 
             @Override
-            public void pauseAd() {
-                log.d("pauseAd");
-                if (isAdPlayerPlaying()) {
-                    return;
+            public void release() {
+                lastAdMediaInfo = null;
+                if (adPlayer != null) {
+                    adPlayer.release();
                 }
-                for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                    callback.onPause();
-                }
-                if (adVideoPlayerView != null && adVideoPlayerView.getPlayer() != null) {
-                    adVideoPlayerView.getPlayer().setPlayWhenReady(false);
-                }
-            }
-
-            @Override
-            public void resumeAd() {
-                log.d("resumeAd");
-                //playAd(); --> resumeAd method is deprecated in IMA so nothing should be called.
-
             }
 
             @Override
@@ -370,16 +380,16 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 if (playWhenReady) {
                     if (adVideoPlayerView.getPlayer().getDuration() > 0) {
                         for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                            callback.onResume();
+                            callback.onResume(lastAdMediaInfo);
                         }
                     } else {
                         for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                            callback.onPlay();
+                            callback.onPlay(lastAdMediaInfo);
                         }
                     }
                 } else {
                     for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                        callback.onPause();
+                        callback.onPause(lastAdMediaInfo);
                     }
                 }
                 break;
@@ -388,7 +398,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 isPlayerReady = false;
                 if (isAdDisplayed) {
                     for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                        callback.onEnded();
+                        callback.onEnded(lastAdMediaInfo);
                     }
                 }
                 break;
@@ -465,6 +475,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
     public void stop(boolean isResetRequired) {
         isPlayerReady = false;
+        lastAdMediaInfo = null;
         if (adVideoPlayerView != null && adVideoPlayerView.getPlayer() != null) {
             adVideoPlayerView.getPlayer().setPlayWhenReady(false);
             adVideoPlayerView.getPlayer().stop(isResetRequired);
@@ -513,6 +524,10 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         return isAdDisplayed;
     }
 
+    public AdMediaInfo getLastAdMediaInfo() {
+        return lastAdMediaInfo;
+    }
+
     public ContentProgressProvider getContentProgressProvider() {
         return contentProgressProvider;
     }
@@ -548,7 +563,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
         for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
             log.d("onPlayerError calling callback.onError()");
-            callback.onError();
+            callback.onError(lastAdMediaInfo);
         }
 
     }
@@ -562,7 +577,8 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             Log.setLogStackTraces(false);
         }
 
-        adPlayer = ExoPlayerFactory.newSimpleInstance(mContext, getRenderersFactory(), getTrackSelector());
+        adPlayer = new SimpleExoPlayer.Builder(mContext, getRenderersFactory())
+                .setTrackSelector(getTrackSelector()).build();
         adPlayer.addAnalyticsListener(getEventLogger());
         if (adVideoPlayerView != null) {  // FEM-2600
             adVideoPlayerView.setPlayer(adPlayer);
