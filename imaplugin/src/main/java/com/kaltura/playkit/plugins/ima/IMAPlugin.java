@@ -1360,7 +1360,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                         log.d("LOG Error but continue to next ad in pod");
                         return;
                     } else {
-                        adsManager.discardAdBreak();
+                        isAdRequested = false;
+                        if (videoPlayerWithAdPlayback != null) {
+                            videoPlayerWithAdPlayback.stop(false);
+                        }
                     }
                 }
                 String error = "Non-fatal Error";
@@ -1371,6 +1374,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 }
 
                 sendError(PKAdErrorType.QUIET_LOG_ERROR, error, null);
+                break;
             default:
                 break;
         }
