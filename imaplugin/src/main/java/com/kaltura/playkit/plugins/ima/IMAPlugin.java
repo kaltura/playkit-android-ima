@@ -1403,6 +1403,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 }
 
                 sendError(PKAdErrorType.QUIET_LOG_ERROR, error, null);
+                break;
             default:
                 break;
         }

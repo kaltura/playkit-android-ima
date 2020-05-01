@@ -3,6 +3,7 @@ package com.kaltura.playkit.plugins.ima;
 import android.content.Context;
 import android.net.Uri;
 
+
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
@@ -269,11 +270,17 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             @Override
             public VideoProgressUpdate getAdProgress() {
                 if (adVideoPlayerView == null || adVideoPlayerView.getPlayer() == null) {
+                    for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
+                        callback.onAdProgress(lastAdMediaInfo, VideoProgressUpdate.VIDEO_TIME_NOT_READY);
+                    }
                     return VideoProgressUpdate.VIDEO_TIME_NOT_READY;
                 }
                 long duration = adVideoPlayerView.getPlayer().getDuration();
                 long position = adVideoPlayerView.getPlayer().getCurrentPosition();
                 if (!isPlayerReady || !isAdDisplayed || duration < 0 || position < 0) {
+                    for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
+                        callback.onAdProgress(lastAdMediaInfo, VideoProgressUpdate.VIDEO_TIME_NOT_READY);
+                    }
                     return VideoProgressUpdate.VIDEO_TIME_NOT_READY;
                 }
 
@@ -282,6 +289,10 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 if (position > duration) {
                     position = duration;
                 }
+                for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
+                                callback.onAdProgress(lastAdMediaInfo, new VideoProgressUpdate(position, duration));
+                }
+
                 return new VideoProgressUpdate(position, duration);
             }
         };
