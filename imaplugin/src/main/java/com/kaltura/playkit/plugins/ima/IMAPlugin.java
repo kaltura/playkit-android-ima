@@ -1362,7 +1362,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     } else {
                         isAdRequested = false;
                         if (videoPlayerWithAdPlayback != null) {
-                            videoPlayerWithAdPlayback.stop(false);
+                            videoPlayerWithAdPlayback.stop();
                         }
                     }
                 }
