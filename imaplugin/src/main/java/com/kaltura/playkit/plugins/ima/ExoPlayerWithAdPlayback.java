@@ -141,6 +141,12 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         return adVideoPlayerView;
     }
 
+    public void sendAdProgressCallback() {
+        for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
+            callback.onAdProgress(lastAdMediaInfo, imaVideoAdPlayer.getAdProgress());
+        }
+    }
+
     private void init() {
         isAdDisplayed = false;
         lastKnownAdPosition = 0;
@@ -235,9 +241,11 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             @Override
             public void pauseAd(AdMediaInfo adMediaInfo) {
                 log.d("pauseAd");
+
                 if (isAdPlayerPlaying()) {
                     return;
                 }
+
                 for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
                     callback.onPause(adMediaInfo);
                 }
@@ -248,13 +256,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
             @Override
             public void stopAd(AdMediaInfo adMediaInfo) {
-
                 log.d("stopAd");
                 isPlayerReady = false;
                 isAdDisplayed = false;
-                if (adPlayer != null) {
-                    adPlayer.stop();
-                }
             }
 
             @Override
@@ -278,17 +282,11 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             @Override
             public VideoProgressUpdate getAdProgress() {
                 if (adVideoPlayerView == null || adVideoPlayerView.getPlayer() == null) {
-                    for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                        callback.onAdProgress(lastAdMediaInfo, VideoProgressUpdate.VIDEO_TIME_NOT_READY);
-                    }
                     return VideoProgressUpdate.VIDEO_TIME_NOT_READY;
                 }
                 long duration = adVideoPlayerView.getPlayer().getDuration();
                 long position = adVideoPlayerView.getPlayer().getCurrentPosition();
                 if (!isPlayerReady || !isAdDisplayed || duration < 0 || position < 0) {
-                    for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                        callback.onAdProgress(lastAdMediaInfo, VideoProgressUpdate.VIDEO_TIME_NOT_READY);
-                    }
                     return VideoProgressUpdate.VIDEO_TIME_NOT_READY;
                 }
 
@@ -297,11 +295,6 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 if (position > duration) {
                     position = duration;
                 }
-
-                for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                    callback.onAdProgress(lastAdMediaInfo, new VideoProgressUpdate(position, duration));
-                }
-
                 return new VideoProgressUpdate(position, duration);
             }
         };

@@ -840,7 +840,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (videoAdPlayer == null || videoAdPlayer.getAdProgress() == null) {
             return Consts.POSITION_UNSET;
         }
-
+        videoPlayerWithAdPlayback.sendAdProgressCallback();
         long currPos = (long) Math.ceil(videoAdPlayer.getAdProgress().getCurrentTime());
         //log.d("IMA Add getCurrentPosition: " + currPos);
         messageBus.post(new AdEvent.AdPlayHeadEvent(currPos));
@@ -1251,16 +1251,15 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
                 log.d("CONTENT_RESUME_REQUESTED isReleaseContentPlayerRequired = " + isReleaseContentPlayerRequired);
 
+                if (isReleaseContentPlayerRequired && videoPlayerWithAdPlayback != null) {
+                    videoPlayerWithAdPlayback.stop(true);
+                }
+
                 if (isReleaseContentPlayerRequired) {
                     displayContent();
                     player.onApplicationResumed();
                     player.play();
                 }
-
-                if (isReleaseContentPlayerRequired && videoPlayerWithAdPlayback != null) {
-                    videoPlayerWithAdPlayback.stop(true);
-                }
-
                 break;
             case ALL_ADS_COMPLETED:
                 log.d("AD_ALL_ADS_COMPLETED");
@@ -1362,6 +1361,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 messageBus.post(new AdEvent(AdEvent.Type.AD_BREAK_READY));
                 break;
             case AD_PROGRESS:
+                //log.d("AD_PROGRESS = " + videoPlayerWithAdPlayback.getAdPosition());
                 messageBus.post(new AdEvent(AdEvent.Type.AD_PROGRESS));
                 break;
             case AD_BREAK_STARTED:
