@@ -20,7 +20,6 @@ import com.google.ads.interactivemedia.v3.api.player.VideoProgressUpdate;
 import com.kaltura.android.exoplayer2.C;
 import com.kaltura.android.exoplayer2.DefaultRenderersFactory;
 import com.kaltura.android.exoplayer2.ExoPlaybackException;
-import com.kaltura.android.exoplayer2.ExoPlayerFactory;
 import com.kaltura.android.exoplayer2.Format;
 import com.kaltura.android.exoplayer2.PlaybackParameters;
 import com.kaltura.android.exoplayer2.PlaybackPreparer;
@@ -47,7 +46,6 @@ import com.kaltura.android.exoplayer2.util.Log;
 import com.kaltura.android.exoplayer2.util.Util;
 import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PlayerState;
-import com.kaltura.playkit.drm.DeferredDrmSessionManager;
 import com.kaltura.playkit.player.MediaSupport;
 import com.kaltura.playkit.plugins.ads.AdCuePoints;
 import com.kaltura.playkit.utils.Consts;
@@ -169,8 +167,13 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         imaVideoAdPlayer = new VideoAdPlayer() {
             @Override
             public int getVolume() {
+                log.d("getVolume");
                 if (adPlayer != null) {
-                    return (int) (adPlayer.getVolume() * 100);
+                    int volume = (int) adPlayer.getVolume() * 100;
+                    for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
+                        callback.onVolumeChanged(lastAdMediaInfo, volume);
+                    }
+                    return volume;
                 }
                 return 0;
             }
@@ -187,6 +190,11 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 if (adVideoPlayerView == null) {   // FEM-2600
                     log.d("IMA Plugin destroyed; avoiding Ad Playback");
                     return;
+                }
+
+                for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
+                    log.d("onLoaded");
+                    callback.onLoaded(adMediaInfo);
                 }
 
                 lastKnownAdPosition = 0;
@@ -289,8 +297,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 if (position > duration) {
                     position = duration;
                 }
+
                 for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                                callback.onAdProgress(lastAdMediaInfo, new VideoProgressUpdate(position, duration));
+                    callback.onAdProgress(lastAdMediaInfo, new VideoProgressUpdate(position, duration));
                 }
 
                 return new VideoProgressUpdate(position, duration);
@@ -374,6 +383,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 log.d("onPlayerStateChanged. BUFFERING. playWhenReady => " + playWhenReady);
                 lastPlayerState = PlayerState.BUFFERING;
                 if (onAdPlayBackListener != null) {
+                    for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
+                        callback.onBuffering(lastAdMediaInfo);
+                    }
                     onAdPlayBackListener.onBufferStart();
                 }
                 break;

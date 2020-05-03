@@ -32,6 +32,7 @@ import com.google.ads.interactivemedia.v3.api.AdsManager;
 import com.google.ads.interactivemedia.v3.api.AdsRenderingSettings;
 import com.google.ads.interactivemedia.v3.api.AdsRequest;
 import com.google.ads.interactivemedia.v3.api.CompanionAdSlot;
+import com.google.ads.interactivemedia.v3.api.FriendlyObstruction;
 import com.google.ads.interactivemedia.v3.api.ImaSdkFactory;
 import com.google.ads.interactivemedia.v3.api.ImaSdkSettings;
 import com.google.ads.interactivemedia.v3.api.player.VideoAdPlayer;
@@ -163,9 +164,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
     };
 
-    ////////PKPlugin
-
-    ///////////END PKPlugin
     @Override
     protected void onLoad(final Player player, Object config, final MessageBus messageBus, Context context) {
         log.d("onLoad");
@@ -299,7 +297,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         //clean up and reuse adDisplayContainer for change media without companion ads
         if (adDisplayContainer != null && adCompanionViewGroup == null) {
             log.d("adDisplayContainer != null return current adDisplayContainer");
-            //adDisplayContainer.unregisterAllVideoControlsOverlays();
+            adDisplayContainer.unregisterAllFriendlyObstructions();
             registerControlsOverlays();
             clearCompanionSlots();
             return adDisplayContainer;
@@ -308,7 +306,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         //clean up for change media with companion ads
         if (adDisplayContainer != null) {
             log.d("adDisplayContainer != null return current adDisplayContainer");
-            //adDisplayContainer.unregisterAllVideoControlsOverlays();
+            adDisplayContainer.unregisterAllFriendlyObstructions();
             clearCompanionSlots();
             adDisplayContainer.destroy();
             adDisplayContainer = null;
@@ -348,9 +346,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     private void registerControlsOverlays() {
-        if (adConfig.getControlsOverlayList() != null && adDisplayContainer != null) {
-            for (View controlView : adConfig.getControlsOverlayList()) {
-                //adDisplayContainer.registerVideoControlsOverlay(controlView);
+        if (adConfig.getFriendlyOverlay() != null && adDisplayContainer != null) {
+            for (FriendlyObstruction friendlyOverlay : adConfig.getFriendlyOverlay()) {
+                adDisplayContainer.registerFriendlyObstruction(friendlyOverlay);
             }
         }
     }
@@ -596,8 +594,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         adTagCuePoints = null;
         adPlaybackCancelled = false;
         if (adDisplayContainer != null) {
-            //adDisplayContainer.setPlayer(null);
-            //adDisplayContainer.unregisterAllVideoControlsOverlays();
+            adDisplayContainer.unregisterAllFriendlyObstructions();
         }
 
         if (adsManager != null) {
