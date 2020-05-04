@@ -257,16 +257,19 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             @Override
             public void stopAd(AdMediaInfo adMediaInfo) {
                 log.d("stopAd");
+                lastAdMediaInfo = null;
                 isPlayerReady = false;
                 isAdDisplayed = false;
+                if (adPlayer != null) {
+                    adPlayer.stop();
+                }
             }
 
             @Override
             public void release() {
                 lastAdMediaInfo = null;
-                if (adPlayer != null) {
-                    adPlayer.release();
-                }
+                isPlayerReady = false;
+                isAdDisplayed = false;
             }
 
             @Override
@@ -374,12 +377,14 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 break;
             case Player.STATE_BUFFERING:
                 log.d("onPlayerStateChanged. BUFFERING. playWhenReady => " + playWhenReady);
-                lastPlayerState = PlayerState.BUFFERING;
-                if (onAdPlayBackListener != null) {
-                    for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                        callback.onBuffering(lastAdMediaInfo);
+                if (lastPlayerState != PlayerState.BUFFERING) {
+                    lastPlayerState = PlayerState.BUFFERING;
+                    if (onAdPlayBackListener != null) {
+                        for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
+                            callback.onBuffering(lastAdMediaInfo);
+                        }
+                        onAdPlayBackListener.onBufferStart();
                     }
-                    onAdPlayBackListener.onBufferStart();
                 }
                 break;
             case Player.STATE_READY:

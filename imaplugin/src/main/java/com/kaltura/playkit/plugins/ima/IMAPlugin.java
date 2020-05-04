@@ -298,7 +298,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (adDisplayContainer != null && adCompanionViewGroup == null) {
             log.d("adDisplayContainer != null return current adDisplayContainer");
             adDisplayContainer.unregisterAllFriendlyObstructions();
-            registerControlsOverlays();
+            registerFriendlyOverlays();
             clearCompanionSlots();
             return adDisplayContainer;
         }
@@ -308,16 +308,15 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             log.d("adDisplayContainer != null return current adDisplayContainer");
             adDisplayContainer.unregisterAllFriendlyObstructions();
             clearCompanionSlots();
-            adDisplayContainer.destroy();
-            adDisplayContainer = null;
+        } else {
+            adDisplayContainer = sdkFactory.createAdDisplayContainer(videoPlayerWithAdPlayback.getAdUiContainer(), videoPlayerWithAdPlayback.getVideoAdPlayer());
         }
 
-        adDisplayContainer = sdkFactory.createAdDisplayContainer(videoPlayerWithAdPlayback.getAdUiContainer(), videoPlayerWithAdPlayback.getVideoAdPlayer());
         // Set up spots for companions.
         if (isValidCompanionAdsSettings(companionAdConfig, adCompanionAdWidth, adCompanionAdHeight)) {
             populateCompanionSlots(adCompanionAdWidth, adCompanionAdHeight);
         }
-        registerControlsOverlays();
+        registerFriendlyOverlays();
         return adDisplayContainer;
     }
 
@@ -345,7 +344,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         adDisplayContainer.setCompanionSlots(companionAdSlots);
     }
 
-    private void registerControlsOverlays() {
+    private void registerFriendlyOverlays() {
         if (adConfig.getFriendlyOverlay() != null && adDisplayContainer != null) {
             for (FriendlyObstruction friendlyOverlay : adConfig.getFriendlyOverlay()) {
                 adDisplayContainer.registerFriendlyObstruction(friendlyOverlay);
@@ -630,10 +629,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         resetIMA();
 
         log.d("Do requestAdsFromIMA");
-//        if (adDisplayContainer != null && videoPlayerWithAdPlayback != null && videoPlayerWithAdPlayback.getVideoAdPlayer() != null) {
-//            adDisplayContainer.setPlayer(videoPlayerWithAdPlayback.getVideoAdPlayer());
-//            adDisplayContainer.setAdContainer(videoPlayerWithAdPlayback.getAdUiContainer());
-//        }
 
         // Create the ads request.
         final AdsRequest request = sdkFactory.createAdsRequest();
@@ -649,7 +644,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (videoPlayerWithAdPlayback != null) {
             request.setContentProgressProvider(videoPlayerWithAdPlayback.getContentProgressProvider());
         }
-
+        //request.setContinuousPlayback(true);
+        //request.setAdWillAutoPlay(isAutoPlay);
         // Request the ad. After the ad is loaded, onAdsManagerLoaded() will be called.
         adManagerTimer = getCountDownTimer();
         adsLoader.requestAds(request);
@@ -726,6 +722,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         adsManager.destroy();
         contentCompleted();
+        adInfo = null;
         isAdDisplayed = false;
         adPlaybackCancelled = false;
     }
