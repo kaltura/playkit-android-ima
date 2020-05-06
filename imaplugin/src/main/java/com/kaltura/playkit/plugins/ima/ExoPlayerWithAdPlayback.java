@@ -143,7 +143,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
     public void sendAdProgressCallback() {
         for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-            callback.onAdProgress(lastAdMediaInfo, imaVideoAdPlayer.getAdProgress());
+            if (lastAdMediaInfo != null) {
+                callback.onAdProgress(lastAdMediaInfo, imaVideoAdPlayer.getAdProgress());
+            }
         }
     }
 
@@ -177,7 +179,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 if (adPlayer != null) {
                     int volume = (int) adPlayer.getVolume() * 100;
                     for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                        callback.onVolumeChanged(lastAdMediaInfo, volume);
+                        if (lastAdMediaInfo != null) {
+                            callback.onVolumeChanged(lastAdMediaInfo, volume);
+                        }
                     }
                     return volume;
                 }
@@ -200,7 +204,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
                 for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
                     log.d("onLoaded");
-                    callback.onLoaded(adMediaInfo);
+                    if (adMediaInfo != null) {
+                        callback.onLoaded(adMediaInfo);
+                    }
                 }
 
                 lastKnownAdPosition = 0;
@@ -216,7 +222,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 if (isAdDisplayed && isPlayerReady) {
                     for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
                         log.d("playAd->onResume");
-                        callback.onResume(adMediaInfo);
+                        if (adMediaInfo != null) {
+                            callback.onResume(adMediaInfo);
+                        }
                         if (isAdPlayerPlaying()) {
                             play();
                         }
@@ -226,7 +234,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                     isAdDisplayed = true;
                     for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
                         log.d("playAd->onPlay");
-                        callback.onPlay(adMediaInfo);
+                        if (adMediaInfo != null) {
+                            callback.onPlay(adMediaInfo);
+                        }
                         isAdFirstPlay = true;
                         return;
                     }
@@ -234,7 +244,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
                 //Make sure events will be fired after pause
                 for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                    callback.onPlay(adMediaInfo);
+                    if (adMediaInfo != null) {
+                        callback.onPlay(adMediaInfo);
+                    }
                 }
             }
 
@@ -247,7 +259,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 }
 
                 for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                    callback.onPause(adMediaInfo);
+                    if (adMediaInfo != null) {
+                        callback.onPause(adMediaInfo);
+                    }
                 }
                 if (adVideoPlayerView != null && adVideoPlayerView.getPlayer() != null) {
                     adVideoPlayerView.getPlayer().setPlayWhenReady(false);
@@ -381,7 +395,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                     lastPlayerState = PlayerState.BUFFERING;
                     if (onAdPlayBackListener != null) {
                         for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                            callback.onBuffering(lastAdMediaInfo);
+                            if (lastAdMediaInfo != null) {
+                                callback.onBuffering(lastAdMediaInfo);
+                            }
                         }
                         onAdPlayBackListener.onBufferStart();
                     }
@@ -401,16 +417,22 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 if (playWhenReady) {
                     if (adVideoPlayerView.getPlayer().getDuration() > 0) {
                         for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                            callback.onResume(lastAdMediaInfo);
+                            if (lastAdMediaInfo != null) {
+                                callback.onResume(lastAdMediaInfo);
+                            }
                         }
                     } else {
                         for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                            callback.onPlay(lastAdMediaInfo);
+                            if (lastAdMediaInfo != null) {
+                                callback.onPlay(lastAdMediaInfo);
+                            }
                         }
                     }
                 } else {
                     for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                        callback.onPause(lastAdMediaInfo);
+                        if (lastAdMediaInfo != null) {
+                            callback.onPause(lastAdMediaInfo);
+                        }
                     }
                 }
                 break;
@@ -419,7 +441,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 isPlayerReady = false;
                 if (isAdDisplayed) {
                     for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
-                        callback.onEnded(lastAdMediaInfo);
+                        if (lastAdMediaInfo != null) {
+                            callback.onEnded(lastAdMediaInfo);
+                        }
                     }
                 }
                 break;
@@ -584,7 +608,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
         for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
             log.d("onPlayerError calling callback.onError()");
-            callback.onError(lastAdMediaInfo);
+            if (lastAdMediaInfo != null) {
+                callback.onError(lastAdMediaInfo);
+            }
         }
 
     }
