@@ -609,7 +609,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             adManagerTimer = null;
         }
     }
-    
+
     private void requestAdsFromIMA(String adTagUrl) {
         String adTagResponse = null;
         if (adConfig != null) {
@@ -837,7 +837,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (videoAdPlayer == null || videoAdPlayer.getAdProgress() == null) {
             return Consts.POSITION_UNSET;
         }
-        videoPlayerWithAdPlayback.sendAdProgressCallback();
         long currPos = (long) Math.ceil(videoAdPlayer.getAdProgress().getCurrentTime());
         //log.d("IMA Add getCurrentPosition: " + currPos);
         messageBus.post(new AdEvent.AdPlayHeadEvent(currPos));
