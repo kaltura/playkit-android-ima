@@ -3,7 +3,6 @@ package com.kaltura.playkit.plugins.ima;
 import android.content.Context;
 import android.net.Uri;
 
-
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
