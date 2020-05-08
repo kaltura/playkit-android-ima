@@ -5,6 +5,7 @@ import android.net.Uri;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Process;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -136,9 +137,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         }
         this.debugEnabled = debugEnabled;
 
-        HandlerThread handlerProgressThread = new HandlerThread("IMAPluginProgress", Process.THREAD_PRIORITY_BACKGROUND);
-        handlerProgressThread.start();
-        handler = new Handler(handlerProgressThread.getLooper());
+        handler = Util.createHandler(getImaLooper(), /* callback= */ null);
         updateAdProgressRunnable = this::updateAdProgress;
 
         init();
@@ -282,6 +281,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 if (adPlayer != null) {
                     adPlayer.stop();
                 }
+
             }
 
             @Override
@@ -400,6 +400,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 if (lastPlayerState != PlayerState.BUFFERING) {
                     lastPlayerState = PlayerState.BUFFERING;
                     if (onAdPlayBackListener != null) {
+                        stopUpdatingAdProgress();
                         for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
                             if (lastAdMediaInfo != null) {
                                 callback.onBuffering(lastAdMediaInfo);
@@ -412,6 +413,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             case Player.STATE_READY:
                 log.d("onPlayerStateChanged. READY. playWhenReady => " + playWhenReady);
                 if (lastPlayerState == PlayerState.BUFFERING && onAdPlayBackListener != null) {
+                    updateAdProgress();
                     onAdPlayBackListener.onBufferEnd();
                     if (isAdFirstPlay && onAdPlayBackListener != null) {
                         onAdPlayBackListener.adFirstPlayStarted();
@@ -696,6 +698,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
     public void releasePlayer() {
         stopUpdatingAdProgress();
+        handler = null;
         if (adPlayer != null) {
             adPlayer.clearVideoSurface();
             adPlayer.release();
@@ -722,14 +725,22 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 adLoadTimeout, true);
     }
 
+    private static Looper getImaLooper() {
+        return Looper.getMainLooper();
+    }
+
     private void updateAdProgress() {
         sendAdProgressCallback();
-        handler.removeCallbacks(updateAdProgressRunnable);
-        handler.postDelayed(updateAdProgressRunnable, AD_PROGRESS_UPDATE_INTERVAL_MS);
+        if (handler != null) {
+            handler.removeCallbacks(updateAdProgressRunnable);
+            handler.postDelayed(updateAdProgressRunnable, AD_PROGRESS_UPDATE_INTERVAL_MS);
+        }
     }
 
     private void stopUpdatingAdProgress() {
-        handler.removeCallbacks(updateAdProgressRunnable);
+        if (handler != null) {
+            handler.removeCallbacks(updateAdProgressRunnable);
+        }
     }
 
     private void sendAdProgressCallback() {
