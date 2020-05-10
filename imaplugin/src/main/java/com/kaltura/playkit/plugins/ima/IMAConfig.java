@@ -15,6 +15,7 @@ package com.kaltura.playkit.plugins.ima;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.ads.interactivemedia.v3.api.FriendlyObstruction;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -72,7 +73,7 @@ public class IMAConfig {
     private String playerType;
     private String playerVersion;
     private List<String> videoMimeTypes = new ArrayList<>();
-    private transient List<View> controlsOverlayList;
+    private transient List<FriendlyObstruction> friendlyOverlay;
     private transient CompanionAdConfig companionAdConfig;
 
     //private Map<Double,String> tagsTimes; // <AdTime,URL_to_execute>
@@ -264,8 +265,8 @@ public class IMAConfig {
         return this;
     }
 
-    public IMAConfig setControlsOverlayList(List<View> controlsOverlayList) {
-        this.controlsOverlayList = controlsOverlayList;
+    public IMAConfig setFriendlyOverlay(List<FriendlyObstruction> friendlyOverlay) {
+        this.friendlyOverlay = friendlyOverlay;
         return this;
     }
 
@@ -278,18 +279,18 @@ public class IMAConfig {
         return this;
     }
 
-    public IMAConfig addControlsOverlay(View controlsOverlay) {
-        if (this.controlsOverlayList == null) {
-            this.controlsOverlayList = new ArrayList<>();
+    public IMAConfig addControlsOverlay(FriendlyObstruction friendlyOverlay) {
+        if (this.friendlyOverlay == null) {
+            this.friendlyOverlay = new ArrayList<>();
         }
-        if (controlsOverlay != null) {
-            this.controlsOverlayList.add(controlsOverlay);
+        if (friendlyOverlay != null) {
+            this.friendlyOverlay.add(friendlyOverlay);
         }
         return this;
     }
 
-    public List<View> getControlsOverlayList() {
-        return controlsOverlayList;
+    public List<FriendlyObstruction> getFriendlyOverlay() {
+        return friendlyOverlay;
     }
 
     /**
