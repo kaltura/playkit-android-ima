@@ -1286,7 +1286,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         }
         mediaSource.setId(id);
         mediaSource.setUrl(url);
-        mediaSource.setMediaFormat(PKMediaFormat.valueOfUrl(url));
+        mediaSource.setMediaFormat(adConfig.getStreamFormat() == StreamRequest.StreamFormat.DASH ? PKMediaFormat.dash : PKMediaFormat.hls);
         if (adConfig.getLicenseUrl() != null) {
             List<PKDrmParams> drmData = new ArrayList<>();
             PKDrmParams pkDrmParams = new PKDrmParams(adConfig.getLicenseUrl(), PKDrmParams.Scheme.WidevineCENC);
