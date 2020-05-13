@@ -561,7 +561,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
         adPlayer = ExoPlayerFactory.newSimpleInstance(mContext, getRenderersFactory(), getTrackSelector());
         adPlayer.addAnalyticsListener(getEventLogger());
-        adVideoPlayerView.setPlayer(adPlayer);
+        if (adVideoPlayerView != null) {  // FEM-2600
+            adVideoPlayerView.setPlayer(adPlayer);
+        }
     }
 
     private MediaSource buildMediaSource(Uri uri) {
