@@ -18,7 +18,7 @@ public class PKFriendlyObstruction {
 
             @Override
             public FriendlyObstructionPurpose getPurpose() {
-                return friendlyObstructionPurpose;
+                return friendlyObstructionPurpose != null ? friendlyObstructionPurpose : FriendlyObstructionPurpose.OTHER;
             }
 
             @Override
