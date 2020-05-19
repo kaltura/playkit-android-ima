@@ -13,10 +13,11 @@
 package com.kaltura.playkit.plugins.imadai;
 
 import android.text.TextUtils;
-import android.view.View;
 
+import com.google.ads.interactivemedia.v3.api.FriendlyObstruction;
 import com.google.ads.interactivemedia.v3.api.StreamRequest;
 import com.kaltura.playkit.PlayKitManager;
+import com.kaltura.playkit.plugins.ima.PKFriendlyObstruction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +57,7 @@ public class IMADAIConfig {
     private int maxRedirects;
     private String playerType;
     private String playerVersion;
-    private transient List<View> controlsOverlayList;
+    private transient List<FriendlyObstruction> friendlyObstructions;
 
     // Map adTagParameters = new HashMap();
     private boolean disablePersonalizedAds; // adTagParameters.put("npa", 1);
@@ -240,8 +241,19 @@ public class IMADAIConfig {
         return this;
     }
 
-    public IMADAIConfig setControlsOverlayList(List<View> controlsOverlayList) {
-        this.controlsOverlayList = controlsOverlayList;
+    public IMADAIConfig setFriendlyObstructions(List<PKFriendlyObstruction> friendlyObstructions) {
+
+        if (friendlyObstructions != null) {
+            if (this.friendlyObstructions == null) {
+                this.friendlyObstructions = new ArrayList<>();
+            }
+
+            for (PKFriendlyObstruction pkFriendlyObstruction : friendlyObstructions) {
+                if (pkFriendlyObstruction != null) {
+                    this.friendlyObstructions.add(pkFriendlyObstruction.getFriendlyObstruction());
+                }
+            }
+        }
         return this;
     }
 
@@ -285,18 +297,18 @@ public class IMADAIConfig {
         return this;
     }
 
-    public IMADAIConfig addControlsOverlay(View controlsOverlay) {
-        if (this.controlsOverlayList == null) {
-            this.controlsOverlayList = new ArrayList<>();
-        }
-        if (controlsOverlay != null) {
-            this.controlsOverlayList.add(controlsOverlay);
+    public IMADAIConfig addFriendlyObstruction(PKFriendlyObstruction friendlyObstruction) {
+        if (friendlyObstruction != null) {
+            if (this.friendlyObstructions == null) {
+                this.friendlyObstructions = new ArrayList<>();
+            }
+            this.friendlyObstructions.add(friendlyObstruction.getFriendlyObstruction());
         }
         return this;
     }
 
-    public List<View> getControlsOverlayList() {
-        return controlsOverlayList;
+    public List<FriendlyObstruction> getFriendlyObstructions() {
+        return friendlyObstructions;
     }
 
     public boolean isDebugMode() {

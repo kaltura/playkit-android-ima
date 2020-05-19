@@ -12,7 +12,6 @@
 
 package com.kaltura.playkit.plugins.ima;
 
-import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.ads.interactivemedia.v3.api.FriendlyObstruction;
@@ -73,7 +72,7 @@ public class IMAConfig {
     private String playerType;
     private String playerVersion;
     private List<String> videoMimeTypes = new ArrayList<>();
-    private transient List<FriendlyObstruction> friendlyOverlay;
+    private transient List<FriendlyObstruction> friendlyObstructions;
     private transient CompanionAdConfig companionAdConfig;
 
     //private Map<Double,String> tagsTimes; // <AdTime,URL_to_execute>
@@ -265,8 +264,19 @@ public class IMAConfig {
         return this;
     }
 
-    public IMAConfig setFriendlyOverlay(List<FriendlyObstruction> friendlyOverlay) {
-        this.friendlyOverlay = friendlyOverlay;
+    public IMAConfig setFriendlyObstructions(List<PKFriendlyObstruction> friendlyObstructions) {
+
+        if (friendlyObstructions != null) {
+            if (this.friendlyObstructions == null) {
+                this.friendlyObstructions = new ArrayList<>();
+            }
+
+            for (PKFriendlyObstruction pkFriendlyObstruction : friendlyObstructions) {
+                if (pkFriendlyObstruction != null) {
+                    this.friendlyObstructions.add(pkFriendlyObstruction.getFriendlyObstruction());
+                }
+            }
+        }
         return this;
     }
 
@@ -279,18 +289,18 @@ public class IMAConfig {
         return this;
     }
 
-    public IMAConfig addControlsOverlay(FriendlyObstruction friendlyOverlay) {
-        if (this.friendlyOverlay == null) {
-            this.friendlyOverlay = new ArrayList<>();
-        }
-        if (friendlyOverlay != null) {
-            this.friendlyOverlay.add(friendlyOverlay);
+    public IMAConfig addFriendlyObstruction(PKFriendlyObstruction friendlyObstruction) {
+        if (friendlyObstruction != null) {
+            if (this.friendlyObstructions == null) {
+                this.friendlyObstructions = new ArrayList<>();
+            }
+            this.friendlyObstructions.add(friendlyObstruction.getFriendlyObstruction());
         }
         return this;
     }
 
-    public List<FriendlyObstruction> getFriendlyOverlay() {
-        return friendlyOverlay;
+    public List<FriendlyObstruction> getFriendlyObstructions() {
+        return friendlyObstructions;
     }
 
     /**
