@@ -249,7 +249,7 @@ public class IMADAIConfig {
             }
 
             for (PKFriendlyObstruction pkFriendlyObstruction : friendlyObstructions) {
-                if (pkFriendlyObstruction != null) {
+                if (pkFriendlyObstruction != null && pkFriendlyObstruction.getFriendlyObstruction().getView() != null) {
                     this.friendlyObstructions.add(pkFriendlyObstruction.getFriendlyObstruction());
                 }
             }
@@ -298,7 +298,7 @@ public class IMADAIConfig {
     }
 
     public IMADAIConfig addFriendlyObstruction(PKFriendlyObstruction friendlyObstruction) {
-        if (friendlyObstruction != null) {
+        if (friendlyObstruction != null && friendlyObstruction.getFriendlyObstruction().getView() != null) {
             if (this.friendlyObstructions == null) {
                 this.friendlyObstructions = new ArrayList<>();
             }

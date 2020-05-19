@@ -37,12 +37,12 @@ public class PKFriendlyObstruction {
 
             @Override
             public FriendlyObstructionPurpose getPurpose() {
-                return friendlyObstructionPurpose;
+                return friendlyObstructionPurpose != null ? friendlyObstructionPurpose : FriendlyObstructionPurpose.OTHER;
             }
 
             @Override
             public String getDetailedReason() {
-                return detailedReason;
+                return detailedReason != null ? detailedReason : "";
             }
         };
     }
