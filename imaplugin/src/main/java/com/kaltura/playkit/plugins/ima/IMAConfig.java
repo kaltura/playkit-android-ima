@@ -14,7 +14,6 @@ package com.kaltura.playkit.plugins.ima;
 
 import android.view.ViewGroup;
 
-import com.google.ads.interactivemedia.v3.api.FriendlyObstruction;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -72,7 +71,7 @@ public class IMAConfig {
     private String playerType;
     private String playerVersion;
     private List<String> videoMimeTypes = new ArrayList<>();
-    private transient List<FriendlyObstruction> friendlyObstructions;
+    private transient List<PKFriendlyObstruction> friendlyObstructions;
     private transient CompanionAdConfig companionAdConfig;
 
     //private Map<Double,String> tagsTimes; // <AdTime,URL_to_execute>
@@ -272,8 +271,8 @@ public class IMAConfig {
             }
 
             for (PKFriendlyObstruction pkFriendlyObstruction : friendlyObstructions) {
-                if (pkFriendlyObstruction != null && pkFriendlyObstruction.getFriendlyObstruction() != null && pkFriendlyObstruction.getFriendlyObstruction().getView() != null) {
-                    this.friendlyObstructions.add(pkFriendlyObstruction.getFriendlyObstruction());
+                if (pkFriendlyObstruction != null && pkFriendlyObstruction.getView() != null) {
+                    this.friendlyObstructions.add(pkFriendlyObstruction);
                 }
             }
         }
@@ -290,16 +289,16 @@ public class IMAConfig {
     }
 
     public IMAConfig addFriendlyObstruction(PKFriendlyObstruction friendlyObstruction) {
-        if (friendlyObstruction != null && friendlyObstruction.getFriendlyObstruction() != null && friendlyObstruction.getFriendlyObstruction().getView() != null) {
+        if (friendlyObstruction != null && friendlyObstruction.getView() != null) {
             if (this.friendlyObstructions == null) {
                 this.friendlyObstructions = new ArrayList<>();
             }
-            this.friendlyObstructions.add(friendlyObstruction.getFriendlyObstruction());
+            this.friendlyObstructions.add(friendlyObstruction);
         }
         return this;
     }
 
-    public List<FriendlyObstruction> getFriendlyObstructions() {
+    public List<PKFriendlyObstruction> getFriendlyObstructions() {
         return friendlyObstructions;
     }
 

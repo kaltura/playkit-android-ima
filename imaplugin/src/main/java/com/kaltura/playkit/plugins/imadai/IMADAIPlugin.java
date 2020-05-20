@@ -50,6 +50,7 @@ import com.kaltura.playkit.plugins.ads.AdCuePoints;
 import com.kaltura.playkit.plugins.ads.AdEvent;
 import com.kaltura.playkit.plugins.ads.AdInfo;
 import com.kaltura.playkit.plugins.ads.AdsProvider;
+import com.kaltura.playkit.plugins.ima.PKFriendlyObstruction;
 import com.kaltura.playkit.utils.Consts;
 
 import java.lang.reflect.InvocationTargetException;
@@ -407,7 +408,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     }
 
     private void registerFriendlyOverlays() {
-        List<FriendlyObstruction> friendlyObstructions = adConfig.getFriendlyObstructions();
+        List<PKFriendlyObstruction> friendlyObstructions = adConfig.getFriendlyObstructions();
         if (friendlyObstructions != null && displayContainer != null) {
             for (FriendlyObstruction friendlyObstruction : friendlyObstructions) {
                 displayContainer.registerFriendlyObstruction(friendlyObstruction);
@@ -835,8 +836,6 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private void sendCuePointsUpdate() {
         log.d("sendCuePointsUpdate");
         List<Long> cuePointsList = buildCuePointsList();
-        if (cuePointsList == null)
-            return;
         if (!cuePointsList.isEmpty()) {
             AdCuePoints adCuePointsForEvent = new AdCuePoints(cuePointsList);
             adCuePointsForEvent.setAdPluginName(IMADAIPlugin.factory.getName());
@@ -982,7 +981,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
     @Override
     public boolean isAlwaysStartWithPreroll() {
-        return (adConfig == null) ? false : adConfig.isAlwaysStartWithPreroll();
+        return (adConfig != null) && adConfig.isAlwaysStartWithPreroll();
     }
 
     @Override

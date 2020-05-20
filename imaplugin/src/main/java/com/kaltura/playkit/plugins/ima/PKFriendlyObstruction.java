@@ -5,49 +5,37 @@ import android.view.View;
 import com.google.ads.interactivemedia.v3.api.FriendlyObstruction;
 import com.google.ads.interactivemedia.v3.api.FriendlyObstructionPurpose;
 
-public class PKFriendlyObstruction {
+public class PKFriendlyObstruction implements FriendlyObstruction {
 
-    private FriendlyObstruction friendlyObstruction;
+    private View friendlyView;
+    private FriendlyObstructionPurpose friendlyObstructionPurpose;
+    private String detailedReason;
 
     public PKFriendlyObstruction(View friendlyView, FriendlyObstructionPurpose friendlyObstructionPurpose) {
-        friendlyObstruction = new FriendlyObstruction() {
-            @Override
-            public View getView() {
-                return friendlyView;
-            }
 
-            @Override
-            public FriendlyObstructionPurpose getPurpose() {
-                return friendlyObstructionPurpose != null ? friendlyObstructionPurpose : FriendlyObstructionPurpose.OTHER;
-            }
-
-            @Override
-            public String getDetailedReason() {
-                return "";
-            }
-        };
+        this.friendlyView = friendlyView;
+        this.friendlyObstructionPurpose = friendlyObstructionPurpose != null ? friendlyObstructionPurpose : FriendlyObstructionPurpose.OTHER;
+        this.detailedReason = "";
     }
 
     public PKFriendlyObstruction(View friendlyView, FriendlyObstructionPurpose friendlyObstructionPurpose, String detailedReason) {
-        friendlyObstruction = new FriendlyObstruction() {
-            @Override
-            public View getView() {
-                return friendlyView;
-            }
-
-            @Override
-            public FriendlyObstructionPurpose getPurpose() {
-                return friendlyObstructionPurpose != null ? friendlyObstructionPurpose : FriendlyObstructionPurpose.OTHER;
-            }
-
-            @Override
-            public String getDetailedReason() {
-                return detailedReason != null ? detailedReason : "";
-            }
-        };
+        this.friendlyView = friendlyView;
+        this.friendlyObstructionPurpose = friendlyObstructionPurpose != null ? friendlyObstructionPurpose : FriendlyObstructionPurpose.OTHER;
+        this.detailedReason = detailedReason != null ? detailedReason : "";
     }
 
-    public FriendlyObstruction getFriendlyObstruction() {
-        return friendlyObstruction;
+    @Override
+    public View getView() {
+        return friendlyView;
+    }
+
+    @Override
+    public FriendlyObstructionPurpose getPurpose() {
+        return friendlyObstructionPurpose;
+    }
+
+    @Override
+    public String getDetailedReason() {
+        return detailedReason;
     }
 }
