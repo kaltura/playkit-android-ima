@@ -11,17 +11,14 @@ public class PKFriendlyObstruction implements FriendlyObstruction {
     private FriendlyObstructionPurpose friendlyObstructionPurpose;
     private String detailedReason;
 
-    public PKFriendlyObstruction(View friendlyView, FriendlyObstructionPurpose friendlyObstructionPurpose) {
-
-        this.friendlyView = friendlyView;
-        this.friendlyObstructionPurpose = friendlyObstructionPurpose != null ? friendlyObstructionPurpose : FriendlyObstructionPurpose.OTHER;
-        this.detailedReason = "";
-    }
-
     public PKFriendlyObstruction(View friendlyView, FriendlyObstructionPurpose friendlyObstructionPurpose, String detailedReason) {
         this.friendlyView = friendlyView;
         this.friendlyObstructionPurpose = friendlyObstructionPurpose != null ? friendlyObstructionPurpose : FriendlyObstructionPurpose.OTHER;
         this.detailedReason = detailedReason != null ? detailedReason : "";
+    }
+
+    public PKFriendlyObstruction(View friendlyView, FriendlyObstructionPurpose friendlyObstructionPurpose) {
+        this(friendlyView, friendlyObstructionPurpose, "");
     }
 
     @Override
