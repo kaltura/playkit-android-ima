@@ -345,8 +345,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     private void registerFriendlyOverlays() {
-        if (adConfig.getFriendlyOverlay() != null && adDisplayContainer != null) {
-            for (FriendlyObstruction friendlyOverlay : adConfig.getFriendlyOverlay()) {
+        List<PKFriendlyObstruction> friendlyObstructions = adConfig.getFriendlyObstructions();
+        if (friendlyObstructions != null && adDisplayContainer != null) {
+            for (FriendlyObstruction friendlyOverlay : friendlyObstructions) {
                 adDisplayContainer.registerFriendlyObstruction(friendlyOverlay);
             }
         }

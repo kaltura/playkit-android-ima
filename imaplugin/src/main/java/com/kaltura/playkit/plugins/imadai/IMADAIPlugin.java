@@ -2,7 +2,6 @@ package com.kaltura.playkit.plugins.imadai;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.ads.interactivemedia.v3.api.Ad;
@@ -11,6 +10,7 @@ import com.google.ads.interactivemedia.v3.api.AdErrorEvent;
 import com.google.ads.interactivemedia.v3.api.AdsLoader;
 import com.google.ads.interactivemedia.v3.api.AdsRenderingSettings;
 import com.google.ads.interactivemedia.v3.api.CuePoint;
+import com.google.ads.interactivemedia.v3.api.FriendlyObstruction;
 import com.google.ads.interactivemedia.v3.api.ImaSdkFactory;
 import com.google.ads.interactivemedia.v3.api.ImaSdkSettings;
 import com.google.ads.interactivemedia.v3.api.StreamDisplayContainer;
@@ -50,6 +50,7 @@ import com.kaltura.playkit.plugins.ads.AdCuePoints;
 import com.kaltura.playkit.plugins.ads.AdEvent;
 import com.kaltura.playkit.plugins.ads.AdInfo;
 import com.kaltura.playkit.plugins.ads.AdsProvider;
+import com.kaltura.playkit.plugins.ima.PKFriendlyObstruction;
 import com.kaltura.playkit.utils.Consts;
 
 import java.lang.reflect.InvocationTargetException;
@@ -321,7 +322,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private void destroyDisplayContainer() {
         if (displayContainer != null) {
             log.d("destroyDisplayContainer");
-            displayContainer.unregisterAllVideoControlsOverlays();
+            displayContainer.unregisterAllFriendlyObstructions();
             displayContainer.destroy();
             displayContainer = null;
         }
@@ -392,8 +393,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         log.d("createStreamDisplayContainer");
         if (displayContainer != null) {
             log.d("displayContainer != null return current displayContainer");
-            displayContainer.unregisterAllVideoControlsOverlays();
-            registerControlsOverlays();
+            displayContainer.unregisterAllFriendlyObstructions();
+            registerFriendlyOverlays();
             return displayContainer;
         }
         displayContainer = sdkFactory.createStreamDisplayContainer();
@@ -401,15 +402,16 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             videoStreamPlayer = createVideoStreamPlayer();
             displayContainer.setVideoStreamPlayer(videoStreamPlayer);
             displayContainer.setAdContainer(mAdUiContainer);
-            registerControlsOverlays();
+            registerFriendlyOverlays();
         }
         return displayContainer;
     }
 
-    private void registerControlsOverlays() {
-        if (adConfig.getControlsOverlayList() != null) {
-            for (View controlView : adConfig.getControlsOverlayList()) {
-                displayContainer.registerVideoControlsOverlay(controlView);
+    private void registerFriendlyOverlays() {
+        List<PKFriendlyObstruction> friendlyObstructions = adConfig.getFriendlyObstructions();
+        if (friendlyObstructions != null && displayContainer != null) {
+            for (FriendlyObstruction friendlyObstruction : friendlyObstructions) {
+                displayContainer.registerFriendlyObstruction(friendlyObstruction);
             }
         }
     }
@@ -834,8 +836,6 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private void sendCuePointsUpdate() {
         log.d("sendCuePointsUpdate");
         List<Long> cuePointsList = buildCuePointsList();
-        if (cuePointsList == null)
-            return;
         if (!cuePointsList.isEmpty()) {
             AdCuePoints adCuePointsForEvent = new AdCuePoints(cuePointsList);
             adCuePointsForEvent.setAdPluginName(IMADAIPlugin.factory.getName());
@@ -981,7 +981,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
     @Override
     public boolean isAlwaysStartWithPreroll() {
-        return (adConfig == null) ? false : adConfig.isAlwaysStartWithPreroll();
+        return (adConfig != null) && adConfig.isAlwaysStartWithPreroll();
     }
 
     @Override
