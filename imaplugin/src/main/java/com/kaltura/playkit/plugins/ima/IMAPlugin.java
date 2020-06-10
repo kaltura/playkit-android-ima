@@ -52,6 +52,7 @@ import com.kaltura.playkit.PlayerEvent;
 
 import com.kaltura.playkit.ads.AdTagType;
 import com.kaltura.playkit.ads.AdsPlayerEngineWrapper;
+import com.kaltura.playkit.ads.PKAdErrorCategory;
 import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdPluginType;
@@ -962,8 +963,19 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         AdError adException = adErrorEvent.getError();
         String errorMessage = (adException == null) ? "Unknown Error" : adException.getMessage();
         Enum errorType = PKAdErrorType.UNKNOWN_ERROR;
+        Enum errorCategory = PKAdErrorCategory.UNKNOWN_CATEGORY;
 
         if (adException != null) {
+            AdError.AdErrorType adErrorCategory = adException.getErrorType();
+
+            switch (adErrorCategory) {
+                case LOAD:
+                    errorCategory = PKAdErrorCategory.LOAD;
+                    break;
+                case PLAY:
+                    errorCategory = PKAdErrorCategory.PLAY;
+                    break;
+            }
 
             switch (adException.getErrorCode()) {
                 case INTERNAL_ERROR:
@@ -1023,6 +1035,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 case PLAYLIST_NO_CONTENT_TRACKING:
                     errorType = PKAdErrorType.PLAYLIST_NO_CONTENT_TRACKING;
                     break;
+                case VAST_TRAFFICKING_ERROR:
+                    errorType = PKAdErrorType.VAST_TRAFFICKING_ERROR;
+                    break;
             }
             if (errorMessage == null) {
                 errorMessage = "Error code = " + adException.getErrorCode();
@@ -1031,7 +1046,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (adConfig != null) {
             messageBus.post(new AdEvent.AdRequestedEvent(!TextUtils.isEmpty(adConfig.getAdTagUrl()) ? adConfig.getAdTagUrl() : adConfig.getAdTagResponse()));
         }
-        sendError(errorType, errorMessage + " adTagUrl=" + adConfig.getAdTagUrl(), adException);
+        sendError(errorCategory, errorType, errorMessage + " adTagUrl=" + adConfig.getAdTagUrl(), adException);
         if (PKAdErrorType.COMPANION_AD_LOADING_FAILED.equals(errorType)) {
             return;
         }
@@ -1101,14 +1116,14 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         cancelAdManagerTimer();
     }
 
-    private void sendError(Enum errorType, String message, Throwable exception) {
+    private void sendError(Enum errorCategory, Enum errorType, String message, Throwable exception) {
         log.e("Ad Error: " + errorType.name() + " with message " + message);
 
         PKError.Severity adErrorSeverity = PKError.Severity.Fatal;
         if (PKAdErrorType.COMPANION_AD_LOADING_FAILED.equals(errorType)) {
             adErrorSeverity = PKError.Severity.Recoverable;
         }
-        AdEvent errorEvent = new AdEvent.Error(new PKError(errorType, adErrorSeverity, message, exception));
+        AdEvent errorEvent = new AdEvent.Error(new PKError(errorCategory, errorType, adErrorSeverity, message, exception));
         messageBus.post(errorEvent);
     }
 
@@ -1404,7 +1419,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     }
                 }
 
-                sendError(PKAdErrorType.QUIET_LOG_ERROR, error, null);
+                sendError(PKAdErrorCategory.LOAD, PKAdErrorType.QUIET_LOG_ERROR, error, null);
                 break;
             default:
                 break;
@@ -1540,7 +1555,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         } else if (exoPlayerException.getCause() != null && exoPlayerException.getCause().getMessage() != null) {
             errorMsg = exoPlayerException.getCause().getMessage();
         }
-        sendError(PKAdErrorType.VIDEO_PLAY_ERROR, errorMsg, exoPlayerException);
+        sendError(PKAdErrorCategory.PLAY, PKAdErrorType.VIDEO_PLAY_ERROR, errorMsg, exoPlayerException);
     }
 
     @Override

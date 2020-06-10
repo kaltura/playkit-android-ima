@@ -36,6 +36,7 @@ import com.kaltura.playkit.PlayerEngineWrapper;
 import com.kaltura.playkit.PlayerEvent;
 import com.kaltura.playkit.PlayerState;
 import com.kaltura.playkit.ads.AdsDAIPlayerEngineWrapper;
+import com.kaltura.playkit.ads.PKAdErrorCategory;
 import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdPluginType;
@@ -707,7 +708,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                         error = adEvent.getAdData().get("errorMessage");
                     }
                 }
-                sendError(PKAdErrorType.QUIET_LOG_ERROR, error, null);
+                sendError(PKAdErrorCategory.LOAD, PKAdErrorType.QUIET_LOG_ERROR, error, null);
                 break;
             default:
                 break;
@@ -789,8 +790,20 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         AdError adException = adErrorEvent.getError();
         String errorMessage = (adException == null) ? "Unknown Error" : adException.getMessage();
         Enum errorType = PKAdErrorType.UNKNOWN_ERROR;
+        Enum errorCategory = PKAdErrorCategory.UNKNOWN_CATEGORY;
 
         if (adException != null) {
+
+            AdError.AdErrorType adErrorCategory = adException.getErrorType();
+
+            switch (adErrorCategory) {
+                case LOAD:
+                    errorCategory = PKAdErrorCategory.LOAD;
+                    break;
+                case PLAY:
+                    errorCategory = PKAdErrorCategory.PLAY;
+                    break;
+            }
 
             switch (adException.getErrorCode()) {
                 case INTERNAL_ERROR:
@@ -823,13 +836,14 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             }
         }
 
-        sendError(errorType, errorMessage, adException);
+        sendError(errorCategory, errorType, errorMessage, adException);
         preparePlayer(true);
     }
 
-    private void sendError(Enum errorType, String message, Throwable exception) {
+    private void sendError(Enum errorCategory, Enum errorType, String message, Throwable exception) {
         log.e("Ad Error: " + errorType.name() + " with message " + message);
-        com.kaltura.playkit.plugins.ads.AdEvent errorEvent = new com.kaltura.playkit.plugins.ads.AdEvent.Error(new PKError(errorType, message, exception));
+        PKError.Severity adErrorSeverity = PKError.Severity.Fatal;
+        com.kaltura.playkit.plugins.ads.AdEvent errorEvent = new com.kaltura.playkit.plugins.ads.AdEvent.Error(new PKError(errorCategory, errorType, adErrorSeverity, message, exception));
         messageBus.post(errorEvent);
     }
 
