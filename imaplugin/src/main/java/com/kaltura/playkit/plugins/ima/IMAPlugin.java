@@ -796,6 +796,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     @Override
+    public boolean isForceSinglePlayerRequired() {
+        return isReleaseContentPlayerRequired();
+    }
+
+    @Override
     public boolean isAdPaused() {
         log.d("isAdPaused: " + isAdIsPaused);
         return isAdIsPaused;
