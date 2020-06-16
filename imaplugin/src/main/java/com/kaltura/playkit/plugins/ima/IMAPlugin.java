@@ -1,6 +1,6 @@
 /*
  * ============================================================================
- * Copyright (C) 2017 Kaltura Inc.
+ * Copyright (C) 2017 Kaltura Inc. 
  *
  * Licensed under the AGPLv3 license, unless a different license for a
  * particular library is specified in the applicable library path.
