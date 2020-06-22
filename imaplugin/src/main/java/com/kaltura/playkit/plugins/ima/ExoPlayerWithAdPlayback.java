@@ -421,7 +421,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 lastPlayerState = PlayerState.READY;
                 isPlayerReady = true;
                 if (playWhenReady) {
-                    if (adVideoPlayerView.getPlayer().getDuration() > 0) {
+                    if (adVideoPlayerView != null &&
+                            adVideoPlayerView.getPlayer() != null &&
+                            adVideoPlayerView.getPlayer().getDuration() > 0) {
                         updateAdProgress();
                         for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
                             if (lastAdMediaInfo != null) {
@@ -506,7 +508,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             long position = contentPlayer.getCurrentPosition();
             //log.d("getContentProgress getDuration " +  duration);
             //log.d("getContentProgress getCurrentPosition " + position);
-            if (position > 0 && duration > 0 && position >= duration && adCuePoints != null && !adCuePoints.hasPostRoll()) {
+            if (duration > 0 && position >= duration && adCuePoints != null && !adCuePoints.hasPostRoll()) {
                 contentProgressProvider = null;
                 return VideoProgressUpdate.VIDEO_TIME_NOT_READY;
             }
@@ -560,6 +562,12 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             }
         }
         return Consts.TIME_UNSET;
+    }
+
+    public void contentComplete() {
+        for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
+            callback.onContentComplete();
+        }
     }
 
     /**

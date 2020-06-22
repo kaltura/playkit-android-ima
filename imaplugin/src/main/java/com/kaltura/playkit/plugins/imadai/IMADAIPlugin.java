@@ -202,13 +202,13 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
         messageBus.addListener(this, PlayerEvent.metadataAvailable, event -> {
             log.d("Received:PlayerEvent:" + event.eventType().name());
-            for (VideoStreamPlayer.VideoStreamPlayerCallback callback : mPlayerCallbacks) {
-                for (PKMetadata pkMetadata : event.metadataList){
-                    if (pkMetadata instanceof PKTextInformationFrame) {
-                        PKTextInformationFrame textFrame = (PKTextInformationFrame) pkMetadata;
-                        if (TXXX.equals(textFrame.id)) {
-                            log.d("Received user text: " + textFrame.value);
-                            if (mPlayerCallbacks != null) {
+            if (mPlayerCallbacks != null) {
+                for (VideoStreamPlayer.VideoStreamPlayerCallback callback : mPlayerCallbacks) {
+                    for (PKMetadata pkMetadata : event.metadataList){
+                        if (pkMetadata instanceof PKTextInformationFrame) {
+                            PKTextInformationFrame textFrame = (PKTextInformationFrame) pkMetadata;
+                            if (TXXX.equals(textFrame.id)) {
+                                log.d("Received user text: " + textFrame.value);
                                 callback.onUserTextReceived(textFrame.value);
                             }
                         }
@@ -397,13 +397,12 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             registerFriendlyOverlays();
             return displayContainer;
         }
-        displayContainer = sdkFactory.createStreamDisplayContainer();
         if (videoStreamPlayer == null) {
             videoStreamPlayer = createVideoStreamPlayer();
-            displayContainer.setVideoStreamPlayer(videoStreamPlayer);
-            displayContainer.setAdContainer(mAdUiContainer);
-            registerFriendlyOverlays();
         }
+        displayContainer = ImaSdkFactory.createStreamDisplayContainer(mAdUiContainer, videoStreamPlayer);
+        registerFriendlyOverlays();
+
         return displayContainer;
     }
 
@@ -964,8 +963,10 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
     @Override
     public void contentCompleted() {
-        if (adsLoader != null) {
-            adsLoader.contentComplete();
+        if (mPlayerCallbacks != null) {
+            for (VideoStreamPlayer.VideoStreamPlayerCallback callback : mPlayerCallbacks) {
+                callback.onContentComplete();
+            }
         }
     }
 
