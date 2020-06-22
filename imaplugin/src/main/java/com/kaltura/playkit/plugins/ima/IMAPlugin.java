@@ -797,6 +797,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     @Override
+    public boolean isForceSinglePlayerRequired() {
+        return isReleaseContentPlayerRequired();
+    }
+
+    @Override
     public boolean isAdPaused() {
         log.d("isAdPaused: " + isAdIsPaused);
         return isAdIsPaused;
@@ -1380,8 +1385,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 messageBus.post(new AdEvent(AdEvent.Type.AD_BREAK_READY));
                 break;
             case AD_PROGRESS:
-                //log.d("AD_PROGRESS = " + videoPlayerWithAdPlayback.getAdPosition());
-                messageBus.post(new AdEvent(AdEvent.Type.AD_PROGRESS));
+                long adPosition = videoPlayerWithAdPlayback != null ? videoPlayerWithAdPlayback.getAdPosition() : -1;
+                // log.d("AD_PROGRESS = " + adPosition);
+                messageBus.post(new AdEvent.AdProgress(adPosition));
                 break;
             case AD_BREAK_STARTED:
                 messageBus.post(new AdEvent(AdEvent.Type.AD_BREAK_STARTED));
