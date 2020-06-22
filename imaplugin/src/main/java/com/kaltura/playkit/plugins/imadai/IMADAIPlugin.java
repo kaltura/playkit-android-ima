@@ -963,10 +963,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
     @Override
     public void contentCompleted() {
-        if (mPlayerCallbacks != null) {
-            for (VideoStreamPlayer.VideoStreamPlayerCallback callback : mPlayerCallbacks) {
-                callback.onContentComplete();
-            }
+        if (adsLoader != null) {
+            adsLoader.contentComplete();
         }
     }
 

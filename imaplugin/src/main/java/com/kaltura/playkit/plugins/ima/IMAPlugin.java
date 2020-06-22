@@ -759,9 +759,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public void contentCompleted() {
-//        if (videoPlayerWithAdPlayback != null) {
-//            videoPlayerWithAdPlayback.contentComplete();
-//        }
         if (adsLoader != null) {
             adsLoader.contentComplete();
         }
