@@ -807,7 +807,6 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                     errorCategory = PKErrorCategory.UNKNOWN;
                     break;
             }
-
             
             switch (adException.getErrorCode()) {
                 case INTERNAL_ERROR:
