@@ -842,7 +842,11 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
     private void sendError(Enum errorCategory, Enum errorType, String message, Throwable exception) {
         log.e("Ad Error: " + errorType.name() + " with message " + message);
+
         PKError.Severity adErrorSeverity = PKError.Severity.Fatal;
+        if (PKAdErrorType.QUIET_LOG_ERROR.equals(errorType)) {
+            adErrorSeverity = PKError.Severity.Recoverable;
+        }
         com.kaltura.playkit.plugins.ads.AdEvent errorEvent = new com.kaltura.playkit.plugins.ads.AdEvent.Error(new PKError(errorCategory, errorType, adErrorSeverity, message, exception));
         messageBus.post(errorEvent);
     }
