@@ -808,6 +808,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                     break;
             }
 
+            
             switch (adException.getErrorCode()) {
                 case INTERNAL_ERROR:
                     errorType = PKAdErrorType.INTERNAL_ERROR;
