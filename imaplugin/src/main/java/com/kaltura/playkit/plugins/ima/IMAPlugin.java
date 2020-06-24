@@ -1053,9 +1053,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         if (adConfig != null) {
             messageBus.post(new AdEvent.AdRequestedEvent(!TextUtils.isEmpty(adConfig.getAdTagUrl()) ? adConfig.getAdTagUrl() : adConfig.getAdTagResponse()));
-            sendError(errorType, errorMessage + " adTagUrl=" + adConfig.getAdTagUrl(), adException);
+            sendError(errorCategory, errorType, errorMessage + " adTagUrl=" + adConfig.getAdTagUrl(), adException);
         } else {
-            sendError(errorType, errorMessage + " adConfig is null", adException);
+            sendError(errorCategory, errorType, errorMessage + " adConfig is null", adException);
         }
 
         if (PKAdErrorType.COMPANION_AD_LOADING_FAILED.equals(errorType)) {
