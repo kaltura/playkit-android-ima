@@ -157,7 +157,6 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         addListeners();
     }
 
-    
     private void addListeners() {
 
         messageBus.addListener(this, PlayerEvent.ended, event -> {
