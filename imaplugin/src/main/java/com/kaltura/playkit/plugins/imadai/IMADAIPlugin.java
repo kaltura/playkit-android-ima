@@ -36,7 +36,7 @@ import com.kaltura.playkit.PlayerEngineWrapper;
 import com.kaltura.playkit.PlayerEvent;
 import com.kaltura.playkit.PlayerState;
 import com.kaltura.playkit.ads.AdsDAIPlayerEngineWrapper;
-import com.kaltura.playkit.ads.PKAdErrorCategory;
+import com.kaltura.playkit.ads.PKErrorCategory;
 import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdPluginType;
@@ -708,7 +708,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                         error = adEvent.getAdData().get("errorMessage");
                     }
                 }
-                sendError(PKAdErrorCategory.LOAD, PKAdErrorType.QUIET_LOG_ERROR, error, null);
+                sendError(PKErrorCategory.LOAD, PKAdErrorType.QUIET_LOG_ERROR, error, null);
                 break;
             default:
                 break;
@@ -790,7 +790,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         AdError adException = adErrorEvent.getError();
         String errorMessage = (adException == null) ? "Unknown Error" : adException.getMessage();
         Enum errorType = PKAdErrorType.UNKNOWN_ERROR;
-        Enum errorCategory = PKAdErrorCategory.UNKNOWN_CATEGORY;
+        Enum errorCategory = PKErrorCategory.UNKNOWN;
 
         if (adException != null) {
 
@@ -798,13 +798,13 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
             switch (adErrorCategory) {
                 case LOAD:
-                    errorCategory = PKAdErrorCategory.LOAD;
+                    errorCategory = PKErrorCategory.LOAD;
                     break;
                 case PLAY:
-                    errorCategory = PKAdErrorCategory.PLAY;
+                    errorCategory = PKErrorCategory.PLAY;
                     break;
                 default:
-                    errorCategory = PKAdErrorCategory.UNKNOWN_CATEGORY;
+                    errorCategory = PKErrorCategory.UNKNOWN;
                     break;
             }
 

@@ -52,7 +52,7 @@ import com.kaltura.playkit.PlayerEvent;
 
 import com.kaltura.playkit.ads.AdTagType;
 import com.kaltura.playkit.ads.AdsPlayerEngineWrapper;
-import com.kaltura.playkit.ads.PKAdErrorCategory;
+import com.kaltura.playkit.ads.PKErrorCategory;
 import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdPluginType;
@@ -968,20 +968,20 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         AdError adException = adErrorEvent.getError();
         String errorMessage = (adException == null) ? "Unknown Error" : adException.getMessage();
         Enum errorType = PKAdErrorType.UNKNOWN_ERROR;
-        Enum errorCategory = PKAdErrorCategory.UNKNOWN_CATEGORY;
+        Enum errorCategory = PKErrorCategory.UNKNOWN;
 
         if (adException != null) {
             AdError.AdErrorType adErrorCategory = adException.getErrorType();
 
             switch (adErrorCategory) {
                 case LOAD:
-                    errorCategory = PKAdErrorCategory.LOAD;
+                    errorCategory = PKErrorCategory.LOAD;
                     break;
                 case PLAY:
-                    errorCategory = PKAdErrorCategory.PLAY;
+                    errorCategory = PKErrorCategory.PLAY;
                     break;
                 default:
-                    errorCategory = PKAdErrorCategory.UNKNOWN_CATEGORY;
+                    errorCategory = PKErrorCategory.UNKNOWN;
                     break;
             }
 
@@ -1428,7 +1428,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     }
                 }
 
-                sendError(PKAdErrorCategory.LOAD, PKAdErrorType.QUIET_LOG_ERROR, error, null);
+                sendError(PKErrorCategory.LOAD, PKAdErrorType.QUIET_LOG_ERROR, error, null);
                 break;
             default:
                 break;
@@ -1564,7 +1564,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         } else if (exoPlayerException.getCause() != null && exoPlayerException.getCause().getMessage() != null) {
             errorMsg = exoPlayerException.getCause().getMessage();
         }
-        sendError(PKAdErrorCategory.PLAY, PKAdErrorType.VIDEO_PLAY_ERROR, errorMsg, exoPlayerException);
+        sendError(PKErrorCategory.PLAY, PKAdErrorType.VIDEO_PLAY_ERROR, errorMsg, exoPlayerException);
     }
 
     @Override
