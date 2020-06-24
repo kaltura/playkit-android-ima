@@ -980,6 +980,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 case PLAY:
                     errorCategory = PKAdErrorCategory.PLAY;
                     break;
+                default:
+                    errorCategory = PKAdErrorCategory.UNKNOWN_CATEGORY;
+                    break;
             }
 
             switch (adException.getErrorCode()) {

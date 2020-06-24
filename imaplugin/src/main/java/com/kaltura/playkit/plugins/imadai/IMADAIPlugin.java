@@ -803,6 +803,9 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 case PLAY:
                     errorCategory = PKAdErrorCategory.PLAY;
                     break;
+                default:
+                    errorCategory = PKAdErrorCategory.UNKNOWN_CATEGORY;
+                    break;
             }
 
             switch (adException.getErrorCode()) {
