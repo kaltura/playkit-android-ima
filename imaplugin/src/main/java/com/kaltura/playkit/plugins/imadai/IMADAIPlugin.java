@@ -24,6 +24,7 @@ import com.kaltura.android.exoplayer2.C;
 import com.kaltura.playkit.MessageBus;
 import com.kaltura.playkit.PKDrmParams;
 import com.kaltura.playkit.PKError;
+import com.kaltura.playkit.PKErrorCategory;
 import com.kaltura.playkit.PKEvent;
 import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PKMediaConfig;
@@ -36,7 +37,6 @@ import com.kaltura.playkit.PlayerEngineWrapper;
 import com.kaltura.playkit.PlayerEvent;
 import com.kaltura.playkit.PlayerState;
 import com.kaltura.playkit.ads.AdsDAIPlayerEngineWrapper;
-import com.kaltura.playkit.ads.PKErrorCategory;
 import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdPluginType;
@@ -807,7 +807,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                     errorCategory = PKErrorCategory.UNKNOWN;
                     break;
             }
-            
+
             switch (adException.getErrorCode()) {
                 case INTERNAL_ERROR:
                     errorType = PKAdErrorType.INTERNAL_ERROR;

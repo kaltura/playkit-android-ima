@@ -15,7 +15,6 @@ package com.kaltura.playkit.plugins.ima;
 import android.content.Context;
 import android.os.CountDownTimer;
 import android.os.Handler;
-
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,24 +39,21 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.kaltura.playkit.MessageBus;
 import com.kaltura.playkit.PKError;
+import com.kaltura.playkit.PKErrorCategory;
 import com.kaltura.playkit.PKEvent;
 import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PKMediaConfig;
 import com.kaltura.playkit.PKMediaFormat;
 import com.kaltura.playkit.PKPlugin;
 import com.kaltura.playkit.Player;
-
 import com.kaltura.playkit.PlayerEngineWrapper;
 import com.kaltura.playkit.PlayerEvent;
-
 import com.kaltura.playkit.ads.AdTagType;
 import com.kaltura.playkit.ads.AdsPlayerEngineWrapper;
-import com.kaltura.playkit.ads.PKErrorCategory;
 import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdPluginType;
 import com.kaltura.playkit.ads.PKAdProviderListener;
-
 import com.kaltura.playkit.player.PlayerEngine;
 import com.kaltura.playkit.player.PlayerSettings;
 import com.kaltura.playkit.plugin.ima.BuildConfig;
