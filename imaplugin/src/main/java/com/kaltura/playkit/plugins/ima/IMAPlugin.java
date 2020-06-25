@@ -306,7 +306,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             adDisplayContainer.unregisterAllFriendlyObstructions();
             clearCompanionSlots();
         } else {
-            adDisplayContainer = sdkFactory.createAdDisplayContainer(videoPlayerWithAdPlayback.getAdUiContainer(), videoPlayerWithAdPlayback.getVideoAdPlayer());
+            adDisplayContainer = ImaSdkFactory.createAdDisplayContainer(videoPlayerWithAdPlayback.getAdUiContainer(), videoPlayerWithAdPlayback.getVideoAdPlayer());
         }
 
         // Set up spots for companions.
@@ -756,8 +756,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public void contentCompleted() {
-        if (adsLoader != null) {
-            adsLoader.contentComplete();
+        if (videoPlayerWithAdPlayback != null) {
+            videoPlayerWithAdPlayback.contentComplete();
         }
     }
 
@@ -1049,8 +1049,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         if (adConfig != null) {
             messageBus.post(new AdEvent.AdRequestedEvent(!TextUtils.isEmpty(adConfig.getAdTagUrl()) ? adConfig.getAdTagUrl() : adConfig.getAdTagResponse()));
+            sendError(errorCategory, errorType, errorMessage + " adTagUrl=" + adConfig.getAdTagUrl(), adException);
+        } else {
+            sendError(errorCategory, errorType, errorMessage + " adConfig is null", adException);
         }
-        sendError(errorCategory, errorType, errorMessage + " adTagUrl=" + adConfig.getAdTagUrl(), adException);
+
         if (PKAdErrorType.COMPANION_AD_LOADING_FAILED.equals(errorType)) {
             return;
         }
