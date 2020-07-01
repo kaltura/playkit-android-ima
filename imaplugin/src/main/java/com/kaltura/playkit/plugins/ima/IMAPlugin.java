@@ -720,10 +720,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         adsManager.destroy();
         contentCompleted();
-        adInfo = null;
         isAdDisplayed = false;
         adPlaybackCancelled = false;
         resetIMA();
+        adInfo = null;
     }
 
     @Override
@@ -1333,14 +1333,18 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             case PAUSED:
                 log.d("AD PAUSED isAdIsPaused = true");
                 isAdIsPaused = true;
-                adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
-                messageBus.post(new AdEvent.AdPausedEvent(adInfo));
+                if (adInfo != null) {
+                    adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
+                    messageBus.post(new AdEvent.AdPausedEvent(adInfo));
+                }
                 break;
             case RESUMED:
                 log.d("AD RESUMED");
                 isAdIsPaused = false;
-                adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
-                messageBus.post(new AdEvent.AdResumedEvent(adInfo));
+                if (adInfo != null) {
+                    adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
+                    messageBus.post(new AdEvent.AdResumedEvent(adInfo));
+                }
                 break;
             case COMPLETED:
                 log.d("AD COMPLETED");
@@ -1356,8 +1360,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 messageBus.post(new AdEvent(AdEvent.Type.THIRD_QUARTILE));
                 break;
             case SKIPPED:
-                adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
-                messageBus.post(new AdEvent.AdSkippedEvent(adInfo));
+                if (adInfo != null) {
+                    adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
+                    messageBus.post(new AdEvent.AdSkippedEvent(adInfo));
+                }
                 Ad adInfoSkip = adEvent.getAd();
                 if (adInfoSkip != null && adInfoSkip.getAdPodInfo() != null) {
                     AdPodInfo adPodInfoSkip = adInfoSkip.getAdPodInfo();
