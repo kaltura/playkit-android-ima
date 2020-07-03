@@ -659,9 +659,11 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 break;
             case STARTED: //Fired when an ad starts.
                 log.d("AD STARTED");
-                adInfo = createAdInfo(adEvent.getAd());
-                messageBus.post(new AdEvent.AdLoadedEvent(adInfo));
-                messageBus.post(new AdEvent.AdStartedEvent(adInfo));
+                if (adInfo != null) {
+                    adInfo = createAdInfo(adEvent.getAd());
+                    messageBus.post(new AdEvent.AdLoadedEvent(adInfo));
+                    messageBus.post(new AdEvent.AdStartedEvent(adInfo));
+                }
                 break;
             case FIRST_QUARTILE: //Fired when an ad reaches its first quartile.
                 log.d("AD FIRST_QUARTILE");
@@ -679,14 +681,18 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 log.d("AD PAUSED");
                 isAdIsPaused = true;
                 isAdDisplayed = true;
-                adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
-                messageBus.post(new AdEvent.AdPausedEvent(adInfo));
+                if (adInfo != null) {
+                    adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
+                    messageBus.post(new AdEvent.AdPausedEvent(adInfo));
+                }
                 break;
             case RESUMED:
                 log.d("AD RESUMED");
                 isAdIsPaused = false;
-                adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
-                messageBus.post(new AdEvent.AdResumedEvent(adInfo));
+                if (adInfo != null) {
+                    adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
+                    messageBus.post(new AdEvent.AdResumedEvent(adInfo));
+                }
                 break;
             case COMPLETED: //Fired when an ad is complete.
                 log.d("AD COMPLETED");
@@ -964,6 +970,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         isAdError = false;
         isContentPrepared = false;
         pluginCuePoints = null;
+        adInfo = null;
     }
 
     @Override
