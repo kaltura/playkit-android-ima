@@ -659,11 +659,9 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 break;
             case STARTED: //Fired when an ad starts.
                 log.d("AD STARTED");
-                if (adInfo != null) {
-                    adInfo = createAdInfo(adEvent.getAd());
-                    messageBus.post(new AdEvent.AdLoadedEvent(adInfo));
-                    messageBus.post(new AdEvent.AdStartedEvent(adInfo));
-                }
+                adInfo = createAdInfo(adEvent.getAd());
+                messageBus.post(new AdEvent.AdLoadedEvent(adInfo));
+                messageBus.post(new AdEvent.AdStartedEvent(adInfo));
                 break;
             case FIRST_QUARTILE: //Fired when an ad reaches its first quartile.
                 log.d("AD FIRST_QUARTILE");
