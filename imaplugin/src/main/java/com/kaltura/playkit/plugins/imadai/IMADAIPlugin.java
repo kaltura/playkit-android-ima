@@ -679,14 +679,18 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 log.d("AD PAUSED");
                 isAdIsPaused = true;
                 isAdDisplayed = true;
-                adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
-                messageBus.post(new AdEvent.AdPausedEvent(adInfo));
+                if (adInfo != null) {
+                    adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
+                    messageBus.post(new AdEvent.AdPausedEvent(adInfo));
+                }
                 break;
             case RESUMED:
                 log.d("AD RESUMED");
                 isAdIsPaused = false;
-                adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
-                messageBus.post(new AdEvent.AdResumedEvent(adInfo));
+                if (adInfo != null) {
+                    adInfo.setAdPlayHead(getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER);
+                    messageBus.post(new AdEvent.AdResumedEvent(adInfo));
+                }
                 break;
             case COMPLETED: //Fired when an ad is complete.
                 log.d("AD COMPLETED");
@@ -964,6 +968,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         isAdError = false;
         isContentPrepared = false;
         pluginCuePoints = null;
+        adInfo = null;
     }
 
     @Override
