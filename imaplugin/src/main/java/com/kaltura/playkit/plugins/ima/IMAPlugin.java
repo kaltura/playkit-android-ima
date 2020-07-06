@@ -198,7 +198,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             if (adInfo != null) {
                 log.d("Event: ENDED adInfo.getAdIndexInPod() = " + adInfo.getAdIndexInPod() + " -  adInfo.getTotalAdsInPod() = " + adInfo.getTotalAdsInPod());
             }
-            boolean isLastMidRollPlayed = (adInfo == null) || !adCuePoints.hasMidRoll() || (adCuePoints.getAdCuePoints().size() >= 2 && adCuePoints.hasPostRoll() && adInfo != null && adInfo.getAdPodTimeOffset() == adCuePoints.getAdCuePoints().get(adCuePoints.getAdCuePoints().size() - 2));
+            boolean isLastMidRollPlayed = (adInfo == null) || !adCuePoints.hasMidRoll() || (adCuePoints.getAdCuePoints().size() >= 2 && adCuePoints.hasPostRoll() && adInfo != null && (adInfo.getAdPodTimeOffset() == adCuePoints.getAdCuePoints().get(adCuePoints.getAdCuePoints().size() - 2) || adInfo.getAdPositionType() == AdPositionType.POST_ROLL));
             boolean isLastMidRollInValid = (adCuePoints.getAdCuePoints().size() >= 2 && adCuePoints.hasPostRoll() && adInfo != null && getPlayerEngine() != null && adCuePoints.getAdCuePoints().get(adCuePoints.getAdCuePoints().size() - 2) > getPlayerEngine().getDuration());
             log.d("contentCompleted isLastMidRollPlayed = " + isLastMidRollPlayed + " isLastMidRollInValid = " + isLastMidRollInValid);
 
