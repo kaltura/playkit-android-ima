@@ -202,7 +202,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             boolean isLastMidRollInValid = (adCuePoints.getAdCuePoints().size() >= 2 && adCuePoints.hasPostRoll() && adInfo != null && getPlayerEngine() != null && adCuePoints.getAdCuePoints().get(adCuePoints.getAdCuePoints().size() - 2) > getPlayerEngine().getDuration());
             log.d("contentCompleted isLastMidRollPlayed = " + isLastMidRollPlayed + " isLastMidRollInValid = " + isLastMidRollInValid);
 
-            if (!isAdDisplayed && (!adCuePoints.hasPostRoll() || isAllAdsCompleted || isLastMidRollPlayed || isLastMidRollInValid)) {
+            if ((!adCuePoints.hasPostRoll() || isAllAdsCompleted || isLastMidRollPlayed || isLastMidRollInValid)) {
                 log.d("contentCompleted on ended");
                 contentCompleted();
             } else {
@@ -463,6 +463,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     @Override
     protected void onApplicationResumed() {
         log.d("onApplicationResumed isAdDisplayed = " + isAdDisplayed + ", lastPlaybackPlayerState = " + lastPlaybackPlayerState + " ,lastAdEventReceived = " + lastAdEventReceived);
+        log.d("onApplicationResumed adinfo = " + adInfo.toString());
         long playerLastPositionTmp =  playerLastPositionForBG;
         playerLastPositionForBG = -1;
         if (videoPlayerWithAdPlayback != null) {
@@ -1299,7 +1300,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             case STARTED:
                 log.d("AD STARTED isAdDisplayed = true");
                 adInfo = createAdInfo(adEvent.getAd());
-                if (adInfo.getAdPositionType() != AdPositionType.PRE_ROLL && !playerPlayingBeforeAdArrived) {
+                if (adInfo.getAdPositionType() == AdPositionType.MID_ROLL && !playerPlayingBeforeAdArrived) {
                     pause();
                     playerPlayingBeforeAdArrived = true;
                 } else {
