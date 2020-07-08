@@ -447,14 +447,16 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
 
         if (getPlayerEngine() != null) {
-            if (!isAdDisplayed) {
-                if (getPlayerEngine().isPlaying()) {
-                    lastPlaybackPlayerState = PlayerEvent.Type.PLAYING;
+            if (lastPlaybackPlayerState != PlayerEvent.Type.ENDED) {
+                if (!isAdDisplayed) {
+                    if (getPlayerEngine().isPlaying()) {
+                        lastPlaybackPlayerState = PlayerEvent.Type.PLAYING;
+                    } else {
+                        lastPlaybackPlayerState = PlayerEvent.Type.PAUSE;
+                    }
                 } else {
                     lastPlaybackPlayerState = PlayerEvent.Type.PAUSE;
                 }
-            } else {
-                lastPlaybackPlayerState = PlayerEvent.Type.PAUSE;
             }
         }
         pause();
@@ -1185,8 +1187,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 }
                 break;
             case CONTENT_PAUSE_REQUESTED:
-                log.d("CONTENT_PAUSE_REQUESTED appIsInBackground = " + appIsInBackground);
-                playerPlayingBeforeAdArrived = getPlayerEngine().isPlaying() || lastPlaybackPlayerState == PlayerEvent.Type.ENDED;
+                log.d("CONTENT_PAUSE_REQUESTED appIsInBackground = " + appIsInBackground + " lastPlaybackPlayerState = " + lastPlaybackPlayerState);
+                playerPlayingBeforeAdArrived = getPlayerEngine().isPlaying() || (lastPlaybackPlayerState != null && lastPlaybackPlayerState == PlayerEvent.Type.ENDED);
+                log.d("CONTENT_PAUSE_REQUESTED playerPlayingBeforeAdArrived = " + playerPlayingBeforeAdArrived);
+
                 if (getPlayerEngine() != null) {
                     getPlayerEngine().pause();
                 }
@@ -1297,7 +1301,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 }
                 break;
             case STARTED:
-                log.d("AD STARTED isAdDisplayed = true");
+                log.d("AD STARTED isAdDisplayed = true lastPlaybackPlayerState =" + lastPlaybackPlayerState + " adInfo.getAdPositionType() "  + adInfo.getAdPositionType() + " playerPlayingBeforeAdArrived =" + playerPlayingBeforeAdArrived);
                 adInfo = createAdInfo(adEvent.getAd());
                 if (adInfo.getAdPositionType() != AdPositionType.PRE_ROLL && !playerPlayingBeforeAdArrived) {
                     pause();
