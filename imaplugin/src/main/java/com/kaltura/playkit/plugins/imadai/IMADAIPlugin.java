@@ -200,6 +200,10 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             log.d("Received:PlayerEvent:" + event.eventType().name());
             lastPlaybackPlayerState = PlayerEvent.Type.SEEKING;
         });
+        messageBus.addListener(this, PlayerEvent.seeked, event -> {
+            log.d("Received:PlayerEvent:" + event.eventType().name());
+            //lastPlaybackPlayerState = PlayerEvent.Type.SEEKED;
+        });
 
         messageBus.addListener(this, PlayerEvent.metadataAvailable, event -> {
             log.d("Received:PlayerEvent:" + event.eventType().name());
@@ -210,7 +214,9 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                             PKTextInformationFrame textFrame = (PKTextInformationFrame) pkMetadata;
                             if (TXXX.equals(textFrame.id)) {
                                 log.d("Received user text: " + textFrame.value);
-                                callback.onUserTextReceived(textFrame.value);
+                                if(adConfig.isLiveDAI()) {
+                                    callback.onUserTextReceived(textFrame.value);
+                                }
                             }
                         }
                     }
@@ -1192,18 +1198,25 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         if (getPlayerEngine() == null) {
             return;
         }
+        log.d("XXX");
         long newPositionToSeek = -1;
         if (streamManager != null) {
+            log.d("XXX XXX");
             if (pluginCuePoints != null) {
+                log.d("XXX XXX XXX");
                 CuePoint candidateCuePoint = streamManager.getPreviousCuePointForStreamTime(streamManager.getStreamTimeForContentTime(Math.floor(position / Consts.MILLISECONDS_MULTIPLIER)));
                 if (candidateCuePoint != null && !candidateCuePoint.isPlayed() && (position == 0 || getPlayerEngineWrapper() != null && position >= getPlayerEngineWrapper().getCurrentPosition())) {
                     newPositionToSeek = (long) Math.floor(candidateCuePoint.getStartTime() * Consts.MILLISECONDS_MULTIPLIER);
+                    log.d("XXX XXX XXX XXX seekTo " + newPositionToSeek);
+
                     getPlayerEngine().seekTo(newPositionToSeek);
                     mSnapBackTime = streamManager.getStreamTimeForContentTime(Math.floor(position / Consts.MILLISECONDS_MULTIPLIER));
                     return;
                 } else {
+                    log.d("XXX XXX XXX YYY");
                     newPositionToSeek = position;
                     if (isPositionInBetweenCuePoint(position)) {
+                        log.d("XXX XXX XXX YYY XXX");
                         newPositionToSeek = getCuePointEndTime(position);
                     }
                     newPositionToSeek = (long) streamManager.getStreamTimeForContentTime(Math.floor(newPositionToSeek / Consts.MILLISECONDS_MULTIPLIER)) * Consts.MILLISECONDS_MULTIPLIER;
