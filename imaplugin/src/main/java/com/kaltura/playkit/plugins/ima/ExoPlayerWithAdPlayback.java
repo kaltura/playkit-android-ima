@@ -22,6 +22,7 @@ import com.kaltura.android.exoplayer2.C;
 import com.kaltura.android.exoplayer2.DefaultRenderersFactory;
 import com.kaltura.android.exoplayer2.ExoPlaybackException;
 import com.kaltura.android.exoplayer2.Format;
+import com.kaltura.android.exoplayer2.MediaItem;
 import com.kaltura.android.exoplayer2.PlaybackParameters;
 import com.kaltura.android.exoplayer2.PlaybackPreparer;
 import com.kaltura.android.exoplayer2.Player;
@@ -46,12 +47,14 @@ import com.kaltura.android.exoplayer2.util.EventLogger;
 import com.kaltura.android.exoplayer2.util.Log;
 import com.kaltura.android.exoplayer2.util.Util;
 import com.kaltura.playkit.PKLog;
+import com.kaltura.playkit.PKMediaFormat;
 import com.kaltura.playkit.PlayerState;
 import com.kaltura.playkit.player.MediaSupport;
 import com.kaltura.playkit.plugins.ads.AdCuePoints;
 import com.kaltura.playkit.utils.Consts;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.kaltura.android.exoplayer2.C.SELECTION_REASON_ADAPTIVE;
@@ -105,6 +108,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     private AdMediaInfo lastAdMediaInfo;
     private Handler handler = null;
     private Runnable updateAdProgressRunnable = null;
+    private boolean playWhenReady;
 
     public interface OnAdPlayBackListener {
         void onBufferStart();
@@ -381,20 +385,25 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     }
 
     @Override
-    public void onLoadingChanged(boolean isLoading) {
+    public void onIsLoadingChanged(boolean isLoading) {
         log.d("onTracksChanged");
     }
 
     @Override
-    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+    public void onPlayWhenReadyChanged(boolean playWhenReady, int reason) {
+        this.playWhenReady = playWhenReady;
+    }
+
+    @Override
+    public void onPlaybackStateChanged(int playbackState) {
         log.d("onPlayerStateChanged " + playbackState + " lastPlayerState = " + lastPlayerState);
         switch (playbackState) {
             case Player.STATE_IDLE:
-                log.d("onPlayerStateChanged. IDLE. playWhenReady => " + playWhenReady);
+                log.d("onPlayerStateChanged. IDLE.");
                 lastPlayerState = PlayerState.IDLE;
                 break;
             case Player.STATE_BUFFERING:
-                log.d("onPlayerStateChanged. BUFFERING. playWhenReady => " + playWhenReady);
+                log.d("onPlayerStateChanged. BUFFERING");
                 if (lastPlayerState != PlayerState.BUFFERING) {
                     lastPlayerState = PlayerState.BUFFERING;
                     if (onAdPlayBackListener != null) {
@@ -409,7 +418,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 }
                 break;
             case Player.STATE_READY:
-                log.d("onPlayerStateChanged. READY. playWhenReady => " + playWhenReady);
+                log.d("onPlayerStateChanged. READY.");
                 if (lastPlayerState == PlayerState.BUFFERING && onAdPlayBackListener != null) {
                     updateAdProgress();
                     onAdPlayBackListener.onBufferEnd();
@@ -490,11 +499,6 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
         log.d("onPlaybackParametersChanged");
 
-    }
-
-    @Override
-    public void onSeekProcessed() {
-        log.d("onSeekProcessed");
     }
 
     public void setContentProgressProvider(final com.kaltura.playkit.Player contentPlayer) {
@@ -614,9 +618,10 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         }
 
         if (adVideoPlayerView != null && adVideoPlayerView.getPlayer() != null) {
-            MediaSource mediaSource = buildMediaSource(currentAdUri);
+            MediaItem mediaItem = buildMediaItem(currentAdUri);
             adVideoPlayerView.getPlayer().stop();
-            adPlayer.prepare(mediaSource);
+            adPlayer.setMediaItems(Collections.singletonList(mediaItem), true);
+            adPlayer.prepare();
             adVideoPlayerView.getPlayer().setPlayWhenReady(adShouldAutoPlay);
         }
     }
@@ -652,24 +657,26 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         }
     }
 
-    private MediaSource buildMediaSource(Uri uri) {
-
+    private MediaItem buildMediaItem(Uri uri) {
+        String mimeType = "";
         switch (Util.inferContentType(uri)) {
             case C.TYPE_DASH:
-                return new DashMediaSource.Factory(
-                        new DefaultDashChunkSource.Factory(mediaDataSourceFactory),
-                        buildDataSourceFactory())
-                        .createMediaSource(uri);
+                mimeType = PKMediaFormat.dash.mimeType;
             case C.TYPE_HLS:
-                return new HlsMediaSource.Factory(mediaDataSourceFactory)
-                        .createMediaSource(uri);
-            case C.TYPE_OTHER:
-                return new ProgressiveMediaSource.Factory(mediaDataSourceFactory)
-                        .createMediaSource(uri);
-            default: {
-                throw new IllegalStateException("Unsupported type: " + Util.inferContentType(uri));
-            }
+                mimeType = PKMediaFormat.hls.mimeType;
+
+            default:
+                mimeType = PKMediaFormat.mp4.mimeType;
         }
+
+        MediaItem.Builder builder =
+                new MediaItem.Builder()
+                        .setUri(uri)
+                        .setMimeType(mimeType)
+                        .setSubtitles(Collections.emptyList())
+                        .setClipStartPositionMs(0L)
+                        .setClipEndPositionMs(C.TIME_END_OF_SOURCE);
+        return builder.build();
     }
 
     public void setIsAppInBackground(boolean isAppInBackground) {
