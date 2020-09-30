@@ -397,7 +397,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             renderingSettings.setPlayAdsAfterTime(playbackStartPosition);
         }
 
-        renderingSettings.setFocusSkipButtonWhenAvailable(adConfig.isEnableFocusSkipButton());
+        if (adsManager != null && adConfig.isEnableFocusSkipButton()) {
+            renderingSettings.setFocusSkipButtonWhenAvailable(true);
+            adsManager.focus();
+        }
+
         if (adConfig.getVideoMimeTypes() != null && adConfig.getVideoMimeTypes().size() > 0) {
             renderingSettings.setMimeTypes(adConfig.getVideoMimeTypes());
         } else {
@@ -775,7 +779,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public boolean isAlwaysStartWithPreroll() {
-        return (adConfig == null) ? false : adConfig.isAlwaysStartWithPreroll();
+        return (adConfig != null) && adConfig.isAlwaysStartWithPreroll();
     }
 
     @Override
@@ -831,7 +835,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             return Consts.TIME_UNSET;
         }
 
-        long duration = (long) Math.ceil(videoAdPlayer.getAdProgress().getDuration());
+        long duration = (long) Math.ceil(videoAdPlayer.getAdProgress().getDurationMs() / Consts.MILLISECONDS_MULTIPLIER_FLOAT);
         //log.d("getDuration: " + duration);
         return duration;
     }
@@ -843,7 +847,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (videoAdPlayer == null || videoAdPlayer.getAdProgress() == null) {
             return Consts.POSITION_UNSET;
         }
-        long currPos = (long) Math.ceil(videoAdPlayer.getAdProgress().getCurrentTime());
+        long currPos = (long) Math.ceil(videoAdPlayer.getAdProgress().getCurrentTimeMs() / Consts.MILLISECONDS_MULTIPLIER_FLOAT);
         //log.d("IMA Add getCurrentPosition: " + currPos);
         messageBus.post(new AdEvent.AdPlayHeadEvent(currPos));
         return currPos;
@@ -1302,6 +1306,13 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             case STARTED:
                 log.d("AD STARTED isAdDisplayed = true lastPlaybackPlayerState =" + lastPlaybackPlayerState + " adInfo.getAdPositionType() "  + adInfo.getAdPositionType() + " playerPlayingBeforeAdArrived =" + playerPlayingBeforeAdArrived);
+
+                // By default `setFocusSkipButtonWhenAvailable` is focused in IMASDK.
+                // If app does not want to focus then we are disabling it.
+                if (renderingSettings != null && !adConfig.isEnableFocusSkipButton()) {
+                    renderingSettings.setFocusSkipButtonWhenAvailable(false);
+                }
+
                 adInfo = createAdInfo(adEvent.getAd());
                 if (adInfo.getAdPositionType() != AdPositionType.PRE_ROLL && !playerPlayingBeforeAdArrived) {
                     pause();
@@ -1386,6 +1397,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             case TAPPED:
                 messageBus.post(new AdEvent(AdEvent.Type.TAPPED));
+                break;
+            case ICON_FALLBACK_IMAGE_CLOSED:
+                messageBus.post(new AdEvent(AdEvent.Type.ICON_FALLBACK_IMAGE_CLOSED));
                 break;
             case ICON_TAPPED:
                 messageBus.post(new AdEvent(AdEvent.Type.ICON_TAPPED));
@@ -1614,6 +1628,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_ENDED, AdEvent.Type.AD_BREAK_ENDED);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_READY, AdEvent.Type.AD_BREAK_READY);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.TAPPED, AdEvent.Type.TAPPED);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.ICON_FALLBACK_IMAGE_CLOSED, AdEvent.Type.ICON_FALLBACK_IMAGE_CLOSED);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.ICON_TAPPED, AdEvent.Type.ICON_TAPPED);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.SKIPPABLE_STATE_CHANGED, AdEvent.Type.SKIPPABLE_STATE_CHANGED);
         return adEventsMap;

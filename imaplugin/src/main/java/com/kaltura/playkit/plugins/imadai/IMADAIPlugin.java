@@ -700,6 +700,10 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 log.d("AD TAPPED");
                 messageBus.post(new AdEvent(AdEvent.Type.TAPPED));
                 break;
+            case ICON_FALLBACK_IMAGE_CLOSED:
+                log.d("ICON_FALLBACK_IMAGE_CLOSED");
+                messageBus.post(new AdEvent(AdEvent.Type.ICON_FALLBACK_IMAGE_CLOSED));
+                break;
             case ICON_TAPPED:
                 log.d("AD ICON_TAPPED");
                 messageBus.post(new AdEvent(AdEvent.Type.ICON_TAPPED));
@@ -977,6 +981,11 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         if (getPlayerEngine() != null) {
             getPlayerEngine().play();
         }
+        if (mPlayerCallbacks != null) {
+            for (VideoStreamPlayer.VideoStreamPlayerCallback callback : mPlayerCallbacks) {
+                callback.onResume();
+            }
+        }
     }
 
     @Override
@@ -984,6 +993,11 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         isAdIsPaused = true;
         if (getPlayerEngine() != null) {
             getPlayerEngine().pause();
+        }
+        if (mPlayerCallbacks != null) {
+            for (VideoStreamPlayer.VideoStreamPlayerCallback callback : mPlayerCallbacks) {
+                callback.onPause();
+            }
         }
     }
 
@@ -1340,6 +1354,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_ENDED, com.kaltura.playkit.plugins.ads.AdEvent.Type.AD_BREAK_ENDED);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_READY, com.kaltura.playkit.plugins.ads.AdEvent.Type.AD_BREAK_READY);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.TAPPED, com.kaltura.playkit.plugins.ads.AdEvent.Type.TAPPED);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.ICON_FALLBACK_IMAGE_CLOSED, AdEvent.Type.ICON_FALLBACK_IMAGE_CLOSED);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.ICON_TAPPED, com.kaltura.playkit.plugins.ads.AdEvent.Type.ICON_TAPPED);
         return adEventsMap;
     }
