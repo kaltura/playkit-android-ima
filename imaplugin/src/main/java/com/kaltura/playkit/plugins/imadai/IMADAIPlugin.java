@@ -87,6 +87,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private boolean isAutoPlay;
     private boolean isContentPrepared;
     private Long playbackStartPosition;
+    private Long playbackCurrentPosition = Consts.TIME_UNSET;
+    private Long playbackDuration = Consts.TIME_UNSET;
 
     private ImaSdkSettings imaSdkSettings;
     private AdsRenderingSettings renderingSettings;
@@ -232,6 +234,9 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             playbackStartPosition = mediaConfig.getStartPosition();
             log.d("mediaConfig start pos = " + playbackStartPosition);
         }
+
+        playbackCurrentPosition = Consts.TIME_UNSET;
+        playbackDuration = Consts.TIME_UNSET;
 
         pkMediaSourceConfig = null;
         playkitAdCuePoints = null;
@@ -531,6 +536,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 if (getPlayerEngine() == null || streamManager == null) {
                     return VideoProgressUpdate.VIDEO_TIME_NOT_READY;
                 }
+
                 long position = (long) streamManager.getStreamTimeForContentTime(getPlayerEngine().getCurrentPosition());
                 boolean isLiveDAI = adConfig.isLiveDAI();
                 if (isLiveDAI) {
@@ -539,9 +545,20 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                     position = Math.round(streamManager.getStreamTimeForContentTime(pos));
                 }
                 long duration = Math.round(streamManager.getStreamTimeForContentTime(getPlayerEngine().getDuration()));
+
+                if (playbackCurrentPosition != Consts.TIME_UNSET && playbackDuration != Consts.TIME_UNSET &&
+                        appIsInBackground && isAdDisplayed && isAdIsPaused && !isAdError &&
+                        (position < 0 || duration < 0)) {
+                    return new VideoProgressUpdate(playbackCurrentPosition, playbackDuration);
+                }
+
                 if (position < 0 || duration < 0) {
                     return VideoProgressUpdate.VIDEO_TIME_NOT_READY;
                 }
+
+                playbackCurrentPosition = getPlayerEngine().getCurrentPosition();
+                playbackDuration = getPlayerEngine().getDuration();
+
                 if (isLiveDAI) {
                     return new VideoProgressUpdate(position, duration);
                 }
