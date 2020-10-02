@@ -351,7 +351,12 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private AdsRenderingSettings getRenderingSettings() {
 
         renderingSettings = ImaSdkFactory.getInstance().createAdsRenderingSettings();
-        renderingSettings.setFocusSkipButtonWhenAvailable(adConfig.isEnableFocusSkipButton());
+
+        if (streamManager != null && adConfig.isEnableFocusSkipButton()) {
+            renderingSettings.setFocusSkipButtonWhenAvailable(true);
+            streamManager.focus();
+        }
+
         if (playbackStartPosition != null && playbackStartPosition > 0) {
             renderingSettings.setPlayAdsAfterTime(playbackStartPosition);
         }
@@ -659,6 +664,12 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 break;
             case STARTED: //Fired when an ad starts.
                 log.d("AD STARTED");
+                // By default `setFocusSkipButtonWhenAvailable` is focused in IMASDK.
+                // If app does not want to focus then we are disabling it.
+                if (renderingSettings != null && !adConfig.isEnableFocusSkipButton()) {
+                    renderingSettings.setFocusSkipButtonWhenAvailable(false);
+                }
+
                 adInfo = createAdInfo(adEvent.getAd());
                 messageBus.post(new AdEvent.AdLoadedEvent(adInfo));
                 messageBus.post(new AdEvent.AdStartedEvent(adInfo));
