@@ -87,7 +87,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private boolean isAutoPlay;
     private boolean isContentPrepared;
     private Long playbackStartPosition;
-    private Long playbackCurrentPosition = Consts.TIME_UNSET;
+    private long playbackCurrentPosition = Consts.POSITION_UNSET;
     private Long playbackDuration = Consts.TIME_UNSET;
 
     private ImaSdkSettings imaSdkSettings;
@@ -235,7 +235,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             log.d("mediaConfig start pos = " + playbackStartPosition);
         }
 
-        playbackCurrentPosition = Consts.TIME_UNSET;
+        playbackCurrentPosition = Consts.POSITION_UNSET;
         playbackDuration = Consts.TIME_UNSET;
 
         pkMediaSourceConfig = null;
@@ -546,22 +546,25 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 }
                 long duration = Math.round(streamManager.getStreamTimeForContentTime(getPlayerEngine().getDuration()));
 
-                if (playbackCurrentPosition != Consts.TIME_UNSET && playbackDuration != Consts.TIME_UNSET &&
-                        appIsInBackground && isAdDisplayed && isAdIsPaused && !isAdError &&
+                if (appIsInBackground && isAdDisplayed && isAdIsPaused && !isAdError &&
+                        playbackCurrentPosition != Consts.POSITION_UNSET && playbackDuration != Consts.TIME_UNSET &&
                         (position < 0 || duration < 0)) {
                     return new VideoProgressUpdate(playbackCurrentPosition, playbackDuration);
                 }
 
-                if (position < 0 || duration < 0) {
-                    return VideoProgressUpdate.VIDEO_TIME_NOT_READY;
+                if (isLiveDAI && (position < 0 || duration < 0)) {
+                    return new VideoProgressUpdate(playbackCurrentPosition, playbackDuration);
                 }
-
-                playbackCurrentPosition = getPlayerEngine().getCurrentPosition();
-                playbackDuration = getPlayerEngine().getDuration();
 
                 if (isLiveDAI) {
-                    return new VideoProgressUpdate(position, duration);
+                    playbackCurrentPosition = position;
+                    playbackDuration = duration;
+                    return new VideoProgressUpdate(playbackCurrentPosition, playbackDuration);
+                } else {
+                    playbackCurrentPosition = getPlayerEngine().getCurrentPosition();
+                    playbackDuration = getPlayerEngine().getDuration();
                 }
+
                 return new VideoProgressUpdate(getPlayerEngine().getCurrentPosition(), getPlayerEngine().getDuration());
             }
         };
@@ -737,6 +740,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 messageBus.post(new AdEvent(AdEvent.Type.ICON_TAPPED));
             case LOG:
                 log.e("AD LOG ERROR");
+                playbackCurrentPosition = Consts.POSITION_UNSET;
+                playbackDuration = Consts.TIME_UNSET;
                 String error = "Non-fatal Error";
                 if (adEvent.getAdData() != null) {
                     if (adEvent.getAdData().containsKey("errorMessage")) {
@@ -820,6 +825,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         isAdError = true;
         isAdDisplayed = false;
         isAdRequested = true;
+        playbackCurrentPosition = Consts.POSITION_UNSET;
+        playbackDuration = Consts.TIME_UNSET;
         //resetFlagsOnError();
 
         AdError adException = adErrorEvent.getError();
@@ -996,6 +1003,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         log.d("IMADAI Start destroyAdsManager");
         destroyStreamManager();
         contentCompleted();
+        playbackCurrentPosition = Consts.POSITION_UNSET;
+        playbackDuration = Consts.TIME_UNSET;
         isAdDisplayed = false;
         isAdError = false;
         isContentPrepared = false;
