@@ -397,10 +397,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             renderingSettings.setPlayAdsAfterTime(playbackStartPosition);
         }
 
-        if (adsManager != null && adConfig.isEnableFocusSkipButton()) {
-            renderingSettings.setFocusSkipButtonWhenAvailable(true);
-            adsManager.focus();
-        }
+        renderingSettings.setFocusSkipButtonWhenAvailable(adConfig.isEnableFocusSkipButton());
 
         if (adConfig.getVideoMimeTypes() != null && adConfig.getVideoMimeTypes().size() > 0) {
             renderingSettings.setMimeTypes(adConfig.getVideoMimeTypes());
@@ -1307,10 +1304,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             case STARTED:
                 log.d("AD STARTED isAdDisplayed = true lastPlaybackPlayerState =" + lastPlaybackPlayerState + " adInfo.getAdPositionType() "  + adInfo.getAdPositionType() + " playerPlayingBeforeAdArrived =" + playerPlayingBeforeAdArrived);
 
-                // By default `setFocusSkipButtonWhenAvailable` is focused in IMASDK.
-                // If app does not want to focus then we are disabling it.
-                if (renderingSettings != null && !adConfig.isEnableFocusSkipButton()) {
-                    renderingSettings.setFocusSkipButtonWhenAvailable(false);
+                if (renderingSettings != null && adsManager != null) {
+                    renderingSettings.setFocusSkipButtonWhenAvailable(adConfig.isEnableFocusSkipButton());
+                    adsManager.focus();
                 }
 
                 adInfo = createAdInfo(adEvent.getAd());
