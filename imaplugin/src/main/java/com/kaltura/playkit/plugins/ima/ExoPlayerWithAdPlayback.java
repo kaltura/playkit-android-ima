@@ -658,24 +658,35 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     }
 
     private MediaItem buildMediaItem(Uri uri) {
-        String mimeType = "";
-        switch (Util.inferContentType(uri)) {
-            case C.TYPE_DASH:
-                mimeType = PKMediaFormat.dash.mimeType;
-            case C.TYPE_HLS:
-                mimeType = PKMediaFormat.hls.mimeType;
-
-            default:
-                mimeType = PKMediaFormat.mp4.mimeType;
-        }
-
+        MediaSource mediaSource;
         MediaItem.Builder builder =
                 new MediaItem.Builder()
                         .setUri(uri)
-                        .setMimeType(mimeType)
                         .setSubtitles(Collections.emptyList())
                         .setClipStartPositionMs(0L)
                         .setClipEndPositionMs(C.TIME_END_OF_SOURCE);
+        switch (Util.inferContentType(uri)) {
+            case C.TYPE_DASH:
+                builder.setMimeType(PKMediaFormat.dash.mimeType);
+                mediaSource = new DashMediaSource.Factory(
+                        new DefaultDashChunkSource.Factory(mediaDataSourceFactory),
+                        buildDataSourceFactory())
+                        .createMediaSource(builder.build());
+               break;
+            case C.TYPE_HLS:
+                builder.setMimeType(PKMediaFormat.hls.mimeType);
+                mediaSource = new HlsMediaSource.Factory(mediaDataSourceFactory)
+                        .createMediaSource(builder.build());
+             break;
+            case C.TYPE_OTHER:
+                builder.setMimeType(PKMediaFormat.mp4.mimeType);
+                mediaSource = new ProgressiveMediaSource.Factory(mediaDataSourceFactory)
+                        .createMediaSource(builder.build());
+                break;
+            default:
+                throw new IllegalStateException("Unsupported type: " + Util.inferContentType(uri));
+        }
+        adPlayer.setMediaSource(mediaSource);
         return builder.build();
     }
 
