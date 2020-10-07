@@ -546,20 +546,20 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 }
                 long duration = Math.round(streamManager.getStreamTimeForContentTime(getPlayerEngine().getDuration()));
 
-                if (appIsInBackground && isAdDisplayed && isAdIsPaused && !isAdError &&
+                if (!isLiveDAI && appIsInBackground && isAdDisplayed && isAdIsPaused && !isAdError &&
                         playbackCurrentPosition != Consts.POSITION_UNSET && playbackDuration != Consts.TIME_UNSET &&
                         (position < 0 || duration < 0)) {
                     return new VideoProgressUpdate(playbackCurrentPosition, playbackDuration);
                 }
 
-                if (isLiveDAI && (position < 0 || duration < 0)) {
+                if (isLiveDAI && (position < playbackCurrentPosition || position < 0 || duration < 0)) {
                     return new VideoProgressUpdate(playbackCurrentPosition, playbackDuration);
                 }
 
                 if (isLiveDAI) {
                     playbackCurrentPosition = position;
                     playbackDuration = duration;
-                    return new VideoProgressUpdate(playbackCurrentPosition, playbackDuration);
+                    return new VideoProgressUpdate(position, duration);
                 } else {
                     playbackCurrentPosition = getPlayerEngine().getCurrentPosition();
                     playbackDuration = getPlayerEngine().getDuration();
