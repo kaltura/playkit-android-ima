@@ -541,6 +541,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 }
                 long duration = Math.round(streamManager.getStreamTimeForContentTime(getPlayerEngine().getDuration()));
 
+                // When app goes in background and it is a VOD DAI asset; return VideoProgressUpdate with the saved position and duration
                 if (!isLiveDAI && appIsInBackground && isAdDisplayed && isAdIsPaused && !isAdError &&
                         playbackCurrentPosition != Consts.POSITION_UNSET && playbackDuration != Consts.TIME_UNSET &&
                         (position < 0 || duration < 0)) {
@@ -657,6 +658,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 if (adConfig != null && adConfig.isLiveDAI()) {
                     return;
                 }
+                playbackCurrentPosition = Consts.POSITION_UNSET;
+                playbackDuration = Consts.TIME_UNSET;
                 log.d("AD AD_BREAK_ENDED");
                 onAdBreakEnded();
                 break;
@@ -733,8 +736,6 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 messageBus.post(new AdEvent(AdEvent.Type.ICON_TAPPED));
             case LOG:
                 log.e("AD LOG ERROR");
-                playbackCurrentPosition = Consts.POSITION_UNSET;
-                playbackDuration = Consts.TIME_UNSET;
                 String error = "Non-fatal Error";
                 if (adEvent.getAdData() != null) {
                     if (adEvent.getAdData().containsKey("errorMessage")) {
