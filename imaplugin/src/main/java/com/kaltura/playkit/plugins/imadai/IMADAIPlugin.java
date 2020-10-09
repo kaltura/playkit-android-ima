@@ -87,6 +87,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private boolean isAutoPlay;
     private boolean isContentPrepared;
     private Long playbackStartPosition;
+    private long playbackCurrentPosition = Consts.POSITION_UNSET;
+    private Long playbackDuration = Consts.TIME_UNSET;
 
     private ImaSdkSettings imaSdkSettings;
     private AdsRenderingSettings renderingSettings;
@@ -232,6 +234,9 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             playbackStartPosition = mediaConfig.getStartPosition();
             log.d("mediaConfig start pos = " + playbackStartPosition);
         }
+
+        playbackCurrentPosition = Consts.POSITION_UNSET;
+        playbackDuration = Consts.TIME_UNSET;
 
         pkMediaSourceConfig = null;
         playkitAdCuePoints = null;
@@ -526,6 +531,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 if (getPlayerEngine() == null || streamManager == null) {
                     return VideoProgressUpdate.VIDEO_TIME_NOT_READY;
                 }
+
                 long position = (long) streamManager.getStreamTimeForContentTime(getPlayerEngine().getCurrentPosition());
                 boolean isLiveDAI = adConfig.isLiveDAI();
                 if (isLiveDAI) {
@@ -534,12 +540,27 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                     position = Math.round(streamManager.getStreamTimeForContentTime(pos));
                 }
                 long duration = Math.round(streamManager.getStreamTimeForContentTime(getPlayerEngine().getDuration()));
-                if (position < 0 || duration < 0) {
-                    return VideoProgressUpdate.VIDEO_TIME_NOT_READY;
+
+                // When app goes in background and it is a VOD DAI asset; return VideoProgressUpdate with the saved position and duration
+                if (!isLiveDAI && appIsInBackground && isAdDisplayed && isAdIsPaused && !isAdError &&
+                        playbackCurrentPosition != Consts.POSITION_UNSET && playbackDuration != Consts.TIME_UNSET &&
+                        (position < 0 || duration < 0)) {
+                    return new VideoProgressUpdate(playbackCurrentPosition, playbackDuration);
                 }
+
+                if (isLiveDAI && (position < playbackCurrentPosition || position < 0 || duration < 0)) {
+                    return new VideoProgressUpdate(playbackCurrentPosition, playbackDuration);
+                }
+
                 if (isLiveDAI) {
+                    playbackCurrentPosition = position;
+                    playbackDuration = duration;
                     return new VideoProgressUpdate(position, duration);
+                } else {
+                    playbackCurrentPosition = getPlayerEngine().getCurrentPosition();
+                    playbackDuration = getPlayerEngine().getDuration();
                 }
+
                 return new VideoProgressUpdate(getPlayerEngine().getCurrentPosition(), getPlayerEngine().getDuration());
             }
         };
@@ -637,6 +658,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 if (adConfig != null && adConfig.isLiveDAI()) {
                     return;
                 }
+                playbackCurrentPosition = Consts.POSITION_UNSET;
+                playbackDuration = Consts.TIME_UNSET;
                 log.d("AD AD_BREAK_ENDED");
                 onAdBreakEnded();
                 break;
@@ -659,6 +682,10 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 break;
             case STARTED: //Fired when an ad starts.
                 log.d("AD STARTED");
+                if (streamManager != null && renderingSettings != null) {
+                    renderingSettings.setFocusSkipButtonWhenAvailable(adConfig.isEnableFocusSkipButton());
+                    streamManager.focus();
+                }
                 adInfo = createAdInfo(adEvent.getAd());
                 messageBus.post(new AdEvent.AdLoadedEvent(adInfo));
                 messageBus.post(new AdEvent.AdStartedEvent(adInfo));
@@ -699,6 +726,10 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             case TAPPED:
                 log.d("AD TAPPED");
                 messageBus.post(new AdEvent(AdEvent.Type.TAPPED));
+                break;
+            case ICON_FALLBACK_IMAGE_CLOSED:
+                log.d("ICON_FALLBACK_IMAGE_CLOSED");
+                messageBus.post(new AdEvent(AdEvent.Type.ICON_FALLBACK_IMAGE_CLOSED));
                 break;
             case ICON_TAPPED:
                 log.d("AD ICON_TAPPED");
@@ -788,6 +819,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         isAdError = true;
         isAdDisplayed = false;
         isAdRequested = true;
+        playbackCurrentPosition = Consts.POSITION_UNSET;
+        playbackDuration = Consts.TIME_UNSET;
         //resetFlagsOnError();
 
         AdError adException = adErrorEvent.getError();
@@ -964,6 +997,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         log.d("IMADAI Start destroyAdsManager");
         destroyStreamManager();
         contentCompleted();
+        playbackCurrentPosition = Consts.POSITION_UNSET;
+        playbackDuration = Consts.TIME_UNSET;
         isAdDisplayed = false;
         isAdError = false;
         isContentPrepared = false;
@@ -977,6 +1012,11 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         if (getPlayerEngine() != null) {
             getPlayerEngine().play();
         }
+        if (mPlayerCallbacks != null) {
+            for (VideoStreamPlayer.VideoStreamPlayerCallback callback : mPlayerCallbacks) {
+                callback.onResume();
+            }
+        }
     }
 
     @Override
@@ -984,6 +1024,11 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         isAdIsPaused = true;
         if (getPlayerEngine() != null) {
             getPlayerEngine().pause();
+        }
+        if (mPlayerCallbacks != null) {
+            for (VideoStreamPlayer.VideoStreamPlayerCallback callback : mPlayerCallbacks) {
+                callback.onPause();
+            }
         }
     }
 
@@ -1340,6 +1385,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_ENDED, com.kaltura.playkit.plugins.ads.AdEvent.Type.AD_BREAK_ENDED);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_READY, com.kaltura.playkit.plugins.ads.AdEvent.Type.AD_BREAK_READY);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.TAPPED, com.kaltura.playkit.plugins.ads.AdEvent.Type.TAPPED);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.ICON_FALLBACK_IMAGE_CLOSED, AdEvent.Type.ICON_FALLBACK_IMAGE_CLOSED);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.ICON_TAPPED, com.kaltura.playkit.plugins.ads.AdEvent.Type.ICON_TAPPED);
         return adEventsMap;
     }
