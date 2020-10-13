@@ -620,7 +620,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         if (adVideoPlayerView != null && adVideoPlayerView.getPlayer() != null) {
             MediaItem mediaItem = buildMediaItem(currentAdUri);
             adVideoPlayerView.getPlayer().stop();
-            adPlayer.setMediaItems(Collections.singletonList(mediaItem), true);
+            adPlayer.setMediaItems(Collections.singletonList(mediaItem), 0, C.TIME_UNSET);
             adPlayer.prepare();
             adVideoPlayerView.getPlayer().setPlayWhenReady(adShouldAutoPlay);
         }
@@ -658,7 +658,6 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     }
 
     private MediaItem buildMediaItem(Uri uri) {
-        MediaSource mediaSource;
         MediaItem.Builder builder =
                 new MediaItem.Builder()
                         .setUri(uri)
@@ -668,25 +667,16 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         switch (Util.inferContentType(uri)) {
             case C.TYPE_DASH:
                 builder.setMimeType(PKMediaFormat.dash.mimeType);
-                mediaSource = new DashMediaSource.Factory(
-                        new DefaultDashChunkSource.Factory(mediaDataSourceFactory),
-                        buildDataSourceFactory())
-                        .createMediaSource(builder.build());
                break;
             case C.TYPE_HLS:
                 builder.setMimeType(PKMediaFormat.hls.mimeType);
-                mediaSource = new HlsMediaSource.Factory(mediaDataSourceFactory)
-                        .createMediaSource(builder.build());
              break;
             case C.TYPE_OTHER:
                 builder.setMimeType(PKMediaFormat.mp4.mimeType);
-                mediaSource = new ProgressiveMediaSource.Factory(mediaDataSourceFactory)
-                        .createMediaSource(builder.build());
                 break;
             default:
                 throw new IllegalStateException("Unsupported type: " + Util.inferContentType(uri));
         }
-        adPlayer.setMediaSource(mediaSource);
         return builder.build();
     }
 
