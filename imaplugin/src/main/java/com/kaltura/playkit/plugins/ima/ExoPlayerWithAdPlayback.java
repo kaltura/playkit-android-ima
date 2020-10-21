@@ -109,6 +109,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     private Handler handler = null;
     private Runnable updateAdProgressRunnable = null;
     private boolean playWhenReady;
+    private boolean isAdPaused;
 
     public interface OnAdPlayBackListener {
         void onBufferStart();
@@ -222,6 +223,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             @Override
             public void playAd(AdMediaInfo adMediaInfo) {
                 updateAdProgress();
+                isAdPaused = false;
                 log.d("playAd isAdDisplayed = " + isAdDisplayed);
                 if (isAdDisplayed && isPlayerReady) {
                     for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
@@ -229,7 +231,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                         if (adMediaInfo != null) {
                             callback.onResume(adMediaInfo);
                         }
-                        if (isAdPlayerPlaying()) {
+                        if (!isAdPlayerPlaying()) {
                             play();
                         }
                         return;
@@ -259,7 +261,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 log.d("pauseAd");
                 stopUpdatingAdProgress();
 
-                if (isAdPlayerPlaying()) {
+                if (isAdPaused) {
                     return;
                 }
 
@@ -271,6 +273,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 if (adVideoPlayerView != null && adVideoPlayerView.getPlayer() != null) {
                     adVideoPlayerView.getPlayer().setPlayWhenReady(false);
                 }
+                isAdPaused = true;
             }
 
             @Override
@@ -356,7 +359,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     }
 
     private boolean isAdPlayerPlaying() {
-        return adPlayer == null || !adPlayer.getPlayWhenReady() || !isPlayerReady;
+        return adPlayer != null && adPlayer.getPlayWhenReady();
     }
 
     @Override
@@ -386,7 +389,12 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
     @Override
     public void onIsLoadingChanged(boolean isLoading) {
-        log.d("onTracksChanged");
+        log.d("onIsLoadingChanged");
+    }
+
+    @Override
+    public void onIsPlayingChanged(boolean isPlaying) {
+        this.playWhenReady = isPlaying;
     }
 
     @Override
