@@ -612,6 +612,15 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
         this.adCuePoints = adCuePoints;
     }
 
+    public void setVolume(float volume) {
+        log.d("setVolume to: " + volume);
+
+        if (adPlayer == null) {
+            return;
+        }
+        adPlayer.setVolume(volume);
+    }
+
     private void initializePlayer(String adUrl, boolean adShouldAutoPlay) {
         log.d("ExoPlayerWithAdPlayback initializePlayer");
         if (TextUtils.isEmpty(adUrl)) {
