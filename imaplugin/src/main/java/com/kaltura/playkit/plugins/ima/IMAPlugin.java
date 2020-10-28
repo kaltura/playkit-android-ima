@@ -213,7 +213,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         messageBus.addListener(this, PlayerEvent.loadedMetadata, event -> {
             log.d("Received:PlayerEvent:" + event.eventType().name() + " lastAdEventReceived = " + lastAdEventReceived);
-            if (player != null && player.getView() != null) {
+            if (player != null && player.getView() != null && isAdDisplayed) {
                 player.getView().hideVideoSurface(); // make sure video surface is set to GONE
             }
         });
