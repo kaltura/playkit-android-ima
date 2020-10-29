@@ -28,12 +28,7 @@ import com.kaltura.android.exoplayer2.PlaybackPreparer;
 import com.kaltura.android.exoplayer2.Player;
 import com.kaltura.android.exoplayer2.SimpleExoPlayer;
 import com.kaltura.android.exoplayer2.Timeline;
-import com.kaltura.android.exoplayer2.source.MediaSource;
-import com.kaltura.android.exoplayer2.source.ProgressiveMediaSource;
 import com.kaltura.android.exoplayer2.source.TrackGroupArray;
-import com.kaltura.android.exoplayer2.source.dash.DashMediaSource;
-import com.kaltura.android.exoplayer2.source.dash.DefaultDashChunkSource;
-import com.kaltura.android.exoplayer2.source.hls.HlsMediaSource;
 import com.kaltura.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.kaltura.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.kaltura.android.exoplayer2.trackselection.TrackSelection;
@@ -67,6 +62,12 @@ import static com.kaltura.android.exoplayer2.util.Log.LOG_LEVEL_OFF;
 public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackPreparer, Player.EventListener {
     private static final PKLog log = PKLog.get("ExoPlayerWithAdPlayback");
     private static final int AD_PROGRESS_UPDATE_INTERVAL_MS = 100;
+
+    public enum IMAAdState {
+        IMA_AD_STATE_NONE,
+        IMA_AD_STATE_PLAYING,
+        IMA_AD_STATE_PAUSED
+    }
 
     private DefaultTrackSelector trackSelector;
     private EventLogger eventLogger;
@@ -109,7 +110,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     private Handler handler = null;
     private Runnable updateAdProgressRunnable = null;
     private boolean playWhenReady;
-    private boolean isAdPaused;
+    private IMAAdState imaAdState = IMAAdState.IMA_AD_STATE_NONE;
 
     public interface OnAdPlayBackListener {
         void onBufferStart();
@@ -223,8 +224,8 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
             @Override
             public void playAd(AdMediaInfo adMediaInfo) {
                 updateAdProgress();
-                isAdPaused = false;
-                log.d("playAd isAdDisplayed = " + isAdDisplayed);
+                log.d("playAd isAdDisplayed = " + isAdDisplayed + " imaAdState = " + imaAdState);
+                imaAdState = IMAAdState.IMA_AD_STATE_PLAYING;
                 if (isAdDisplayed && isPlayerReady) {
                     for (VideoAdPlayer.VideoAdPlayerCallback callback : adCallbacks) {
                         log.d("playAd->onResume");
@@ -261,7 +262,8 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 log.d("pauseAd");
                 stopUpdatingAdProgress();
 
-                if (isAdPaused) {
+                log.d("pauseAd imaAdState = " + imaAdState);
+                if (imaAdState == IMAAdState.IMA_AD_STATE_PAUSED) {
                     return;
                 }
 
@@ -273,7 +275,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 if (adVideoPlayerView != null && adVideoPlayerView.getPlayer() != null) {
                     adVideoPlayerView.getPlayer().setPlayWhenReady(false);
                 }
-                isAdPaused = true;
+                imaAdState = IMAAdState.IMA_AD_STATE_PAUSED;
             }
 
             @Override
@@ -286,7 +288,6 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
                 if (adPlayer != null) {
                     adPlayer.stop();
                 }
-
             }
 
             @Override
@@ -359,7 +360,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     }
 
     private boolean isAdPlayerPlaying() {
-        return adPlayer != null && adPlayer.getPlayWhenReady();
+        return adPlayer != null && adPlayer.isPlaying();
     }
 
     @Override
@@ -390,11 +391,6 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
     @Override
     public void onIsLoadingChanged(boolean isLoading) {
         log.d("onIsLoadingChanged");
-    }
-
-    @Override
-    public void onIsPlayingChanged(boolean isPlaying) {
-        this.playWhenReady = isPlaying;
     }
 
     @Override
