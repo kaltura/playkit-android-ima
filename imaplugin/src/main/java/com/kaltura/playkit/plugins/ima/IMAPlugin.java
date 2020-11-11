@@ -936,6 +936,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         int totalAdsInPod = ad.getAdPodInfo().getTotalAds();
         int adIndexInPod = ad.getAdPodInfo().getAdPosition();   // index starts in 1
         int podCount = (adsManager != null && adsManager.getAdCuePoints() != null) ? adsManager.getAdCuePoints().size() : 0;
+        String streamId = "";
 
         int podIndex = (ad.getAdPodInfo().getPodIndex() >= 0) ? ad.getAdPodInfo().getPodIndex() + 1 : podCount; // index starts in 0
         if (podIndex == 1 && podCount == 0) { // For Vast
@@ -964,6 +965,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 podCount,
                 isBumper,
                 (adPodTimeOffset < 0) ? -1 : adPodTimeOffset);
+        adInfo.setStreamId(streamId);
 
         log.v("AdInfo: " + adInfo.toString());
         return adInfo;
