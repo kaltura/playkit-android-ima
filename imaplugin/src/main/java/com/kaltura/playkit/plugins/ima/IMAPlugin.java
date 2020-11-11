@@ -915,15 +915,21 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private AdInfo createAdInfo(Ad ad) {
 
-        String adDescription = ad.getDescription();
+        String adDescription = ad.getDescription() != null ? ad.getDescription() : "";
         long adDuration = (long) ad.getDuration() * Consts.MILLISECONDS_MULTIPLIER;
         long adPlayHead = getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER;
         String adTitle = ad.getTitle();
         boolean isAdSkippable = ad.isSkippable();
         long skipTimeOffset = (long) ad.getSkipTimeOffset() * Consts.MILLISECONDS_MULTIPLIER;
-        String contentType = ad.getContentType();
+        String contentType = ad.getContentType() != null ? ad.getContentType() : "";
         String adId = ad.getAdId();
         String adSystem = ad.getAdSystem();
+        String creativeId = ad.getCreativeId();
+        String creativeAdId = ad.getCreativeAdId();
+        String advertiserName = ad.getAdvertiserName();
+        String dealId = ad.getDealId();
+        String surveyUrl = ad.getSurveyUrl() != null ? ad.getSurveyUrl() : "";
+        String traffickingParams = ad.getTraffickingParameters();
         int adHeight = ad.isLinear() ? ad.getVastMediaHeight() : ad.getHeight();
         int adWidth  = ad.isLinear() ? ad.getVastMediaWidth() : ad.getWidth();
         int mediaBitrate = ad.getVastMediaBitrate() != 0 ? ad.getVastMediaBitrate() * KB_MULTIPLIER : -1;
@@ -946,8 +952,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         AdInfo adInfo = new AdInfo(adDescription, adDuration, adPlayHead,
                 adTitle, isAdSkippable, skipTimeOffset,
-                contentType, adId,
-                adSystem,
+                contentType, adId, adSystem,
+                creativeId, creativeAdId, advertiserName,
+                dealId, surveyUrl, traffickingParams,
                 adHeight,
                 adWidth,
                 mediaBitrate,
