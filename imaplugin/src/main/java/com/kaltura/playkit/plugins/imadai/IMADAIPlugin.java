@@ -949,6 +949,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         boolean isBumper = ad.getAdPodInfo().isBumper();
         long adPodTimeOffset = (long) (ad.getAdPodInfo().getTimeOffset() * Consts.MILLISECONDS_MULTIPLIER);
 
+        
         AdInfo adInfo = new AdInfo(adDescription, adDuration, adPlayHead,
                 adTitle, isAdSkippable, skipTimeOffset,
                 contentType, adId, adSystem,
