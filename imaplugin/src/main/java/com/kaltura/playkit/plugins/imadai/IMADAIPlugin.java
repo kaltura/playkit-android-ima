@@ -971,6 +971,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
     }
 
+    
     private boolean isAdInfoPostRoll(long adPodTimeOffset) {
         if(pluginCuePoints == null || pluginCuePoints.isEmpty()) {
             return false;
