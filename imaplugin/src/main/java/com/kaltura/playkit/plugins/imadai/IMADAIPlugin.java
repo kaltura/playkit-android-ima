@@ -948,6 +948,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         int podIndex = (ad.getAdPodInfo().getPodIndex() >= 0) ? ad.getAdPodInfo().getPodIndex() + 1 : podCount; // index starts in 0
         boolean isBumper = ad.getAdPodInfo().isBumper();
         long adPodTimeOffset = (long) (ad.getAdPodInfo().getTimeOffset() * Consts.MILLISECONDS_MULTIPLIER);
+        String streamId = streamManager != null ? streamManager.getStreamId() : "";
 
         AdInfo adInfo = new AdInfo(adDescription, adDuration, adPlayHead,
                 adTitle, isAdSkippable, skipTimeOffset,
@@ -963,6 +964,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 podCount,
                 isBumper,
                 isAdInfoPostRoll(adPodTimeOffset) ? -1 : adPodTimeOffset);
+        adInfo.setStreamId(streamId);
+
         log.v("AdInfo: " + adInfo.toString());
         return adInfo;
 
