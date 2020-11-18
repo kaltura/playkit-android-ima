@@ -1432,7 +1432,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             case CUEPOINTS_CHANGED:
                 sendCuePointsUpdateEvent();
                 break;
-            //case AD_BREAK_FETCH_ERROR:
+            case AD_BREAK_FETCH_ERROR:
+                log.d("AD AD_BREAK_FETCH_ERROR");
+                messageBus.post(new AdEvent(AdEvent.Type.AD_BREAK_FETCH_ERROR));
+                break;
             case LOG:
                 isAdRequested = true;
                 //for this case no AD ERROR is fired need to show view {type=adLoadError, errorCode=1009, errorMessage=The response does not contain any valid ads.}
@@ -1634,6 +1637,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_PROGRESS, AdEvent.Type.AD_PROGRESS);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_STARTED, AdEvent.Type.AD_BREAK_STARTED);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_ENDED, AdEvent.Type.AD_BREAK_ENDED);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_FETCH_ERROR, AdEvent.Type.AD_BREAK_FETCH_ERROR);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_READY, AdEvent.Type.AD_BREAK_READY);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.TAPPED, AdEvent.Type.TAPPED);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.ICON_FALLBACK_IMAGE_CLOSED, AdEvent.Type.ICON_FALLBACK_IMAGE_CLOSED);

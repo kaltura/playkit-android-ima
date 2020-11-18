@@ -730,6 +730,11 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             case ICON_TAPPED:
                 log.d("AD ICON_TAPPED");
                 messageBus.post(new AdEvent(AdEvent.Type.ICON_TAPPED));
+                break;
+            case AD_BREAK_FETCH_ERROR:
+                log.d("AD AD_BREAK_FETCH_ERROR");
+                messageBus.post(new AdEvent(AdEvent.Type.AD_BREAK_FETCH_ERROR));
+                break;
             case LOG:
                 log.e("AD LOG ERROR");
                 String error = "Non-fatal Error";
@@ -1390,6 +1395,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_PROGRESS, com.kaltura.playkit.plugins.ads.AdEvent.Type.AD_PROGRESS);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_STARTED, com.kaltura.playkit.plugins.ads.AdEvent.Type.AD_BREAK_STARTED);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_ENDED, com.kaltura.playkit.plugins.ads.AdEvent.Type.AD_BREAK_ENDED);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_FETCH_ERROR, com.kaltura.playkit.plugins.ads.AdEvent.Type.AD_BREAK_FETCH_ERROR);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_READY, com.kaltura.playkit.plugins.ads.AdEvent.Type.AD_BREAK_READY);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.TAPPED, com.kaltura.playkit.plugins.ads.AdEvent.Type.TAPPED);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.ICON_FALLBACK_IMAGE_CLOSED, AdEvent.Type.ICON_FALLBACK_IMAGE_CLOSED);
