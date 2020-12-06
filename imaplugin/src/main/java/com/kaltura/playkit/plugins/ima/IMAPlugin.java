@@ -213,7 +213,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         messageBus.addListener(this, PlayerEvent.loadedMetadata, event -> {
             log.d("Received:PlayerEvent:" + event.eventType().name() + " lastAdEventReceived = " + lastAdEventReceived);
-            if (player != null && player.getView() != null) {
+            if (player != null && player.getView() != null && isAdDisplayed) {
                 player.getView().hideVideoSurface(); // make sure video surface is set to GONE
             }
         });
@@ -922,21 +922,28 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private AdInfo createAdInfo(Ad ad) {
 
-        String adDescription = ad.getDescription();
+        String adDescription = ad.getDescription() != null ? ad.getDescription() : "";
         long adDuration = (long) ad.getDuration() * Consts.MILLISECONDS_MULTIPLIER;
         long adPlayHead = getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER;
         String adTitle = ad.getTitle();
         boolean isAdSkippable = ad.isSkippable();
         long skipTimeOffset = (long) ad.getSkipTimeOffset() * Consts.MILLISECONDS_MULTIPLIER;
-        String contentType = ad.getContentType();
+        String contentType = ad.getContentType() != null ? ad.getContentType() : "";
         String adId = ad.getAdId();
         String adSystem = ad.getAdSystem();
+        String creativeId = ad.getCreativeId();
+        String creativeAdId = ad.getCreativeAdId();
+        String advertiserName = ad.getAdvertiserName();
+        String dealId = ad.getDealId();
+        String surveyUrl = ad.getSurveyUrl() != null ? ad.getSurveyUrl() : "";
+        String traffickingParams = ad.getTraffickingParameters();
         int adHeight = ad.isLinear() ? ad.getVastMediaHeight() : ad.getHeight();
         int adWidth  = ad.isLinear() ? ad.getVastMediaWidth() : ad.getWidth();
         int mediaBitrate = ad.getVastMediaBitrate() != 0 ? ad.getVastMediaBitrate() * KB_MULTIPLIER : -1;
         int totalAdsInPod = ad.getAdPodInfo().getTotalAds();
         int adIndexInPod = ad.getAdPodInfo().getAdPosition();   // index starts in 1
         int podCount = (adsManager != null && adsManager.getAdCuePoints() != null) ? adsManager.getAdCuePoints().size() : 0;
+        String streamId = "";
 
         int podIndex = (ad.getAdPodInfo().getPodIndex() >= 0) ? ad.getAdPodInfo().getPodIndex() + 1 : podCount; // index starts in 0
         if (podIndex == 1 && podCount == 0) { // For Vast
@@ -953,8 +960,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         AdInfo adInfo = new AdInfo(adDescription, adDuration, adPlayHead,
                 adTitle, isAdSkippable, skipTimeOffset,
-                contentType, adId,
-                adSystem,
+                contentType, adId, adSystem,
+                creativeId, creativeAdId, advertiserName,
+                dealId, surveyUrl, traffickingParams,
                 adHeight,
                 adWidth,
                 mediaBitrate,
@@ -964,6 +972,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 podCount,
                 isBumper,
                 (adPodTimeOffset < 0) ? -1 : adPodTimeOffset);
+        adInfo.setStreamId(streamId);
 
         log.v("AdInfo: " + adInfo.toString());
         return adInfo;
@@ -1430,7 +1439,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             case CUEPOINTS_CHANGED:
                 sendCuePointsUpdateEvent();
                 break;
-            //case AD_BREAK_FETCH_ERROR:
+            case AD_BREAK_FETCH_ERROR:
+                log.d("AD AD_BREAK_FETCH_ERROR");
+                messageBus.post(new AdEvent(AdEvent.Type.AD_BREAK_FETCH_ERROR));
+                break;
             case LOG:
                 isAdRequested = true;
                 //for this case no AD ERROR is fired need to show view {type=adLoadError, errorCode=1009, errorMessage=The response does not contain any valid ads.}
@@ -1632,6 +1644,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_PROGRESS, AdEvent.Type.AD_PROGRESS);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_STARTED, AdEvent.Type.AD_BREAK_STARTED);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_ENDED, AdEvent.Type.AD_BREAK_ENDED);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_FETCH_ERROR, AdEvent.Type.AD_BREAK_FETCH_ERROR);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_READY, AdEvent.Type.AD_BREAK_READY);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.TAPPED, AdEvent.Type.TAPPED);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.ICON_FALLBACK_IMAGE_CLOSED, AdEvent.Type.ICON_FALLBACK_IMAGE_CLOSED);

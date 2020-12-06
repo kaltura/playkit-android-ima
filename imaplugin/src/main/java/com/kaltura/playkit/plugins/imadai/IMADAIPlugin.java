@@ -730,6 +730,11 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             case ICON_TAPPED:
                 log.d("AD ICON_TAPPED");
                 messageBus.post(new AdEvent(AdEvent.Type.ICON_TAPPED));
+                break;
+            case AD_BREAK_FETCH_ERROR:
+                log.d("AD AD_BREAK_FETCH_ERROR");
+                messageBus.post(new AdEvent(AdEvent.Type.AD_BREAK_FETCH_ERROR));
+                break;
             case LOG:
                 log.e("AD LOG ERROR");
                 String error = "Non-fatal Error";
@@ -923,15 +928,22 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     }
 
     private AdInfo createAdInfo(Ad ad) {
-        String adDescription = ad.getDescription();
+
+        String adDescription = ad.getDescription() != null ? ad.getDescription() : "";
         long adDuration = (long) (ad.getDuration() * Consts.MILLISECONDS_MULTIPLIER);
         long adPlayHead = getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER;
         String adTitle = ad.getTitle();
         boolean isAdSkippable = ad.isSkippable();
         long skipTimeOffset = (long) ad.getSkipTimeOffset() * Consts.MILLISECONDS_MULTIPLIER;
-        String contentType = ad.getContentType();
+        String contentType = ad.getContentType() != null ? ad.getContentType() : "";
         String adId = ad.getAdId();
         String adSystem = ad.getAdSystem();
+        String creativeId = ad.getCreativeId();
+        String creativeAdId = ad.getCreativeAdId();
+        String advertiserName = ad.getAdvertiserName();
+        String dealId = ad.getDealId();
+        String surveyUrl = ad.getSurveyUrl() != null ? ad.getSurveyUrl() : "";
+        String traffickingParams = ad.getTraffickingParameters();
         int adHeight = ad.isLinear() ? ad.getVastMediaHeight() : ad.getHeight();
         int adWidth  = ad.isLinear() ? ad.getVastMediaWidth() : ad.getWidth();
         int mediaBitrate = ad.getVastMediaBitrate() != 0 ? ad.getVastMediaBitrate() * KB_MULTIPLIER : -1;
@@ -941,11 +953,13 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         int podIndex = (ad.getAdPodInfo().getPodIndex() >= 0) ? ad.getAdPodInfo().getPodIndex() + 1 : podCount; // index starts in 0
         boolean isBumper = ad.getAdPodInfo().isBumper();
         long adPodTimeOffset = (long) (ad.getAdPodInfo().getTimeOffset() * Consts.MILLISECONDS_MULTIPLIER);
+        String streamId = streamManager != null ? streamManager.getStreamId() : "";
 
         AdInfo adInfo = new AdInfo(adDescription, adDuration, adPlayHead,
                 adTitle, isAdSkippable, skipTimeOffset,
-                contentType, adId,
-                adSystem,
+                contentType, adId, adSystem,
+                creativeId, creativeAdId, advertiserName,
+                dealId, surveyUrl, traffickingParams,
                 adHeight,
                 adWidth,
                 mediaBitrate,
@@ -955,6 +969,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 podCount,
                 isBumper,
                 isAdInfoPostRoll(adPodTimeOffset) ? -1 : adPodTimeOffset);
+        adInfo.setStreamId(streamId);
+
         log.v("AdInfo: " + adInfo.toString());
         return adInfo;
 
@@ -1379,6 +1395,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_PROGRESS, com.kaltura.playkit.plugins.ads.AdEvent.Type.AD_PROGRESS);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_STARTED, com.kaltura.playkit.plugins.ads.AdEvent.Type.AD_BREAK_STARTED);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_ENDED, com.kaltura.playkit.plugins.ads.AdEvent.Type.AD_BREAK_ENDED);
+        adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_FETCH_ERROR, com.kaltura.playkit.plugins.ads.AdEvent.Type.AD_BREAK_FETCH_ERROR);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.AD_BREAK_READY, com.kaltura.playkit.plugins.ads.AdEvent.Type.AD_BREAK_READY);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.TAPPED, com.kaltura.playkit.plugins.ads.AdEvent.Type.TAPPED);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.ICON_FALLBACK_IMAGE_CLOSED, AdEvent.Type.ICON_FALLBACK_IMAGE_CLOSED);
