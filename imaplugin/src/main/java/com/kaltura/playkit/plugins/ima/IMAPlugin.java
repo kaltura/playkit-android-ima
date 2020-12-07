@@ -761,6 +761,13 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     @Override
+    public void setVolume(float volume) {
+        if (videoPlayerWithAdPlayback != null) {
+            videoPlayerWithAdPlayback.setVolume(volume);
+        }
+    }
+
+    @Override
     public void contentCompleted() {
         if (videoPlayerWithAdPlayback != null) {
             videoPlayerWithAdPlayback.contentComplete();
@@ -1438,7 +1445,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             case LOG:
                 isAdRequested = true;
-                //for this case no AD ERROR is fired need to show view {type=adLoadError, errorCode=1009, errorMessage=The response does not contain any valid ads.}
+                //for this case no AD ERROR is fired need to show view {type=adLoadError, errorCode=1009, errorMessage=The response does not contain any valid ads}
                 preparePlayer(false);
                 Ad adInfo = adEvent.getAd();
                 if (adInfo != null) {
