@@ -365,6 +365,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (adsLoader != null) {
             adsLoader.removeAdErrorListener(this);
             adsLoader.removeAdsLoadedListener(adsLoadedListener);
+            adsLoader.release();
             adsLoadedListener = null;
             adsLoader = null;
         }
@@ -563,9 +564,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         boolean adManagerInitialized = (adsManager != null); // FEM-2600
         log.d("IMA onDestroy adManagerInitialized = " + adManagerInitialized);
         destroyIMA();
-        if (adDisplayContainer != null && adManagerInitialized) {
-            adDisplayContainer.destroy();
-        }
         adDisplayContainer = null;
         if (videoPlayerWithAdPlayback != null) {
             videoPlayerWithAdPlayback.removeAdPlaybackEventListener();

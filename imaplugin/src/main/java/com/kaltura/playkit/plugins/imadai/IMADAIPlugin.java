@@ -329,7 +329,6 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         if (displayContainer != null) {
             log.d("destroyDisplayContainer");
             displayContainer.unregisterAllFriendlyObstructions();
-            displayContainer.destroy();
             displayContainer = null;
         }
     }
@@ -348,6 +347,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         if (adsLoader != null) {
             adsLoader.removeAdErrorListener(this);
             adsLoader.removeAdsLoadedListener(adsLoadedListener);
+            adsLoader.release();
             adsLoadedListener = null;
             adsLoader = null;
         }
