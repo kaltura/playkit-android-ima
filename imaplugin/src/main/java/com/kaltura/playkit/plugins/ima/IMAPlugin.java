@@ -137,7 +137,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private Boolean playerPlayingBeforeAdArrived;
 
     private Map<com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType, AdEvent.Type> adEventsMap;
-    
 
     public static final Factory factory = new Factory() {
         @Override
