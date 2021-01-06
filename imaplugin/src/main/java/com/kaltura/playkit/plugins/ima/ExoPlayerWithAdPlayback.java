@@ -59,7 +59,7 @@ import static com.kaltura.android.exoplayer2.util.Log.LOG_LEVEL_OFF;
 /**
  * Video adPlayer that can play content video and ads.
  */
-public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackPreparer, Player.EventListener {
+public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.EventListener {
     private static final PKLog log = PKLog.get("ExoPlayerWithAdPlayback");
     private static final int AD_PROGRESS_UPDATE_INTERVAL_MS = 100;
 
@@ -361,11 +361,6 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements PlaybackP
 
     private boolean isAdPlayerPlaying() {
         return adPlayer != null && adPlayer.isPlaying();
-    }
-
-    @Override
-    public void preparePlayback() {
-        log.d("preparePlayback");
     }
 
     @Override
