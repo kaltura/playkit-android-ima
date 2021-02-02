@@ -155,6 +155,19 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Ev
         return adVideoPlayerView;
     }
 
+    public void createNewAdPlayerView() {
+        adVideoPlayerView = null;
+        adVideoPlayerView = new PlayerView(getContext());
+        adVideoPlayerView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        int id = 123456789;
+        adVideoPlayerView.setId(id);
+        adVideoPlayerView.setUseController(false);
+        adVideoPlayerView.setPlayer(adPlayer);
+        adUiContainer.removeAllViews();
+        adUiContainer = null;
+        adUiContainer = adVideoPlayerView;
+    }
+
     private void init() {
         isAdDisplayed = false;
         lastKnownAdPosition = 0;

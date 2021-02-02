@@ -56,6 +56,7 @@ import com.kaltura.playkit.ads.PKAdPluginType;
 import com.kaltura.playkit.ads.PKAdProviderListener;
 import com.kaltura.playkit.player.PlayerEngine;
 import com.kaltura.playkit.player.PlayerSettings;
+import com.kaltura.playkit.player.PlayerView;
 import com.kaltura.playkit.plugin.ima.BuildConfig;
 import com.kaltura.playkit.plugins.ads.AdCuePoints;
 import com.kaltura.playkit.plugins.ads.AdEvent;
@@ -297,6 +298,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             adDisplayContainer.unregisterAllFriendlyObstructions();
             registerFriendlyOverlays();
             clearCompanionSlots();
+            adDisplayContainer = ImaSdkFactory.createAdDisplayContainer(videoPlayerWithAdPlayback.getAdUiContainer(), videoPlayerWithAdPlayback.getVideoAdPlayer());
             return adDisplayContainer;
         }
 
@@ -305,6 +307,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             log.d("adDisplayContainer != null return current adDisplayContainer");
             adDisplayContainer.unregisterAllFriendlyObstructions();
             clearCompanionSlots();
+            if (adDisplayContainer != null) {
+                adDisplayContainer = ImaSdkFactory.createAdDisplayContainer(videoPlayerWithAdPlayback.getAdUiContainer(), videoPlayerWithAdPlayback.getVideoAdPlayer());
+            }
         } else {
             adDisplayContainer = ImaSdkFactory.createAdDisplayContainer(videoPlayerWithAdPlayback.getAdUiContainer(), videoPlayerWithAdPlayback.getVideoAdPlayer());
         }
@@ -358,6 +363,12 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             log.e("Error adConfig Incorrect or null");
             adConfig = new IMAConfig().setAdTagUrl("");
         }
+        if (videoPlayerWithAdPlayback != null) {
+            player.getView().removeView(videoPlayerWithAdPlayback.getAdPlayerView());
+//            videoPlayerWithAdPlayback.removeAdPlaybackEventListener();
+//            videoPlayerWithAdPlayback.releasePlayer();
+//            videoPlayerWithAdPlayback = null;
+        }
     }
 
     private void clearAdsLoader() {
@@ -365,6 +376,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (adsLoader != null) {
             adsLoader.removeAdErrorListener(this);
             adsLoader.removeAdsLoadedListener(adsLoadedListener);
+            adsLoader.release();
             adsLoadedListener = null;
             adsLoader = null;
         }
@@ -374,14 +386,22 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private void imaSetup() {
         log.d("imaSetup start");
         imaSettingSetup();
+        boolean isSdkFactoryFirstInit = false;
         if (sdkFactory == null) {
             sdkFactory = ImaSdkFactory.getInstance();
+            isSdkFactoryFirstInit = true;
         }
         if (adsLoader == null) {
+            if (!isSdkFactoryFirstInit) {
+                videoPlayerWithAdPlayback.createNewAdPlayerView();
+            }
             adsLoader = sdkFactory.createAdsLoader(context, imaSdkSettings, createAdDisplayContainer());
             // Add listeners for when ads are loaded and for errors.
             adsLoader.addAdErrorListener(this);
             adsLoader.addAdsLoadedListener(getAdsLoadedListener());
+        }
+        if (!isSdkFactoryFirstInit) {
+            player.getView().addView(videoPlayerWithAdPlayback.getAdPlayerView());
         }
     }
 
@@ -564,7 +584,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         log.d("IMA onDestroy adManagerInitialized = " + adManagerInitialized);
         destroyIMA();
         if (adDisplayContainer != null && adManagerInitialized) {
-            adDisplayContainer.destroy();
+           // adDisplayContainer.destroy();
         }
         adDisplayContainer = null;
         if (videoPlayerWithAdPlayback != null) {
@@ -599,6 +619,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
         if (adsManager != null) {
             adsManager.destroy();
+            if (adDisplayContainer != null)
+            adsLoader.release();
             adsManager = null;
         }
     }
