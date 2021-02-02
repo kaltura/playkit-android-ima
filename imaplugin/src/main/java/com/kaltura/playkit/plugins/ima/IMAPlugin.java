@@ -372,6 +372,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             videoPlayerWithAdPlayback.createNewAdPlayerView();
             player.getView().addView(videoPlayerWithAdPlayback.getAdPlayerView());
         }
+
         if (adsLoader == null) {
             adsLoader = sdkFactory.createAdsLoader(context, imaSdkSettings, createAdDisplayContainer());
             // Add listeners for when ads are loaded and for errors.
@@ -569,8 +570,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     private void destroyIMA() {
-        resetIMA();
         clearAdsLoader();
+        resetIMA();
     }
 
     protected void resetIMA() {

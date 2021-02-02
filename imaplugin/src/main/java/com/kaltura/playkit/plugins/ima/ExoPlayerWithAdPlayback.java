@@ -147,6 +147,15 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Ev
         init();
     }
 
+    private PlayerView createAdPlayerView() {
+        adVideoPlayerView = new PlayerView(getContext());
+        adVideoPlayerView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        int id = 123456789;
+        adVideoPlayerView.setId(id);
+        adVideoPlayerView.setUseController(false);
+        return adVideoPlayerView;
+    }
+
     public ViewGroup getAdUiContainer() {
         return adUiContainer;
     }
@@ -157,11 +166,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Ev
 
     public void createNewAdPlayerView() {
         adVideoPlayerView = null;
-        adVideoPlayerView = new PlayerView(getContext());
-        adVideoPlayerView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        int id = 123456789;
-        adVideoPlayerView.setId(id);
-        adVideoPlayerView.setUseController(false);
+        adVideoPlayerView = createAdPlayerView();
         adVideoPlayerView.setPlayer(adPlayer);
         adUiContainer.removeAllViews();
         adUiContainer = null;
@@ -171,19 +176,11 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Ev
     private void init() {
         isAdDisplayed = false;
         lastKnownAdPosition = 0;
-        adVideoPlayerView = new PlayerView(getContext());
-        adVideoPlayerView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        int id = 123456789;
-        adVideoPlayerView.setId(id);
-        adVideoPlayerView.setUseController(false);
+        adVideoPlayerView = createAdPlayerView();
         if (adPlayer == null) {
-
             mediaDataSourceFactory = buildDataSourceFactory();
-
             renderersFactory = getRenderersFactory();
-
             trackSelector = getTrackSelector();
-
             eventLogger = getEventLogger();
             initAdPlayer();
         }
