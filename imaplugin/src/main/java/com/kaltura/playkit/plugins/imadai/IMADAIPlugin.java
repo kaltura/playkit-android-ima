@@ -2,6 +2,7 @@ package com.kaltura.playkit.plugins.imadai;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.ads.interactivemedia.v3.api.Ad;
@@ -18,9 +19,9 @@ import com.google.ads.interactivemedia.v3.api.StreamManager;
 import com.google.ads.interactivemedia.v3.api.StreamRequest;
 import com.google.ads.interactivemedia.v3.api.player.VideoProgressUpdate;
 import com.google.ads.interactivemedia.v3.api.player.VideoStreamPlayer;
-import com.kaltura.android.exoplayer2.C;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.kaltura.android.exoplayer2.C;
 import com.kaltura.playkit.MessageBus;
 import com.kaltura.playkit.PKDrmParams;
 import com.kaltura.playkit.PKError;
@@ -41,6 +42,7 @@ import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdPluginType;
 import com.kaltura.playkit.ads.PKAdProviderListener;
+import com.kaltura.playkit.player.BaseExoplayerView;
 import com.kaltura.playkit.player.PKMediaSourceConfig;
 import com.kaltura.playkit.player.PlayerEngine;
 import com.kaltura.playkit.player.PlayerSettings;
@@ -105,8 +107,8 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private PlayerEngineWrapper adsPlayerEngineWrapper;
     private boolean shouldPrepareOnResume;
     private Map<com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType, com.kaltura.playkit.plugins.ads.AdEvent.Type> adEventsMap;
-    private Context mContext;
     private ViewGroup mAdUiContainer;
+    private View savedPlayerView;
 
     //private double mBookMarkContentTime; // Bookmarked content time, in seconds.
     private double mSnapBackTime; // Stream time to snap back to, in seconds.
@@ -134,12 +136,10 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         }
     };
 
-
-
     @Override
     protected void onLoad(final Player player, Object config, MessageBus messageBus, Context context) {
         log.d("onLoad");
-        mContext = context;
+        this.context = context;
         this.player = player;
         mPlayerCallbacks = new ArrayList<>();
         if (player == null) {
@@ -153,7 +153,6 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             return;
         }
         mAdUiContainer = player.getView();
-        this.context = context;
         this.messageBus = messageBus;
 
         addListeners();
@@ -280,6 +279,9 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         imaSettingSetup();
         if (sdkFactory == null) {
             sdkFactory = ImaSdkFactory.getInstance();
+        } else {
+            player.getView().addView(savedPlayerView);
+            mAdUiContainer = player.getView();
         }
         if (adsLoader == null) {
             adsLoader = sdkFactory.createAdsLoader(context, imaSdkSettings, createStreamDisplayContainer());
@@ -347,9 +349,21 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         if (adsLoader != null) {
             adsLoader.removeAdErrorListener(this);
             adsLoader.removeAdsLoadedListener(adsLoadedListener);
+            savePlayerView();
             adsLoader.release();
             adsLoadedListener = null;
             adsLoader = null;
+            displayContainer = null;
+        }
+    }
+
+    private void savePlayerView() {
+        if (mAdUiContainer != null && mAdUiContainer.getChildCount() > 0) {
+            for (int childPosition = 0; childPosition <= mAdUiContainer.getChildCount(); childPosition++) {
+                if (mAdUiContainer.getChildAt(childPosition) != null && mAdUiContainer.getChildAt(childPosition) instanceof BaseExoplayerView) {
+                    savedPlayerView = mAdUiContainer.getChildAt(childPosition);
+                }
+            }
         }
     }
 
@@ -397,15 +411,10 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
     private StreamDisplayContainer createStreamDisplayContainer() {
         log.d("createStreamDisplayContainer");
-        if (displayContainer != null) {
-            log.d("displayContainer != null return current displayContainer");
-            displayContainer.unregisterAllFriendlyObstructions();
-            registerFriendlyOverlays();
-            return displayContainer;
-        }
         if (videoStreamPlayer == null) {
             videoStreamPlayer = createVideoStreamPlayer();
         }
+
         displayContainer = ImaSdkFactory.createStreamDisplayContainer(mAdUiContainer, videoStreamPlayer);
         registerFriendlyOverlays();
 
