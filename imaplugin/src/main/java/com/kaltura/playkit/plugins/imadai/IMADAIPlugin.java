@@ -353,7 +353,10 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             adsLoader.release();
             adsLoadedListener = null;
             adsLoader = null;
-            displayContainer = null;
+            if (displayContainer != null) {
+                displayContainer.unregisterAllFriendlyObstructions();
+                displayContainer = null;
+            }
         }
     }
 
