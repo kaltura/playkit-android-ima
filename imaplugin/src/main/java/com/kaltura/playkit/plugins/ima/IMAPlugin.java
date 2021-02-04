@@ -292,7 +292,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
 
         if (adDisplayContainer == null) {
-            log.d("adDisplayContainer != null return current adDisplayContainer");
+            log.d("adDisplayContainer == null return new adDisplayContainer");
             adDisplayContainer = ImaSdkFactory.createAdDisplayContainer(videoPlayerWithAdPlayback.getAdUiContainer(), videoPlayerWithAdPlayback.getVideoAdPlayer());
         }
 
