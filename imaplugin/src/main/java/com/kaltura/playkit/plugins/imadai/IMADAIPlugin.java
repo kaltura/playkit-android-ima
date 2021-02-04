@@ -353,13 +353,14 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             adsLoader.release();
             adsLoadedListener = null;
             adsLoader = null;
-            if (displayContainer != null) {
-                displayContainer.unregisterAllFriendlyObstructions();
-                displayContainer = null;
-            }
+            destroyDisplayContainer();
         }
     }
 
+    /**
+     * Applicable on changeMedia: in adsLoader.release() IMA is removing the playerview that's why we are saving the PlayerView
+     * before calling adsLoader.release()  and pass it to IMA by creating an AdDisplayContainer
+     */
     private void savePlayerView() {
         if (mAdUiContainer != null && mAdUiContainer.getChildCount() > 0) {
             for (int childPosition = 0; childPosition <= mAdUiContainer.getChildCount(); childPosition++) {

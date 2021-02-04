@@ -367,9 +367,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (sdkFactory == null) {
             sdkFactory = ImaSdkFactory.getInstance();
         } else {
-            if (videoPlayerWithAdPlayback != null) {
-                player.getView().removeView(videoPlayerWithAdPlayback.getAdPlayerView());
-            }
+            // Applicable on changeMedia: in adsLoader.release() IMA is removing the playerview that's why we need to create PlayerView
+            // again and pass it to IMA by creating an AdDisplayContainer
+            player.getView().removeView(videoPlayerWithAdPlayback.getAdPlayerView());
             videoPlayerWithAdPlayback.createNewAdPlayerView();
             player.getView().addView(videoPlayerWithAdPlayback.getAdPlayerView());
         }
