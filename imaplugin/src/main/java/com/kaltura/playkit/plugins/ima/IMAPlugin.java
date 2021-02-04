@@ -296,8 +296,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             adDisplayContainer = ImaSdkFactory.createAdDisplayContainer(videoPlayerWithAdPlayback.getAdUiContainer(), videoPlayerWithAdPlayback.getVideoAdPlayer());
         }
 
-        clearCompanionSlots();
-
         // Set up spots for companions.
         if (isValidCompanionAdsSettings(companionAdConfig, adCompanionAdWidth, adCompanionAdHeight)) {
             populateCompanionSlots(adCompanionAdWidth, adCompanionAdHeight);
@@ -347,9 +345,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             log.e("Error adConfig Incorrect or null");
             adConfig = new IMAConfig().setAdTagUrl("");
         }
-        if (videoPlayerWithAdPlayback != null) {
-            player.getView().removeView(videoPlayerWithAdPlayback.getAdPlayerView());
-        }
     }
 
     private void clearAdsLoader() {
@@ -360,6 +355,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             adsLoader.release();
             adsLoadedListener = null;
             adsLoader = null;
+            clearCompanionSlots();
             adDisplayContainer = null;
         }
     }
@@ -371,6 +367,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (sdkFactory == null) {
             sdkFactory = ImaSdkFactory.getInstance();
         } else {
+            if (videoPlayerWithAdPlayback != null) {
+                player.getView().removeView(videoPlayerWithAdPlayback.getAdPlayerView());
+            }
             videoPlayerWithAdPlayback.createNewAdPlayerView();
             player.getView().addView(videoPlayerWithAdPlayback.getAdPlayerView());
         }
