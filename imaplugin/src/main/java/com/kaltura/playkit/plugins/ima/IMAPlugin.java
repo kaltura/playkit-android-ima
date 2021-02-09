@@ -349,13 +349,13 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private void clearAdsLoader() {
         cancelAdManagerTimer();
+        clearCompanionSlots();
         if (adsLoader != null) {
             adsLoader.removeAdErrorListener(this);
             adsLoader.removeAdsLoadedListener(adsLoadedListener);
             adsLoader.release();
             adsLoadedListener = null;
             adsLoader = null;
-            clearCompanionSlots();
             adDisplayContainer = null;
         }
     }
