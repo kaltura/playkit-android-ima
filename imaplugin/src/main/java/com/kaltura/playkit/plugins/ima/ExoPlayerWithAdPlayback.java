@@ -31,6 +31,7 @@ import com.kaltura.android.exoplayer2.Timeline;
 import com.kaltura.android.exoplayer2.source.TrackGroupArray;
 import com.kaltura.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.kaltura.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.kaltura.android.exoplayer2.trackselection.ExoTrackSelection;
 import com.kaltura.android.exoplayer2.trackselection.TrackSelection;
 import com.kaltura.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.kaltura.android.exoplayer2.ui.PlayerView;
@@ -372,7 +373,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Ev
     public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
         log.d("onLoadingChanged");
         if (trackSelections != null && trackSelections.length > 0) {
-            TrackSelection trackSelection = trackSelections.get(Consts.TRACK_TYPE_VIDEO);
+            ExoTrackSelection trackSelection = (ExoTrackSelection) trackSelections.get(Consts.TRACK_TYPE_VIDEO);
             if (trackSelection != null) {
                 log.d("onLoadingChanged trackSelection.getSelectionReason() = " + trackSelection.getSelectionReason());
                 if (trackSelection.getSelectionReason() == SELECTION_REASON_INITIAL || trackSelection.getSelectionReason() == SELECTION_REASON_ADAPTIVE) {
