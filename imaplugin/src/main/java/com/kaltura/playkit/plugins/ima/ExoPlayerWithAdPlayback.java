@@ -153,7 +153,6 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Ev
         return adVideoPlayerView;
     }
 
-    
     private void init() {
         isAdDisplayed = false;
         lastKnownAdPosition = 0;
