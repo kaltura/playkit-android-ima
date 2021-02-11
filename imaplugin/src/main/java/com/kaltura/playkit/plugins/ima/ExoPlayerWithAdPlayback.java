@@ -2,7 +2,6 @@ package com.kaltura.playkit.plugins.ima;
 
 import android.content.Context;
 import android.net.Uri;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -24,19 +23,18 @@ import com.kaltura.android.exoplayer2.ExoPlaybackException;
 import com.kaltura.android.exoplayer2.Format;
 import com.kaltura.android.exoplayer2.MediaItem;
 import com.kaltura.android.exoplayer2.PlaybackParameters;
-import com.kaltura.android.exoplayer2.PlaybackPreparer;
 import com.kaltura.android.exoplayer2.Player;
 import com.kaltura.android.exoplayer2.SimpleExoPlayer;
 import com.kaltura.android.exoplayer2.Timeline;
 import com.kaltura.android.exoplayer2.source.TrackGroupArray;
 import com.kaltura.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.kaltura.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.kaltura.android.exoplayer2.trackselection.TrackSelection;
+import com.kaltura.android.exoplayer2.trackselection.ExoTrackSelection;
 import com.kaltura.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.kaltura.android.exoplayer2.ui.PlayerView;
 import com.kaltura.android.exoplayer2.upstream.DataSource;
 import com.kaltura.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.kaltura.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
+import com.kaltura.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.kaltura.android.exoplayer2.upstream.HttpDataSource;
 import com.kaltura.android.exoplayer2.util.EventLogger;
 import com.kaltura.android.exoplayer2.util.Log;
@@ -382,7 +380,10 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Ev
     public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
         log.d("onLoadingChanged");
         if (trackSelections != null && trackSelections.length > 0) {
-            TrackSelection trackSelection = trackSelections.get(Consts.TRACK_TYPE_VIDEO);
+            ExoTrackSelection trackSelection = null;
+            if (trackSelections.get(Consts.TRACK_TYPE_VIDEO) instanceof ExoTrackSelection) {
+                trackSelection = (ExoTrackSelection) trackSelections.get(Consts.TRACK_TYPE_VIDEO);
+            }
             if (trackSelection != null) {
                 log.d("onLoadingChanged trackSelection.getSelectionReason() = " + trackSelection.getSelectionReason());
                 if (trackSelection.getSelectionReason() == SELECTION_REASON_INITIAL || trackSelection.getSelectionReason() == SELECTION_REASON_ADAPTIVE) {
@@ -549,7 +550,10 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Ev
         lastAdMediaInfo = null;
         if (adVideoPlayerView != null && adVideoPlayerView.getPlayer() != null) {
             adVideoPlayerView.getPlayer().setPlayWhenReady(false);
-            adVideoPlayerView.getPlayer().stop(isResetRequired);
+            adVideoPlayerView.getPlayer().stop();
+            if (isResetRequired) {
+                adVideoPlayerView.getPlayer().clearMediaItems();
+            }
         }
     }
 
@@ -685,10 +689,10 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Ev
         switch (Util.inferContentType(uri)) {
             case C.TYPE_DASH:
                 builder.setMimeType(PKMediaFormat.dash.mimeType);
-               break;
+                break;
             case C.TYPE_HLS:
                 builder.setMimeType(PKMediaFormat.hls.mimeType);
-             break;
+                break;
             case C.TYPE_OTHER:
                 builder.setMimeType(PKMediaFormat.mp4.mimeType);
                 break;
@@ -752,9 +756,11 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Ev
     }
 
     private HttpDataSource.Factory buildHttpDataSourceFactory() {
-        return new DefaultHttpDataSourceFactory(Util.getUserAgent(getContext(), "AdPlayKit"),
-                adLoadTimeout,
-                adLoadTimeout, true);
+        return new DefaultHttpDataSource.Factory()
+                .setUserAgent(Util.getUserAgent(getContext(), "AdPlayKit"))
+                .setConnectTimeoutMs(adLoadTimeout)
+                .setReadTimeoutMs(adLoadTimeout)
+                .setAllowCrossProtocolRedirects(true);
     }
 
     private static Looper getImaLooper() {
