@@ -546,7 +546,6 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Ev
             } else {
                 adVideoPlayerView.getPlayer().stop();
             }
-
         }
     }
 
