@@ -540,11 +540,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Ev
         lastAdMediaInfo = null;
         if (adVideoPlayerView != null && adVideoPlayerView.getPlayer() != null) {
             adVideoPlayerView.getPlayer().setPlayWhenReady(false);
+            adVideoPlayerView.getPlayer().stop();
             if (isResetRequired) {
-                adVideoPlayerView.getPlayer().stop();
                 adVideoPlayerView.getPlayer().clearMediaItems();
-            } else {
-                adVideoPlayerView.getPlayer().stop();
             }
         }
     }
