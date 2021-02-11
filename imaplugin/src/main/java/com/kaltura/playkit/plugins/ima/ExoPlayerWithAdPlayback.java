@@ -126,7 +126,6 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Ev
         super(context, attrs, defStyle);
         this.mContext = context;
     }
-    
 
     public ExoPlayerWithAdPlayback(Context context, AttributeSet attrs) {
         super(context, attrs, 0);
