@@ -248,6 +248,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         isAdError     = false;
         shouldPrepareOnResume = false;
         this.mediaConfig = mediaConfig;
+        savePlayerView();
         clearAdsLoader();
         imaSetup();
         log.d("Event: " + AdEvent.Type.AD_REQUESTED);
@@ -349,7 +350,6 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         if (adsLoader != null) {
             adsLoader.removeAdErrorListener(this);
             adsLoader.removeAdsLoadedListener(adsLoadedListener);
-            savePlayerView();
             adsLoader.release();
             adsLoadedListener = null;
             adsLoader = null;
@@ -627,6 +627,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     @Override
     protected void onDestroy() {
         isAdRequested = false;
+        savedPlayerView = null;
         clearAdsLoader();
         resetIMA();
     }
