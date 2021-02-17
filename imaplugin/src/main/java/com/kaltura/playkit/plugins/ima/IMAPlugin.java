@@ -291,21 +291,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             adCompanionAdHeight  = companionAdConfig.getCompanionAdHeight();
         }
 
-        //clean up and reuse adDisplayContainer for change media without companion ads
-        if (adDisplayContainer != null && adCompanionViewGroup == null) {
-            log.d("adDisplayContainer != null return current adDisplayContainer");
-            adDisplayContainer.unregisterAllFriendlyObstructions();
-            registerFriendlyOverlays();
-            clearCompanionSlots();
-            return adDisplayContainer;
-        }
-
-        //clean up for change media with companion ads
-        if (adDisplayContainer != null) {
-            log.d("adDisplayContainer != null return current adDisplayContainer");
-            adDisplayContainer.unregisterAllFriendlyObstructions();
-            clearCompanionSlots();
-        } else {
+        if (adDisplayContainer == null) {
+            log.d("adDisplayContainer == null return new adDisplayContainer");
             adDisplayContainer = ImaSdkFactory.createAdDisplayContainer(videoPlayerWithAdPlayback.getAdUiContainer(), videoPlayerWithAdPlayback.getVideoAdPlayer());
         }
 
@@ -362,11 +349,14 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private void clearAdsLoader() {
         cancelAdManagerTimer();
+        clearCompanionSlots();
         if (adsLoader != null) {
             adsLoader.removeAdErrorListener(this);
             adsLoader.removeAdsLoadedListener(adsLoadedListener);
+            adsLoader.release();
             adsLoadedListener = null;
             adsLoader = null;
+            adDisplayContainer = null;
         }
     }
 
@@ -376,7 +366,14 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         imaSettingSetup();
         if (sdkFactory == null) {
             sdkFactory = ImaSdkFactory.getInstance();
+        } else {
+            // Applicable on changeMedia: in adsLoader.release() IMA is removing the playerview that's why we need to create PlayerView
+            // again and pass it to IMA by creating an AdDisplayContainer
+            player.getView().removeView(videoPlayerWithAdPlayback.getAdPlayerView());
+            videoPlayerWithAdPlayback.createNewAdPlayerView();
+            player.getView().addView(videoPlayerWithAdPlayback.getAdPlayerView());
         }
+
         if (adsLoader == null) {
             adsLoader = sdkFactory.createAdsLoader(context, imaSdkSettings, createAdDisplayContainer());
             // Add listeners for when ads are loaded and for errors.
@@ -563,10 +560,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         boolean adManagerInitialized = (adsManager != null); // FEM-2600
         log.d("IMA onDestroy adManagerInitialized = " + adManagerInitialized);
         destroyIMA();
-        if (adDisplayContainer != null && adManagerInitialized) {
-            adDisplayContainer.destroy();
-        }
-        adDisplayContainer = null;
         if (videoPlayerWithAdPlayback != null) {
             videoPlayerWithAdPlayback.removeAdPlaybackEventListener();
             videoPlayerWithAdPlayback.releasePlayer();
