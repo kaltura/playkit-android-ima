@@ -34,6 +34,7 @@ public class IMAConfig {
     public static final int DEFAULT_AD_LOAD_TIMEOUT = 8;
     public static final int DEFAULT_AD_LOAD_COUNT_DOWN_TICK = 250;
     public static final int DEFAULT_CUE_POINTS_CHANGED_DELAY = 2000;
+    // Default value for content duration. Setting this will disable postroll preloading.
     public static final float DEFAULT_CONTENT_DURATION = -3;
 
     private static final String AD_PLAYER_TYPE = "kaltura-vp-android";
@@ -70,7 +71,7 @@ public class IMAConfig {
     private boolean enableFocusSkipButton;
     private int adLoadTimeOut; // in sec
     private int maxRedirects;
-    private float contentDuration;
+    private float contentDuration; // FEC-10734
     private String playerType;
     private String playerVersion;
     private List<String> videoMimeTypes = new ArrayList<>();
@@ -226,9 +227,13 @@ public class IMAConfig {
 
     /**
      * Specifies the duration of the content in seconds to be shown.
+     * This optional parameter is used by AdX requests. It is recommended for AdX users.
+     * <br>
      * Default value is {@value IMAConfig#DEFAULT_CONTENT_DURATION}.
-     * By Default postroll preloading is disabled.
-     *
+     * By default postroll preloading is disabled.
+     * <br>
+     * {@value IMAConfig#DEFAULT_CONTENT_DURATION} is the fixed value given by IMA. 
+     * <br>
      * If App will set any other value instead of {@value IMAConfig#DEFAULT_CONTENT_DURATION} then
      * postroll will be preloaded.
      */
