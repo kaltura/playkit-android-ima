@@ -51,7 +51,7 @@ public class IMAConfig {
     private static final String AD_COUNTDOWN_UIELEMENT_KEY    = "adCountDown";
     private static final String AD_LOAD_TIMEOUT_KEY           = "adLoadTimeOut";
     private static final String AD_MAX_REDIRECTS_KEY          = "adMaxRedirects";
-    private static final String AD_CONTENT_DURATION           = "adContentDuration";
+    private static final String CONTENT_DURATION              = "contentDuration";
     private static final String AD_ENABLE_DEBUG_MODE_KEY      = "enableDebugMode";
     private static final String AD_PLAYER_TYPE_KEY            = "playerType";
     private static final String AD_PLAYER_VERSION_KEY         = "playerVersion";
@@ -346,7 +346,7 @@ public class IMAConfig {
         jsonObject.addProperty(AD_LOAD_TIMEOUT_KEY, adLoadTimeOut);
         jsonObject.addProperty(AD_ENABLE_DEBUG_MODE_KEY, enableDebugMode);
         jsonObject.addProperty(AD_MAX_REDIRECTS_KEY, maxRedirects);
-        jsonObject.addProperty(AD_CONTENT_DURATION, contentDuration);
+        jsonObject.addProperty(CONTENT_DURATION, contentDuration);
         jsonObject.addProperty(AD_PLAYER_TYPE_KEY, playerType);
         jsonObject.addProperty(AD_PLAYER_VERSION_KEY, playerVersion);
         jsonObject.addProperty(AD_ALWAYES_START_WITH_PREROLL, alwaysStartWithPreroll);
