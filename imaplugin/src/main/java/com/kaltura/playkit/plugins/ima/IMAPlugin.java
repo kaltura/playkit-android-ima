@@ -638,6 +638,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (videoPlayerWithAdPlayback != null) {
             request.setContentProgressProvider(videoPlayerWithAdPlayback.getContentProgressProvider());
         }
+
+        if (adConfig != null) {
+            request.setContentDuration(adConfig.getContentDuration());
+        }
         //request.setContinuousPlayback(true);
         //request.setAdWillAutoPlay(isAutoPlay);
         // Request the ad. After the ad is loaded, onAdsManagerLoaded() will be called.

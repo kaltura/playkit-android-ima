@@ -31,9 +31,11 @@ import java.util.List;
 
 public class IMAConfig {
 
-    public  static final int DEFAULT_AD_LOAD_TIMEOUT = 8;
+    public static final int DEFAULT_AD_LOAD_TIMEOUT = 8;
     public static final int DEFAULT_AD_LOAD_COUNT_DOWN_TICK = 250;
     public static final int DEFAULT_CUE_POINTS_CHANGED_DELAY = 2000;
+    // Default value for content duration. Setting this will disable postroll preloading.
+    public static final float DEFAULT_CONTENT_DURATION = -3;
 
     private static final String AD_PLAYER_TYPE = "kaltura-vp-android";
     private static final String AD_PLAYER_VERSION = PlayKitManager.VERSION_STRING;
@@ -49,6 +51,7 @@ public class IMAConfig {
     private static final String AD_COUNTDOWN_UIELEMENT_KEY    = "adCountDown";
     private static final String AD_LOAD_TIMEOUT_KEY           = "adLoadTimeOut";
     private static final String AD_MAX_REDIRECTS_KEY          = "adMaxRedirects";
+    private static final String CONTENT_DURATION              = "contentDuration";
     private static final String AD_ENABLE_DEBUG_MODE_KEY      = "enableDebugMode";
     private static final String AD_PLAYER_TYPE_KEY            = "playerType";
     private static final String AD_PLAYER_VERSION_KEY         = "playerVersion";
@@ -68,6 +71,7 @@ public class IMAConfig {
     private boolean enableFocusSkipButton;
     private int adLoadTimeOut; // in sec
     private int maxRedirects;
+    private float contentDuration; // FEC-10734
     private String playerType;
     private String playerVersion;
     private List<String> videoMimeTypes = new ArrayList<>();
@@ -94,6 +98,7 @@ public class IMAConfig {
         this.adTagResponse                          = null;
         this.playerType                             = AD_PLAYER_TYPE;
         this.playerVersion                          = AD_PLAYER_VERSION;
+        this.contentDuration                        = DEFAULT_CONTENT_DURATION;
 
         //if (tagTimes == null) {
         //    tagTimes = new HashMap<>();
@@ -145,6 +150,10 @@ public class IMAConfig {
 
     public int getMaxRedirects() {
         return maxRedirects;
+    }
+
+    public float getContentDuration() {
+        return contentDuration;
     }
 
     // select the MIME TYPE that IMA will play instead of letting it select it by itself
@@ -213,6 +222,23 @@ public class IMAConfig {
 
     public IMAConfig setMaxRedirects(int maxRedirects) {
         this.maxRedirects = maxRedirects;
+        return this;
+    }
+
+    /**
+     * Specifies the duration of the content in seconds to be shown.
+     * This optional parameter is used by AdX requests. It is recommended for AdX users.
+     * <br>
+     * Default value is {@value IMAConfig#DEFAULT_CONTENT_DURATION}.
+     * By default postroll preloading is disabled.
+     * <br>
+     * {@value IMAConfig#DEFAULT_CONTENT_DURATION} is the fixed value given by IMA. 
+     * <br>
+     * If App will set any other value instead of {@value IMAConfig#DEFAULT_CONTENT_DURATION} then
+     * postroll will be preloaded.
+     */
+    public IMAConfig setContentDuration(float contentDuration) {
+        this.contentDuration = contentDuration;
         return this;
     }
 
@@ -320,6 +346,7 @@ public class IMAConfig {
         jsonObject.addProperty(AD_LOAD_TIMEOUT_KEY, adLoadTimeOut);
         jsonObject.addProperty(AD_ENABLE_DEBUG_MODE_KEY, enableDebugMode);
         jsonObject.addProperty(AD_MAX_REDIRECTS_KEY, maxRedirects);
+        jsonObject.addProperty(CONTENT_DURATION, contentDuration);
         jsonObject.addProperty(AD_PLAYER_TYPE_KEY, playerType);
         jsonObject.addProperty(AD_PLAYER_VERSION_KEY, playerVersion);
         jsonObject.addProperty(AD_ALWAYES_START_WITH_PREROLL, alwaysStartWithPreroll);
