@@ -33,9 +33,8 @@ dependencies {
 
     //Ads libraries.
     api 'com.google.ads.interactivemedia.v3:interactivemedia:3.22.0'
-    implementation 'com.google.android.gms:play-services-ads:15.0.1'
-    testImplementation 'junit:junit:4.12'
-    implementation 'androidx.annotation:annotation:1.1.0'
+    testImplementation 'junit:junit:4.13.2'
+    implementation 'androidx.annotation:annotation:1.2.0'
 }
 
 repositories {
@@ -43,3 +42,5 @@ repositories {
     jcenter()
     maven { url "https://jitpack.io" }
 }
+
+apply from: './gradle-mvn-push.gradle'
