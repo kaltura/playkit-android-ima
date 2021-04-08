@@ -74,6 +74,7 @@ public class IMAConfig {
     private float contentDuration; // FEC-10734
     private String playerType;
     private String playerVersion;
+    private String sessionId;
     private List<String> videoMimeTypes = new ArrayList<>();
     private transient List<PKFriendlyObstruction> friendlyObstructions;
     private transient CompanionAdConfig companionAdConfig;
@@ -99,6 +100,7 @@ public class IMAConfig {
         this.playerType                             = AD_PLAYER_TYPE;
         this.playerVersion                          = AD_PLAYER_VERSION;
         this.contentDuration                        = DEFAULT_CONTENT_DURATION;
+        this.sessionId                              = null;
 
         //if (tagTimes == null) {
         //    tagTimes = new HashMap<>();
@@ -287,6 +289,20 @@ public class IMAConfig {
     public IMAConfig setPlayerVersion(String playerVersion) {
         this.playerVersion = playerVersion;
         return this;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    /**
+     * Session ID is a temporary random ID. It is used exclusively for frequency capping.
+     * A session ID must be a UUID, or an empty string if the SDK should not send a session ID.
+     *
+     * @param sessionId id for this session
+     */
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
     public IMAConfig setFriendlyObstructions(List<PKFriendlyObstruction> friendlyObstructions) {

@@ -56,6 +56,7 @@ public class IMADAIConfig {
     private int maxRedirects;
     private String playerType;
     private String playerVersion;
+    private String sessionId;
     private transient List<PKFriendlyObstruction> friendlyObstructions;
 
     // Map adTagParameters = new HashMap();
@@ -75,22 +76,23 @@ public class IMADAIConfig {
                          StreamRequest.StreamFormat streamFormat, // DASH or HLS
                          String licenseUrl) {
 
-        this.assetKey = assetKey;
-        this.contentSourceId = contentSourceId;
-        this.videoId = videoId;
-        this.assetTitle = assetTitle;
-        this.apiKey = apiKey;
-        this.streamFormat = streamFormat;
-        this.licenseUrl = licenseUrl;
-        this.language                  = "en";
-        this.adAttribution             = true;
-        this.adCountDown               = true;
-        this.adLoadTimeOut             = DEFAULT_AD_LOAD_TIMEOUT;
-        this.enableDebugMode           = false;
-        this.alwaysStartWithPreroll    = false;
-        this.enableFocusSkipButton     = true;
-        this.playerType                = AD_PLAYER_TYPE;
-        this.playerVersion             = AD_PLAYER_VERSION;
+        this.assetKey                         = assetKey;
+        this.contentSourceId                  = contentSourceId;
+        this.videoId                          = videoId;
+        this.assetTitle                       = assetTitle;
+        this.apiKey                           = apiKey;
+        this.streamFormat                     = streamFormat;
+        this.licenseUrl                       = licenseUrl;
+        this.language                         = "en";
+        this.adAttribution                    = true;
+        this.adCountDown                      = true;
+        this.adLoadTimeOut                    = DEFAULT_AD_LOAD_TIMEOUT;
+        this.enableDebugMode                  = false;
+        this.alwaysStartWithPreroll           = false;
+        this.enableFocusSkipButton            = true;
+        this.playerType                       = AD_PLAYER_TYPE;
+        this.playerVersion                    = AD_PLAYER_VERSION;
+        this.sessionId                        = null;
     }
 
     //VOD Factory
@@ -240,6 +242,16 @@ public class IMADAIConfig {
         return this;
     }
 
+    /**
+     * Session ID is a temporary random ID. It is used exclusively for frequency capping.
+     * A session ID must be a UUID, or an empty string if the SDK should not send a session ID.
+     *
+     * @param sessionId id for this session
+     */
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
     public IMADAIConfig setFriendlyObstructions(List<PKFriendlyObstruction> friendlyObstructions) {
 
         if (friendlyObstructions != null) {
@@ -328,6 +340,10 @@ public class IMADAIConfig {
 
     public String getPlayerVersion() {
         return playerVersion;
+    }
+
+    public String getSessionId() {
+        return sessionId;
     }
 
     public boolean isLiveDAI() {

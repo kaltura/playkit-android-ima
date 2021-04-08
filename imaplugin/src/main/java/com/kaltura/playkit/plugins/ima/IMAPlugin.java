@@ -428,6 +428,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         imaSdkSettings.setLanguage(adConfig.getLanguage());
         imaSdkSettings.setDebugMode(adConfig.isDebugMode());
+        if (adConfig.getSessionId() != null) {
+            imaSdkSettings.setSessionId(adConfig.getSessionId());
+        }
     }
 
     @Override
