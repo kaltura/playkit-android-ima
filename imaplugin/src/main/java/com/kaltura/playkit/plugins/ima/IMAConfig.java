@@ -297,7 +297,7 @@ public class IMAConfig {
 
     /**
      * Session ID is a temporary random ID. It is used exclusively for frequency capping.
-     * A session ID must be a UUID, or an empty string if the SDK should not send a session ID.
+     * A session ID must be a UUID, or an empty string if app doesn't want the SDK to use capping (Useful for changeMedia).
      *
      * @param sessionId id for this session
      */
