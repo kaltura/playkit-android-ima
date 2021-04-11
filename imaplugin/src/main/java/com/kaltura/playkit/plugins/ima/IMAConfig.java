@@ -236,6 +236,8 @@ public class IMAConfig {
      * <br>
      * If App will set any other value instead of {@value IMAConfig#DEFAULT_CONTENT_DURATION} then
      * postroll will be preloaded.
+     * @param contentDuration - the contentDuration
+     * @return - IMAConfig
      */
     public IMAConfig setContentDuration(float contentDuration) {
         this.contentDuration = contentDuration;
@@ -332,6 +334,7 @@ public class IMAConfig {
      * Due to Views required for setControlsOverlayList()
      *
      * @deprecated pass only IMAConfig object to the plugin instead of JsonObject.
+     * @return - JsonObject as jsonObject
      */
     @Deprecated
     public JsonObject toJSONObject() {
