@@ -31,14 +31,18 @@ dependencies {
     implementation 'com.kaltura:playkit-android:dev-SNAPSHOT'
     //implementation project(":playkit")
 
-    //Ads libraries.
+    //Ads library.
     api 'com.google.ads.interactivemedia.v3:interactivemedia:3.23.0'
-    testImplementation 'junit:junit:4.12'
-    implementation 'androidx.annotation:annotation:1.1.0'
+    
+    testImplementation 'junit:junit:4.13.2'
+    implementation 'androidx.annotation:annotation:1.2.0'
 }
 
 repositories {
     google()
     jcenter()
+    mavenCentral()
     maven { url "https://jitpack.io" }
 }
+
+apply from: './gradle-mvn-push.gradle'
