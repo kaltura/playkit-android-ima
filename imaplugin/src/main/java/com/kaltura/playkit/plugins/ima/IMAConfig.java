@@ -303,8 +303,9 @@ public class IMAConfig {
      *
      * @param sessionId id for this session
      */
-    public void setSessionId(String sessionId) {
+    public IMAConfig setSessionId(String sessionId) {
         this.sessionId = sessionId;
+        return this;
     }
 
     public IMAConfig setFriendlyObstructions(List<PKFriendlyObstruction> friendlyObstructions) {

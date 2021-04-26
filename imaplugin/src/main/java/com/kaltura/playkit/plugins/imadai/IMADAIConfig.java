@@ -248,8 +248,9 @@ public class IMADAIConfig {
      *
      * @param sessionId id for this session
      */
-    public void setSessionId(String sessionId) {
+    public IMADAIConfig setSessionId(String sessionId) {
         this.sessionId = sessionId;
+        return this;
     }
 
     public IMADAIConfig setFriendlyObstructions(List<PKFriendlyObstruction> friendlyObstructions) {
