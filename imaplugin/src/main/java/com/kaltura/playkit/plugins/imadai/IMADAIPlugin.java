@@ -304,6 +304,9 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         imaSdkSettings.setDebugMode(adConfig.isDebugMode());
         imaSdkSettings.setPlayerType(adConfig.getPlayerType());
         imaSdkSettings.setPlayerVersion(adConfig.getPlayerVersion());
+        if (adConfig.getSessionId() != null) {
+            imaSdkSettings.setSessionId(adConfig.getSessionId());
+        }
     }
 
     private AdsLoader.AdsLoadedListener getAdsLoadedListener() {
