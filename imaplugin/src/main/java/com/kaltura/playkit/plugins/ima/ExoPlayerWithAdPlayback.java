@@ -501,7 +501,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
     }
 
     @Override
-    public void onPositionDiscontinuity(int reason) {
+    public void onPositionDiscontinuity(Player.PositionInfo oldPosition, Player.PositionInfo newPosition, @Player.DiscontinuityReason int reason) {
         log.d("onPositionDiscontinuity");
     }
 
