@@ -57,7 +57,7 @@ import static com.kaltura.android.exoplayer2.util.Log.LOG_LEVEL_OFF;
 /**
  * Video adPlayer that can play content video and ads.
  */
-public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.EventListener {
+public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Listener {
     private static final PKLog log = PKLog.get("ExoPlayerWithAdPlayback");
     private static final int AD_PROGRESS_UPDATE_INTERVAL_MS = 100;
 
@@ -501,7 +501,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Ev
     }
 
     @Override
-    public void onPositionDiscontinuity(int reason) {
+    public void onPositionDiscontinuity(Player.PositionInfo oldPosition, Player.PositionInfo newPosition, @Player.DiscontinuityReason int reason) {
         log.d("onPositionDiscontinuity");
     }
 
