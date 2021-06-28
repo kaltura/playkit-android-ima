@@ -111,7 +111,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private View savedPlayerView;
 
     //private double mBookMarkContentTime; // Bookmarked content time, in seconds.
-    private long mSnapBackTime; // Stream time to snap back to, in seconds.
+    private long mSnapBackTime; // Stream time to snap back to, in miliseconds.
 
     public static final Factory factory = new Factory() {
         @Override
@@ -164,10 +164,10 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
             log.d("Received:PlayerEvent:" + event.eventType().name());
             lastPlaybackPlayerState = PlayerEvent.Type.ENDED;
             if (getPlayerEngine() != null) {
-                long currentPosSec = getPlayerEngine().getCurrentPosition();
+                long currentPosMs = getPlayerEngine().getCurrentPosition();
                 if (streamManager != null) {
-                    CuePoint prevCuePoint = streamManager.getPreviousCuePointForStreamTimeMs(currentPosSec);
-                    if (getPlayerEngine().getCurrentPosition() >= getPlayerEngine().getDuration() && prevCuePoint != null && currentPosSec >= prevCuePoint.getEndTimeMs()) {
+                    CuePoint prevCuePoint = streamManager.getPreviousCuePointForStreamTimeMs(currentPosMs);
+                    if (getPlayerEngine().getCurrentPosition() >= getPlayerEngine().getDuration() && prevCuePoint != null && currentPosMs >= prevCuePoint.getEndTimeMs()) {
                         if (pluginCuePoints != null && !pluginCuePoints.isEmpty() && Math.floor(pluginCuePoints.get(pluginCuePoints.size() - 1).getEndTimeMs()) == getPlayerEngine().getDuration()) {
                             if (!pluginCuePoints.get(pluginCuePoints.size() - 1).isPlayed()) {
                                 getPlayerEngine().seekTo(pluginCuePoints.get(pluginCuePoints.size() - 1).getStartTimeMs());
