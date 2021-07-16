@@ -453,12 +453,12 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
 
                 if (!appIsInBackground) {
                     if (mediaConfig.getStartPosition() != null && mediaConfig.getStartPosition() > 0) {
-                        long fakeStartPos = streamManager.getStreamTimeMsForContentTimeMs(mediaConfig.getStartPosition());
+                        long fakeStartPos = streamManager.getStreamTimeMsForContentTimeMs(mediaConfig.getStartPosition() * Consts.MILLISECONDS_MULTIPLIER);
                         if (adConfig.isAlwaysStartWithPreroll()) {
                             mSnapBackTime = fakeStartPos;
                             mediaConfig.setStartPosition(0L);
                         } else {
-                            mediaConfig.setStartPosition(fakeStartPos);
+                            mediaConfig.setStartPosition(fakeStartPos / Consts.MILLISECONDS_MULTIPLIER);
                         }
                     }
 
