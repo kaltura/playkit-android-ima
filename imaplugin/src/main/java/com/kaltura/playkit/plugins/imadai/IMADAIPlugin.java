@@ -961,6 +961,9 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         String dealId = ad.getDealId();
         String surveyUrl = ad.getSurveyUrl() != null ? ad.getSurveyUrl() : "";
         String traffickingParams = ad.getTraffickingParameters();
+        String[] adWrapperCreativeIds = ad.getAdWrapperCreativeIds();
+        String[] adWrapperIds = ad.getAdWrapperIds();
+        String[] adWrapperSystems = ad.getAdWrapperSystems();
         int adHeight = ad.isLinear() ? ad.getVastMediaHeight() : ad.getHeight();
         int adWidth  = ad.isLinear() ? ad.getVastMediaWidth() : ad.getWidth();
         int mediaBitrate = ad.getVastMediaBitrate() != 0 ? ad.getVastMediaBitrate() * KB_MULTIPLIER : -1;
@@ -977,6 +980,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 contentType, adId, adSystem,
                 creativeId, creativeAdId, advertiserName,
                 dealId, surveyUrl, traffickingParams,
+                adWrapperCreativeIds, adWrapperIds, adWrapperSystems,
                 adHeight,
                 adWidth,
                 mediaBitrate,
