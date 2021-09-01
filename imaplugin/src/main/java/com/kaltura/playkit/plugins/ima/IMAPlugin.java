@@ -938,9 +938,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         String dealId = ad.getDealId();
         String surveyUrl = ad.getSurveyUrl() != null ? ad.getSurveyUrl() : "";
         String traffickingParams = ad.getTraffickingParameters();
-        List<String> adWrapperCreativeIds = Arrays.asList(ad.getAdWrapperCreativeIds());
-        List<String> adWrapperIds = Arrays.asList(ad.getAdWrapperIds());
-        List<String> adWrapperSystems = Arrays.asList(ad.getAdWrapperSystems());
+        List<String> adWrapperCreativeIds = ad.getAdWrapperCreativeIds() != null ? Arrays.asList(ad.getAdWrapperCreativeIds()) : Collections.emptyList();
+        List<String> adWrapperIds = ad.getAdWrapperIds() != null ? Arrays.asList(ad.getAdWrapperIds()) : Collections.emptyList();
+        List<String> adWrapperSystems = ad.getAdWrapperSystems() != null ? Arrays.asList(ad.getAdWrapperSystems()) : Collections.emptyList();
         int adHeight = ad.isLinear() ? ad.getVastMediaHeight() : ad.getHeight();
         int adWidth  = ad.isLinear() ? ad.getVastMediaWidth() : ad.getWidth();
         int mediaBitrate = ad.getVastMediaBitrate() != 0 ? ad.getVastMediaBitrate() * KB_MULTIPLIER : -1;
