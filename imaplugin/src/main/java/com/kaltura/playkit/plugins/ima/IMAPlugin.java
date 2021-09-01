@@ -983,6 +983,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         return adInfo;
     }
 
+
     @Override
     public void onAdError(AdErrorEvent adErrorEvent) {
         log.e("Event: onAdError" + adErrorEvent.getError().getErrorCode());
