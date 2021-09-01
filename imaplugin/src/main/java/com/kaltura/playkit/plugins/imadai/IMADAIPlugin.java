@@ -59,6 +59,7 @@ import com.kaltura.playkit.utils.Consts;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -961,6 +962,9 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
         String dealId = ad.getDealId();
         String surveyUrl = ad.getSurveyUrl() != null ? ad.getSurveyUrl() : "";
         String traffickingParams = ad.getTraffickingParameters();
+        List<String> adWrapperCreativeIds = ad.getAdWrapperCreativeIds() != null ? Arrays.asList(ad.getAdWrapperCreativeIds()) : Collections.emptyList();
+        List<String> adWrapperIds = ad.getAdWrapperIds() != null ? Arrays.asList(ad.getAdWrapperIds()) : Collections.emptyList();
+        List<String> adWrapperSystems = ad.getAdWrapperSystems() != null ? Arrays.asList(ad.getAdWrapperSystems()) : Collections.emptyList();
         int adHeight = ad.isLinear() ? ad.getVastMediaHeight() : ad.getHeight();
         int adWidth  = ad.isLinear() ? ad.getVastMediaWidth() : ad.getWidth();
         int mediaBitrate = ad.getVastMediaBitrate() != 0 ? ad.getVastMediaBitrate() * KB_MULTIPLIER : -1;
@@ -977,6 +981,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 contentType, adId, adSystem,
                 creativeId, creativeAdId, advertiserName,
                 dealId, surveyUrl, traffickingParams,
+                adWrapperCreativeIds, adWrapperIds, adWrapperSystems,
                 adHeight,
                 adWidth,
                 mediaBitrate,
