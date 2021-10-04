@@ -19,9 +19,9 @@ import com.google.ads.interactivemedia.v3.api.player.VideoAdPlayer;
 import com.google.ads.interactivemedia.v3.api.player.VideoProgressUpdate;
 import com.kaltura.android.exoplayer2.C;
 import com.kaltura.android.exoplayer2.DefaultRenderersFactory;
-import com.kaltura.android.exoplayer2.ExoPlaybackException;
 import com.kaltura.android.exoplayer2.Format;
 import com.kaltura.android.exoplayer2.MediaItem;
+import com.kaltura.android.exoplayer2.PlaybackException;
 import com.kaltura.android.exoplayer2.PlaybackParameters;
 import com.kaltura.android.exoplayer2.Player;
 import com.kaltura.android.exoplayer2.SimpleExoPlayer;
@@ -494,10 +494,10 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
     }
 
     @Override
-    public void onPlayerError(ExoPlaybackException error) {
-        log.d("onPlayerError error = " + error.getMessage());
+    public void onPlayerError(PlaybackException playbackException) {
+        log.d("onPlayerError error = " + playbackException.getMessage());
         stopUpdatingAdProgress();
-        sendSourceError(error);
+        sendSourceError(playbackException);
     }
 
     @Override
