@@ -634,7 +634,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     private void requestAdsFromIMA(String adTagResponse, String adTagUrl) {
-        log.d("Do requestAdsFromIMA");
+        log.d("Do requestAdsFromIMA " + adTagUrl + "\n" + adTagResponse);
 
         // Create the ads request.
         AdsRequest request = sdkFactory.createAdsRequest();
@@ -1239,7 +1239,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private void resetFlagsOnError() {
         isAdError = true;
-        adPlaybackCancelled = true;
+        //adPlaybackCancelled = true; //TODO: Manage state of this flag when waterfalling happens
         isAdRequested = true;
         isAdDisplayed = false;
         cancelAdManagerTimer();
