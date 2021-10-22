@@ -275,7 +275,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         clearAdsLoader();
         imaSetup();
         log.d("adtag = " + adConfig.getAdTagUrl());
-        requestAdsOnChangeMedia(adConfig.getAdTagUrl());
+        requestAdsOnUpdateMedia(adConfig.getAdTagUrl());
     }
 
     private AdDisplayContainer createAdDisplayContainer() {
@@ -424,7 +424,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         imaSdkSettings.setPlayerType(adConfig.getPlayerType());
         imaSdkSettings.setPlayerVersion(adConfig.getPlayerVersion());
         // Tell the SDK we want to control ad break playback.
-        //imaSdkSettings.setAutoPlayAdBreaks(false);
+        //imaSdkSettings.setAutoPlayAdBreaks(true);
         if (adConfig.getMaxRedirects() > 0) {
             imaSdkSettings.setMaxRedirects(adConfig.getMaxRedirects());
         }
@@ -609,7 +609,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
     }
 
-    private void requestAdsOnChangeMedia(String adTagUrl) {
+    private void requestAdsOnUpdateMedia(String adTagUrl) {
         log.d("Do requestAdsOnChangeMedia");
         String adTagResponse = null;
         if (adConfig != null) {
