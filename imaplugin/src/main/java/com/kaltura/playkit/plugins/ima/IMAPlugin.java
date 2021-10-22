@@ -637,7 +637,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         log.d("Do requestAdsFromIMA " + adTagUrl + "\n" + adTagResponse);
 
         // Create the ads request.
-        AdsRequest request = sdkFactory.createAdsRequest();
+        final AdsRequest request = sdkFactory.createAdsRequest();
         if (TextUtils.isEmpty(adTagUrl)) {
             request.setAdsResponse(adTagResponse);
         } else{
@@ -655,7 +655,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             request.setContentDuration(adConfig.getContentDuration());
         }
         //request.setContinuousPlayback(true);
-        // request.setAdWillAutoPlay(false);
+        //request.setAdWillAutoPlay(isAutoPlay);
         // Request the ad. After the ad is loaded, onAdsManagerLoaded() will be called.
         adManagerTimer = getCountDownTimer();
         isInitWaiting = true;
@@ -1106,82 +1106,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         preparePlayer(isAutoPlay);
     }
 
-    //    2021-09-29 11:18:57.214 18935-18935/com.kaltura.playkitdemo E/IMAPlugin: Gourav => adInfo.getAdPositionType() MID_ROLL adInfo.getAdIndexInPod() 1 adInfo.getPodIndex() 2 adInfo.getPodCount() 3 adInfo.getTotalAdsInPod() 5 adInfo.isBumper() false
-//            2021-09-29 11:18:57.214 18935-18935/com.kaltura.playkitdemo E/IMAPlugin: Gourav => adInfo.getAdPodTimeOffset() 15000 adInfo.getAdPlayHead() 0
-//            2021-09-29 11:19:10.736 18935-18935/com.kaltura.playkitdemo E/IMAPlugin: Gourav => adInfo.getAdPositionType() MID_ROLL adInfo.getAdIndexInPod() 2 adInfo.getPodIndex() 2 adInfo.getPodCount() 3 adInfo.getTotalAdsInPod() 5 adInfo.isBumper() false
-//            2021-09-29 11:19:10.736 18935-18935/com.kaltura.playkitdemo E/IMAPlugin: Gourav => adInfo.getAdPodTimeOffset() 15000 adInfo.getAdPlayHead() 0
-//            2021-09-29 11:19:21.503 18935-18935/com.kaltura.playkitdemo E/IMAPlugin: Gourav => adInfo.getAdPositionType() MID_ROLL adInfo.getAdIndexInPod() 3 adInfo.getPodIndex() 2 adInfo.getPodCount() 3 adInfo.getTotalAdsInPod() 5 adInfo.isBumper() false
-
-
-   /* private void extractWaterfallAd(AdPositionType adPositionType) {
-        if (adConfig.getAdvertisingWaterFall() == null || adConfig.getAdvertisingWaterFall().getAdBreaks() == null) {
-            return;
-        }
-        
-        String adTag = null;
-        int position = -1;
-
-        List<AdBreaks> adBreakList = adConfig.getAdvertisingWaterFall().getAdBreaks();
-
-        if (adPositionType == AdPositionType.PRE_ROLL) {
-            Ads ads = null;
-            for (int i = 0; i < adBreakList.size(); i++) {
-                if (adBreakList.get(i).getPosition() == 0) {
-                    ads = adBreakList.get(i).getAds();
-                    break;
-                }
-            }
-
-            if (ads != null) {
-                List<AdUrl> adUrlsList = ads.getAdUrls();
-            }
-
-        }
-        
-        
-       // ads
-        playWaterfallAd("https://pubads.g.doubleclick.net/gampad/live/ads?slotname=/21633895671/QA/Android_Native_App/COI&sz=640x360&ciu_szs=&cust_params=sample_ar%3Dskippablelinear%26Gender%3DM%26Age%3D33%26KidsPinEnabled%3DN%26distinct_id%3D42c92f17603e4ee2b4232666b9591134%26AppVersion%3D0.1.80%26DeviceModel%3Dmoto+g(6)%26OptOut%3DFalse%26OSVersion%3D9%26PackageName%3Dcom.tv.v18.viola%26first_time%3DFalse%26logintype%3DTraditional&url=&unviewed_position_start=1&output=xml_vast3&impl=s&env=vp&gdfp_req=1&ad_rule=0&video_url_to_fetch=https%253A%252F%252Fwww.voot.com&vad_type=linear&vpos=preroll&pod=1&ppos=1&lip=true&min_ad_duration=0&max_ad_duration=65000&vrid=1095418&ppid=42c92f17603e4ee2b4232666b9591134&correlator=10771&lpr=true&cmsid=2467608&video_doc_id=0_im5ianso&kfa=0&tfcd=0");
-    }
-
-    private void playWaterfallAd(String adTag) {
-        final AdsRequest request = sdkFactory.createAdsRequest();
-        request.setAdTagUrl(adTag);
-        //  request.setAdTagUrl("https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpost&cmsid=496&vid=short_onecue&correlator=");
-
-//                if (adConfig.getAdLoadTimeOut() > 0 && adConfig.getAdLoadTimeOut() < Consts.MILLISECONDS_MULTIPLIER && adConfig.getAdLoadTimeOut() != IMAConfig.DEFAULT_AD_LOAD_TIMEOUT) {
-//                    request.setVastLoadTimeout(adConfig.getAdLoadTimeOut() * Consts.MILLISECONDS_MULTIPLIER);
-//                }
-//                if (videoPlayerWithAdPlayback != null) {
-//                    request.setContentProgressProvider(videoPlayerWithAdPlayback.getContentProgressProvider());
-//                }
-//
-//                if (adConfig != null) {
-//                    request.setContentDuration(adConfig.getContentDuration());
-//                }
-        //request.setContinuousPlayback(true);
-        //request.setAdWillAutoPlay(isAutoPlay);
-        // Request the ad. After the ad is loaded, onAdsManagerLoaded() will be called.
-        //  adManagerTimer = getCountDownTimer();
-        //  ImaSdkSettings imaSdkSettings = ImaSdkFactory.getInstance().createImaSdkSettings();
-        //    imaSdkSettings.setAutoPlayAdBreaks(false);
-        isInitWaiting = true;
-        adsLoader = sdkFactory.createAdsLoader(context, imaSdkSettings, ImaSdkFactory.createAdDisplayContainer(videoPlayerWithAdPlayback.getAdUiContainer(), videoPlayerWithAdPlayback.getVideoAdPlayer()));
-        // Add listeners for when ads are loaded and for errors.
-        adsLoader.addAdErrorListener(this);
-        adsLoader.addAdsLoadedListener(getAdsLoadedListener());
-        adsLoader.requestAds(request);
-    }*/
-
-//    private void checkIfWaterfallAdBePlayed() {
-//        if (adConfig.getAdvertisingWaterFall() == null) {
-//            return;
-//        }
-//
-//        if (adInfo == null && player != null) {
-//
-//        }
-//    }
-
     private void displayAd() {
         log.d("displayAd");
         if (videoPlayerWithAdPlayback != null && videoPlayerWithAdPlayback.getAdPlayerView() != null) {
@@ -1285,8 +1209,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         switch (adEvent.getType()) {
             case LOADED:
                 adInfo = createAdInfo(adEvent.getAd());
-                log.e("Gourav => adInfo.getAdPositionType() "+ adInfo.getAdPositionType() + " adInfo.getAdIndexInPod() " + adInfo.getAdIndexInPod() + " adInfo.getPodIndex() " + adInfo.getPodIndex() + " adInfo.getPodCount() " + adInfo.getPodCount() + " adInfo.getTotalAdsInPod() " + adInfo.getTotalAdsInPod() + " adInfo.isBumper() " + adInfo.isBumper());
-                log.e("Gourav => adInfo.getAdPodTimeOffset() " + adInfo.getAdPodTimeOffset() + " adInfo.getAdPlayHead() " + adInfo.getAdPlayHead());
                 if (appIsInBackground) {
                     appInBackgroundDuringAdLoad = true;
                     if (adsManager != null) {
@@ -1522,7 +1444,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 messageBus.post(new AdEvent(AdEvent.Type.ICON_TAPPED));
                 break;
             case AD_BREAK_READY:
-                log.d("AD_BREAK_READY");
                 if (adsManager != null) {
                     adsManager.start();
                 }
