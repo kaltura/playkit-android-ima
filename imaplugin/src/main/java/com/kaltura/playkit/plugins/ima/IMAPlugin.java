@@ -1334,14 +1334,18 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 }
                 break;
             case ALL_ADS_COMPLETED:
-                log.d("AD_ALL_ADS_COMPLETED");
-                isAllAdsCompleted = true;
-                messageBus.post(new AdEvent(AdEvent.Type.ALL_ADS_COMPLETED));
-                displayContent();
+                if (!isAdvertisingConfigured) {
+                    log.d("AD_ALL_ADS_COMPLETED");
+                    isAllAdsCompleted = true;
+                    messageBus.post(new AdEvent(AdEvent.Type.ALL_ADS_COMPLETED));
+                    displayContent();
 
-                if (adsManager != null) {
-                    log.d("AD_ALL_ADS_COMPLETED onDestroy");
-                    // destroyIMA();
+                    if (adsManager != null) {
+                        log.d("AD_ALL_ADS_COMPLETED onDestroy");
+                        destroyIMA();
+                    }
+                } else {
+                    log.d("Masking AD_ALL_ADS_COMPLETED event because advertising is configured");
                 }
                 break;
             case STARTED:
