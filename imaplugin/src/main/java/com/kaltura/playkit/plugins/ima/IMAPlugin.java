@@ -50,6 +50,7 @@ import com.kaltura.playkit.PlayerEngineWrapper;
 import com.kaltura.playkit.PlayerEvent;
 import com.kaltura.playkit.ads.AdTagType;
 import com.kaltura.playkit.ads.AdsPlayerEngineWrapper;
+import com.kaltura.playkit.ads.IMAEventsListener;
 import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdPluginType;
@@ -134,6 +135,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private AdEvent.Type lastAdEventReceived;
     private boolean adManagerInitDuringBackground;
     private PKAdProviderListener pkAdProviderListener;
+    private IMAEventsListener imaEventsListener;
     private Long playbackStartPosition;
     private PlayerEngineWrapper adsPlayerEngineWrapper;
     private Boolean playerPlayingBeforeAdArrived;
@@ -615,7 +617,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (adConfig != null) {
             adTagResponse = adConfig.getAdTagResponse();
         }
-        if (TextUtils.isEmpty(adTagUrl) && TextUtils.isEmpty(adTagResponse)) {
+        if (!isAdvertisingConfigured && TextUtils.isEmpty(adTagUrl) && TextUtils.isEmpty(adTagResponse)) {
             log.d("AdTag is empty avoiding ad request");
             isAdRequested = true;
             if (adTagCuePoints != null && adTagCuePoints.getAdCuePoints() != null) {
@@ -790,8 +792,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     @Override
-    public void advertisingConfigured(boolean isConfigured) {
+    public void setAdvertisingConfig(boolean isConfigured, IMAEventsListener imaEventsListener) {
         isAdvertisingConfigured = isConfigured;
+        this.imaEventsListener = imaEventsListener;
     }
 
     @Override
@@ -1093,6 +1096,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 errorMessage = "Error code = " + adException.getErrorCode();
             }
         }
+
         if (adConfig != null) {
             messageBus.post(new AdEvent.AdRequestedEvent(!TextUtils.isEmpty(adConfig.getAdTagUrl()) ? adConfig.getAdTagUrl() : adConfig.getAdTagResponse(), isAutoPlay));
             sendError(errorCategory, errorType, errorMessage + " adTagUrl=" + adConfig.getAdTagUrl(), adException);
@@ -1176,7 +1180,12 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (PKAdErrorType.COMPANION_AD_LOADING_FAILED.equals(errorType)) {
             adErrorSeverity = PKError.Severity.Recoverable;
         }
-        AdEvent errorEvent = new AdEvent.Error(new PKError(errorCategory, errorType, adErrorSeverity, message, exception));
+        AdEvent.Error errorEvent = new AdEvent.Error(new PKError(errorCategory, errorType, adErrorSeverity, message, exception));
+
+        if (getIMAEventsListener() != null) {
+            imaEventsListener.adError(errorEvent);
+        }
+
         messageBus.post(errorEvent);
     }
 
@@ -1231,6 +1240,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 }
                 break;
             case CONTENT_PAUSE_REQUESTED:
+                if (getIMAEventsListener() != null) {
+                    imaEventsListener.contentPauseRequested();
+                }
                 log.d("CONTENT_PAUSE_REQUESTED appIsInBackground = " + appIsInBackground + " lastPlaybackPlayerState = " + lastPlaybackPlayerState);
                 playerPlayingBeforeAdArrived = getPlayerEngine().isPlaying() || (lastPlaybackPlayerState != null && lastPlaybackPlayerState == PlayerEvent.Type.ENDED);
                 log.d("CONTENT_PAUSE_REQUESTED playerPlayingBeforeAdArrived = " + playerPlayingBeforeAdArrived);
@@ -1261,6 +1273,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 messageBus.post(new AdEvent(AdEvent.Type.CONTENT_PAUSE_REQUESTED));
                 break;
             case CONTENT_RESUME_REQUESTED:
+                if (getIMAEventsListener() != null) {
+                    imaEventsListener.contentResumeRequested();
+                }
                 log.d("AD REQUEST AD_CONTENT_RESUME_REQUESTED");
                 if (checkIfDiscardAdRequired()) {
                     for (Long cuePoint : adTagCuePoints.getAdCuePoints()) {
@@ -1345,6 +1360,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                         destroyIMA();
                     }
                 } else {
+                    if (getIMAEventsListener() != null) {
+                        imaEventsListener.allAdsCompleted();
+                    }
                     log.d("Masking AD_ALL_ADS_COMPLETED event because advertising is configured");
                 }
                 break;
@@ -1405,6 +1423,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 }
                 break;
             case COMPLETED:
+                if (getIMAEventsListener() != null) {
+                    imaEventsListener.adCompleted();
+                }
                 log.d("AD COMPLETED");
                 messageBus.post(new AdEvent(AdEvent.Type.COMPLETED));
                 break;
@@ -1679,6 +1700,13 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.ICON_TAPPED, AdEvent.Type.ICON_TAPPED);
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.SKIPPABLE_STATE_CHANGED, AdEvent.Type.SKIPPABLE_STATE_CHANGED);
         return adEventsMap;
+    }
+
+    private IMAEventsListener getIMAEventsListener() {
+        if (imaEventsListener == null) {
+            return null;
+        }
+        return imaEventsListener;
     }
 
     @Override
