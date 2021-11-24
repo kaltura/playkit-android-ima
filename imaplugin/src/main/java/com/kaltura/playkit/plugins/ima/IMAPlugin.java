@@ -618,14 +618,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             adTagResponse = adConfig.getAdTagResponse();
         }
         if (!isAdvertisingConfigured && TextUtils.isEmpty(adTagUrl) && TextUtils.isEmpty(adTagResponse)) {
-            log.d("AdTag is empty avoiding ad request");
-            isAdRequested = true;
-            if (adTagCuePoints != null && adTagCuePoints.getAdCuePoints() != null) {
-                adTagCuePoints.getAdCuePoints().clear();
-                adTagCuePoints = null;
-            }
-            displayContent();
-            preparePlayer(false);
+            prepareContentPlayer();
             return;
         }
         resetIMA();
@@ -637,6 +630,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private void requestAdsFromIMA(String adTagResponse, String adTagUrl) {
         log.d("Do requestAdsFromIMA " + adTagUrl + "\n" + adTagResponse);
+
+        if (TextUtils.isEmpty(adTagUrl) && TextUtils.isEmpty(adTagResponse)) {
+            prepareContentPlayer();
+            return;
+        }
 
         // Create the ads request.
         final AdsRequest request = sdkFactory.createAdsRequest();
@@ -663,6 +661,17 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         isInitWaiting = true;
         adsLoader.requestAds(request);
         adManagerTimer.start();
+    }
+
+    private void prepareContentPlayer() {
+        log.d("AdTag is empty avoiding ad request");
+        isAdRequested = true;
+        if (adTagCuePoints != null && adTagCuePoints.getAdCuePoints() != null) {
+            adTagCuePoints.getAdCuePoints().clear();
+            adTagCuePoints = null;
+        }
+        displayContent();
+        preparePlayer(false);
     }
 
     @NonNull
