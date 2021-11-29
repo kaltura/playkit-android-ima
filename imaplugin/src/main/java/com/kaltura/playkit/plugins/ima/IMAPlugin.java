@@ -799,8 +799,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public void playAdNow(String adTagUrl) {
-        isAdvertisingConfigLoading = !TextUtils.isEmpty(adTagUrl);
-        requestAdsFromIMA(null, adTagUrl);
+        if (isAdvertisingConfigured) {
+            isAdvertisingConfigLoading = !TextUtils.isEmpty(adTagUrl);
+            requestAdsFromIMA(null, adTagUrl);
+        }
     }
 
     @Override
@@ -811,12 +813,25 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public void setAllAdsCompleted() {
-        //TODO
+        if (isAdvertisingConfigured) {
+            //TODO
+        }
     }
 
     @Override
     public void adControllerPreparePlayer() {
-        isAdvertisingConfigLoading = false;
+        if (isAdvertisingConfigured) {
+            isAdvertisingConfigLoading = false;
+            displayContent();
+            getPlayerEngine().play();
+        }
+    }
+
+    private boolean isAdvertisingConfigLoading() {
+        if (isAdvertisingConfigured) {
+            return isAdvertisingConfigLoading;
+        }
+        return false;
     }
 
     @Override
@@ -1144,7 +1159,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     private void displayContent() {
-        if (isAdvertisingConfigLoading) {
+        if (isAdvertisingConfigLoading()) {
             log.d("in displayContent but AdvertisingConfigLoading, hence returning");
             return;
         }
@@ -1182,7 +1197,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
                             IMAPlugin.this.displayContent();
                             if (IMAPlugin.this.getPlayerEngine() != null) {
-                                if (isAdvertisingConfigLoading) {
+                                if (isAdvertisingConfigLoading()) {
                                     displayAd();
                                 } else {
                                     IMAPlugin.this.getPlayerEngine().play();
@@ -1347,7 +1362,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                                 preparePlayer(false);
                             }
                             if (getPlayerEngine() != null) {
-                                if (isAdvertisingConfigLoading) {
+                                if (isAdvertisingConfigLoading()) {
                                     displayAd();
                                 } else {
                                     getPlayerEngine().play();
@@ -1361,7 +1376,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     log.d("Content prepared.. lastPlaybackPlayerState = " + lastPlaybackPlayerState + ", time = " + position + "/" + duration);
                     if (duration < 0) {
                         preparePlayer(false);
-                        if (isAdvertisingConfigLoading) {
+                        if (isAdvertisingConfigLoading()) {
                             displayAd();
                         } else {
                             getPlayerEngine().play();
@@ -1369,7 +1384,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     } else if (lastPlaybackPlayerState != PlayerEvent.Type.ENDED && position <= duration) {
                         if (adInfo == null || (adInfo.getAdPositionType() != AdPositionType.POST_ROLL)) {
                             log.d("Content prepared.. Play called.");
-                            if (isAdvertisingConfigLoading) {
+                            if (isAdvertisingConfigLoading()) {
                                 displayAd();
                             } else {
                                 getPlayerEngine().play();
@@ -1746,7 +1761,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     private IMAEventsListener getIMAEventsListener() {
-        if (imaEventsListener == null) {
+        if (!isAdvertisingConfigured || imaEventsListener == null) {
             return null;
         }
         return imaEventsListener;
