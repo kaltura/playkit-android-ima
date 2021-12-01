@@ -637,6 +637,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             return;
         }
 
+        if (sdkFactory == null) {
+            return;
+        }
+
         // Create the ads request.
         final AdsRequest request = sdkFactory.createAdsRequest();
         if (TextUtils.isEmpty(adTagUrl)) {
@@ -645,7 +649,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             request.setAdTagUrl(adTagUrl);
         }
 
-        if (adConfig.getAdLoadTimeOut() > 0 && adConfig.getAdLoadTimeOut() < Consts.MILLISECONDS_MULTIPLIER && adConfig.getAdLoadTimeOut() != IMAConfig.DEFAULT_AD_LOAD_TIMEOUT) {
+        if (adConfig != null && adConfig.getAdLoadTimeOut() > 0 && adConfig.getAdLoadTimeOut() < Consts.MILLISECONDS_MULTIPLIER && adConfig.getAdLoadTimeOut() != IMAConfig.DEFAULT_AD_LOAD_TIMEOUT) {
             request.setVastLoadTimeout(adConfig.getAdLoadTimeOut() * Consts.MILLISECONDS_MULTIPLIER);
         }
         if (videoPlayerWithAdPlayback != null) {
