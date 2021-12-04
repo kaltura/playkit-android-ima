@@ -56,6 +56,7 @@ import com.kaltura.playkit.ads.PKAdErrorType;
 import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdPluginType;
 import com.kaltura.playkit.ads.PKAdProviderListener;
+import com.kaltura.playkit.ads.PKAdvertisingAdInfo;
 import com.kaltura.playkit.player.PlayerEngine;
 import com.kaltura.playkit.player.PlayerSettings;
 import com.kaltura.playkit.plugin.ima.BuildConfig;
@@ -130,6 +131,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private boolean isAdvertisingConfigLoading;
     private List<Long> advertisingConfigCuePoints;
     private AdBreakPositionType midrollAdBreakPositionType = AdBreakPositionType.POSITION;
+    private PKAdvertisingAdInfo pkAdvertisingAdInfo = null;
 
     private boolean isContentPrepared;
     private boolean isAutoPlay;
@@ -830,6 +832,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     @Override
+    public void setAdInfo(PKAdvertisingAdInfo pkAdvertisingAdInfo) {
+        this.pkAdvertisingAdInfo = pkAdvertisingAdInfo;
+    }
+
+    @Override
     public void adControllerPreparePlayer() {
         if (isAdvertisingConfigured) {
             isAdvertisingConfigLoading = false;
@@ -995,11 +1002,32 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     private AdInfo createAdInfo(Ad ad) {
+        String adDescription;
+        String adTitle;
+        long adPodTimeOffset;
+        int podCount;
+        int podIndex;
 
-        String adDescription = ad.getDescription() != null ? ad.getDescription() : "";
+        if (isAdvertisingConfigured && pkAdvertisingAdInfo != null) {
+            adDescription = pkAdvertisingAdInfo.getAdDescription();
+            adTitle = pkAdvertisingAdInfo.getAdTitle();
+            adPodTimeOffset = pkAdvertisingAdInfo.getAdPodTimeOffset();
+            podCount = pkAdvertisingAdInfo.getPodCount();
+            podIndex = pkAdvertisingAdInfo.getPodIndex();
+        } else {
+            adDescription = ad.getDescription() != null ? ad.getDescription() : "";
+            adTitle = ad.getTitle();
+            adPodTimeOffset = (long) ad.getAdPodInfo().getTimeOffset() * Consts.MILLISECONDS_MULTIPLIER;
+            podCount = (adsManager != null && adsManager.getAdCuePoints() != null) ? adsManager.getAdCuePoints().size() : 0;
+            podIndex = (ad.getAdPodInfo().getPodIndex() >= 0) ? ad.getAdPodInfo().getPodIndex() + 1 : podCount; // index starts in 0
+            if (podIndex == 1 && podCount == 0) { // For Vast
+                podCount = 1;
+            }
+        }
+
         long adDuration = (long) ad.getDuration() * Consts.MILLISECONDS_MULTIPLIER;
         long adPlayHead = getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER;
-        String adTitle = ad.getTitle();
+
         boolean isAdSkippable = ad.isSkippable();
         long skipTimeOffset = (long) ad.getSkipTimeOffset() * Consts.MILLISECONDS_MULTIPLIER;
         String contentType = ad.getContentType() != null ? ad.getContentType() : "";
@@ -1017,17 +1045,12 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         int adHeight = ad.isLinear() ? ad.getVastMediaHeight() : ad.getHeight();
         int adWidth  = ad.isLinear() ? ad.getVastMediaWidth() : ad.getWidth();
         int mediaBitrate = ad.getVastMediaBitrate() != 0 ? ad.getVastMediaBitrate() * KB_MULTIPLIER : -1;
+
+        String streamId = "";
+        boolean isBumper = ad.getAdPodInfo().isBumper();
+
         int totalAdsInPod = ad.getAdPodInfo().getTotalAds();
         int adIndexInPod = ad.getAdPodInfo().getAdPosition();   // index starts in 1
-        int podCount = (adsManager != null && adsManager.getAdCuePoints() != null) ? adsManager.getAdCuePoints().size() : 0;
-        String streamId = "";
-
-        int podIndex = (ad.getAdPodInfo().getPodIndex() >= 0) ? ad.getAdPodInfo().getPodIndex() + 1 : podCount; // index starts in 0
-        if (podIndex == 1 && podCount == 0) { // For Vast
-            podCount = 1;
-        }
-        boolean isBumper = ad.getAdPodInfo().isBumper();
-        long adPodTimeOffset = (long) ad.getAdPodInfo().getTimeOffset() * Consts.MILLISECONDS_MULTIPLIER;
 
         if (!PKMediaFormat.mp4.mimeType.equals(ad.getContentType()) && adInfo != null) {
             adHeight = adInfo.getAdHeight();
