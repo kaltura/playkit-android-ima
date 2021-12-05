@@ -532,6 +532,13 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             }
 
             clearAdLoadingInBackground();
+            log.d("lastPlaybackPlayerState = " + lastPlaybackPlayerState);
+
+            if (lastPlaybackPlayerState == PlayerEvent.Type.ENDED) {
+                log.d("onApplicationResumed: Media playback ended return");
+                return;
+            }
+
             if (mediaConfig != null) {
                 log.d("onApplicationResumed Default..... request Ad");
                 onUpdateMedia(mediaConfig);
