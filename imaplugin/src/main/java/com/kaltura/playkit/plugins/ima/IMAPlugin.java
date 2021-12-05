@@ -1265,11 +1265,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         AdEvent.Error errorEvent = new AdEvent.Error(new PKError(errorCategory, errorType, adErrorSeverity, message, exception));
 
-        if (getIMAEventsListener() != null) {
+        if (isAdvertisingConfigured && getIMAEventsListener() != null) {
             imaEventsListener.adError(errorEvent);
+        } else {
+            messageBus.post(errorEvent);
         }
-
-        messageBus.post(errorEvent);
     }
 
     @Override
