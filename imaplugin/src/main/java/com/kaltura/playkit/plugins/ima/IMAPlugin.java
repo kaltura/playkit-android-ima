@@ -825,7 +825,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (isAdvertisingConfigured && cuePoints != null && !cuePoints.isEmpty()) {
             advertisingConfigCuePoints = cuePoints;
             midrollAdBreakPositionType = adBreakPositionType;
-            if (isUpdatedCuePoint && midrollAdBreakPositionType == AdBreakPositionType.PERCENTAGE) {
+            if (isUpdatedCuePoint && midrollAdBreakPositionType != AdBreakPositionType.POSITION) {
                 sendCuePointsUpdateEvent();
             }
         }
@@ -1492,7 +1492,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     preparePlayer(false);
                 }
 
-                if (adTagCuePoints == null && midrollAdBreakPositionType != AdBreakPositionType.PERCENTAGE) {
+                if (adTagCuePoints == null && midrollAdBreakPositionType != AdBreakPositionType.POSITION) {
                     Handler handler = new Handler();
                     handler.postDelayed(() -> {
                         log.d("AD CUEPOINTS CHANGED TRIGGERED WITH DELAY");
@@ -1581,7 +1581,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 messageBus.post(new AdEvent(AdEvent.Type.AD_BREAK_ENDED));
                 break;
             case CUEPOINTS_CHANGED:
-                if (midrollAdBreakPositionType != AdBreakPositionType.PERCENTAGE) {
+                if (midrollAdBreakPositionType != AdBreakPositionType.POSITION) {
                     sendCuePointsUpdateEvent();
                 }
                 break;
@@ -1689,7 +1689,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             //Attach event and error event listeners.
             adsManager.addAdErrorListener(IMAPlugin.this);
             adsManager.addAdEventListener(IMAPlugin.this);
-            if (midrollAdBreakPositionType != AdBreakPositionType.PERCENTAGE) {
+            if (midrollAdBreakPositionType != AdBreakPositionType.POSITION) {
                 sendCuePointsUpdateEvent();
             }
 
