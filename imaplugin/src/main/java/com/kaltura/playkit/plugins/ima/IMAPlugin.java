@@ -729,7 +729,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     if (getPlayerEngine() != null) {
                         getPlayerEngine().play();
                     }
-                    //TODO: Check if content player should be hidden here
+
                     messageBus.post(new AdEvent(AdEvent.Type.AD_BREAK_IGNORED));
                     if (isAdRequested) {
                         adPlaybackCancelled = true;
@@ -1276,7 +1276,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private void resetFlagsOnError() {
         isAdError = true;
-        //adPlaybackCancelled = true; //TODO: Manage state of this flag when waterfalling happens
+        // This check is required because AdError comes for Advertising config and
+        // From Controller level, waterfalling will be triggered
+        if (!isAdvertisingConfigured) {
+            adPlaybackCancelled = true;
+        }
         isAdRequested = true;
         isAdDisplayed = false;
         cancelAdManagerTimer();
