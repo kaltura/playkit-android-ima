@@ -1021,7 +1021,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 adCuePoints.add(0L);
             }
         } else {
-            adCuePoints.addAll(advertisingConfigCuePoints);
+            if (advertisingConfigCuePoints != null && advertisingConfigCuePoints.size() > 0) {
+                adCuePoints.addAll(advertisingConfigCuePoints);
+            }
         }
 
         return adCuePoints;
