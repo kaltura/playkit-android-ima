@@ -275,6 +275,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         isContentEndedBeforeMidroll = false;
         lastPlaybackPlayerState = null;
         lastAdEventReceived = null;
+        isInitWaiting = false;
 
         if (videoPlayerWithAdPlayback == null) {
             log.d("onUpdateMedia videoPlayerWithAdPlayback = null recreating it");
@@ -689,7 +690,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         //request.setAdWillAutoPlay(isAutoPlay);
         // Request the ad. After the ad is loaded, onAdsManagerLoaded() will be called.
         adManagerTimer = getCountDownTimer();
-        isInitWaiting = true;
         adsLoader.requestAds(request);
         adManagerTimer.start();
     }
@@ -831,7 +831,13 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     public void playAdNow(String adTag) {
         log.d("playAdNow adType: " + adType + " \n and adTag: " + adTag);
         if (isAdvertisingConfigured) {
+            isAdError = false;
+            isAdRequested = false;
             isAdvertisingConfigLoading = !TextUtils.isEmpty(adTag);
+            if (adInfo != null || (player != null && player.getCurrentPosition() > 0)) {
+                log.d("playAdNow isInitWaiting = true");
+                isInitWaiting = true;
+            }
             if (adType == AdType.AD_RESPONSE) {
                 requestAdsFromIMA(adTag, null);
             } else {
@@ -1209,7 +1215,10 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         if (PKAdErrorType.COMPANION_AD_LOADING_FAILED.equals(errorType)) {
             return;
         }
-        preparePlayer(isAutoPlay);
+
+        if (!isAdvertisingConfigLoading()) {
+            preparePlayer(isAutoPlay);
+        }
     }
 
     private void displayAd() {
