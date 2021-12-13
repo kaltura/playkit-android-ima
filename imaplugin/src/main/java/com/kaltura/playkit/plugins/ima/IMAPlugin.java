@@ -1413,6 +1413,12 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                         }
                     }
                 }
+
+                if (isContentEndedBeforeMidroll && isAdvertisingConfigured) {
+                    isAdDisplayed = false;
+                    isAdvertisingConfigLoading = false;
+                }
+
                 // AdEventType.CONTENT_RESUME_REQUESTED is fired when the ad is completed
                 // and you should start playing your content.
                 if (isContentEndedBeforeMidroll && !isAllAdsCompleted && getPlayerEngine() != null && getPlayerEngine().getCurrentPosition() >= getPlayerEngine().getDuration()) {
