@@ -1364,6 +1364,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 }
                 break;
             case CONTENT_PAUSE_REQUESTED:
+                if (getIMAEventsListener() != null) {
+                    imaEventsListener.contentPauseRequested();
+                }
                 log.d("CONTENT_PAUSE_REQUESTED appIsInBackground = " + appIsInBackground + " lastPlaybackPlayerState = " + lastPlaybackPlayerState);
                 playerPlayingBeforeAdArrived = getPlayerEngine().isPlaying() || (lastPlaybackPlayerState != null && lastPlaybackPlayerState == PlayerEvent.Type.ENDED);
                 log.d("CONTENT_PAUSE_REQUESTED playerPlayingBeforeAdArrived = " + playerPlayingBeforeAdArrived);
@@ -1394,6 +1397,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 messageBus.post(new AdEvent(AdEvent.Type.CONTENT_PAUSE_REQUESTED));
                 break;
             case CONTENT_RESUME_REQUESTED:
+                if (getIMAEventsListener() != null) {
+                    imaEventsListener.contentResumeRequested();
+                }
                 log.d("AD REQUEST AD_CONTENT_RESUME_REQUESTED");
                 if (checkIfDiscardAdRequired()) {
                     for (Long cuePoint : adTagCuePoints.getAdCuePoints()) {
@@ -1422,6 +1428,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
                 messageBus.post(new AdEvent(AdEvent.Type.CONTENT_RESUME_REQUESTED));
                 isAdDisplayed = false;
+                isAdvertisingConfigLoading = false;
                 if (videoPlayerWithAdPlayback != null) {
                     videoPlayerWithAdPlayback.resumeContentAfterAdPlayback();
                 }
