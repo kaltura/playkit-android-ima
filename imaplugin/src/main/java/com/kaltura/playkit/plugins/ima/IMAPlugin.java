@@ -141,7 +141,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     private PlayerEngineWrapper adsPlayerEngineWrapper;
     private Boolean playerPlayingBeforeAdArrived;
 
-    // Advertsing Configuration
+    // Advertising Configuration
     private boolean isAdvertisingConfigured;
     private IMAEventsListener imaEventsListener;
     private boolean isAdvertisingConfigLoading;
