@@ -1368,7 +1368,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     imaEventsListener.contentPauseRequested();
                 }
                 log.d("CONTENT_PAUSE_REQUESTED appIsInBackground = " + appIsInBackground + " lastPlaybackPlayerState = " + lastPlaybackPlayerState);
-                playerPlayingBeforeAdArrived = getPlayerEngine().isPlaying() || (lastPlaybackPlayerState != null && lastPlaybackPlayerState == PlayerEvent.Type.ENDED);
+
+                playerPlayingBeforeAdArrived = (isAdvertisingConfigured && !getPlayerEngine().isPlaying()) ||
+                        getPlayerEngine().isPlaying() ||
+                        (lastPlaybackPlayerState != null && lastPlaybackPlayerState == PlayerEvent.Type.ENDED);
+
                 log.d("CONTENT_PAUSE_REQUESTED playerPlayingBeforeAdArrived = " + playerPlayingBeforeAdArrived);
 
                 if (getPlayerEngine() != null) {
