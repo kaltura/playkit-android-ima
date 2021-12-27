@@ -827,7 +827,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     @Override
-    public void playAdNow(String adTag) {
+    public void advertisingPlayAdNow(String adTag) {
         log.d("playAdNow adType: " + adType + " \n and adTag: " + adTag);
         if (isAdvertisingConfigured) {
             isAdError = false;
@@ -854,7 +854,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     @Override
-    public void setCuePoints(List<Long> cuePoints) {
+    public void advertisingSetCuePoints(List<Long> cuePoints) {
         log.d("setCuePoints");
         if (isAdvertisingConfigured && cuePoints != null && !cuePoints.isEmpty()) {
             advertisingConfigCuePoints = cuePoints;
@@ -863,12 +863,12 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     @Override
-    public void setAdInfo(PKAdvertisingAdInfo pkAdvertisingAdInfo) {
+    public void advertisingSetAdInfo(PKAdvertisingAdInfo pkAdvertisingAdInfo) {
         this.pkAdvertisingAdInfo = pkAdvertisingAdInfo;
     }
 
     @Override
-    public void adControllerPreparePlayer() {
+    public void advertisingPreparePlayer() {
         if (isAdvertisingConfigured) {
             isAdvertisingConfigLoading = false;
             displayContent();
