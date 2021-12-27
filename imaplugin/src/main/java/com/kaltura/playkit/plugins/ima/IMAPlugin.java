@@ -1035,21 +1035,16 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     private AdInfo createAdInfo(Ad ad) {
-        String adDescription;
-        String adTitle;
+
         long adPodTimeOffset;
         int podCount;
         int podIndex;
 
         if (isAdvertisingConfigured && pkAdvertisingAdInfo != null) {
-            adDescription = pkAdvertisingAdInfo.getAdDescription();
-            adTitle = pkAdvertisingAdInfo.getAdTitle();
             adPodTimeOffset = pkAdvertisingAdInfo.getAdPodTimeOffset();
             podCount = pkAdvertisingAdInfo.getPodCount();
             podIndex = pkAdvertisingAdInfo.getPodIndex();
         } else {
-            adDescription = ad.getDescription() != null ? ad.getDescription() : "";
-            adTitle = ad.getTitle();
             adPodTimeOffset = (long) ad.getAdPodInfo().getTimeOffset() * Consts.MILLISECONDS_MULTIPLIER;
             podCount = (adsManager != null && adsManager.getAdCuePoints() != null) ? adsManager.getAdCuePoints().size() : 0;
             podIndex = (ad.getAdPodInfo().getPodIndex() >= 0) ? ad.getAdPodInfo().getPodIndex() + 1 : podCount; // index starts in 0
@@ -1057,6 +1052,9 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 podCount = 1;
             }
         }
+
+        String adDescription = ad.getDescription() != null ? ad.getDescription() : "";
+        String adTitle = ad.getTitle();
 
         long adDuration = (long) ad.getDuration() * Consts.MILLISECONDS_MULTIPLIER;
         long adPlayHead = getCurrentPosition() * Consts.MILLISECONDS_MULTIPLIER;
