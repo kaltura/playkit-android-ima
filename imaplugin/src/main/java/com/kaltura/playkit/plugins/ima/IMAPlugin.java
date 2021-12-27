@@ -48,7 +48,6 @@ import com.kaltura.playkit.PKPlugin;
 import com.kaltura.playkit.Player;
 import com.kaltura.playkit.PlayerEngineWrapper;
 import com.kaltura.playkit.PlayerEvent;
-import com.kaltura.playkit.ads.AdBreakPositionType;
 import com.kaltura.playkit.ads.AdTagType;
 import com.kaltura.playkit.ads.AdType;
 import com.kaltura.playkit.ads.AdsPlayerEngineWrapper;
