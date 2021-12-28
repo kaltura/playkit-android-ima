@@ -828,8 +828,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public void advertisingPlayAdNow(String adTag) {
-        log.d("playAdNow adType: " + adType + " \n and adTag: " + adTag);
         if (isAdvertisingConfigured) {
+            log.d("advertisingPlayAdNow adType: " + adType + " \n and adTag: " + adTag);
             isAdError = false;
             isAdRequested = false;
             isAdvertisingConfigLoading = !TextUtils.isEmpty(adTag);
@@ -842,11 +842,14 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             } else {
                 requestAdsFromIMA(null, adTag);
             }
+        } else {
+            log.w("Advertising is not configured. Ignoring advertisingPlayAdNow.");
         }
     }
 
     @Override
     public void setAdvertisingConfig(boolean isConfigured, @NonNull AdType adType, IMAEventsListener imaEventsListener) {
+        log.d("setAdvertisingConfig");
         resetAdvertisingConfig();
         isAdvertisingConfigured = isConfigured;
         this.imaEventsListener = imaEventsListener;
@@ -855,8 +858,8 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public void advertisingSetCuePoints(List<Long> cuePoints) {
-        log.d("setCuePoints");
         if (isAdvertisingConfigured && cuePoints != null && !cuePoints.isEmpty()) {
+            log.d("advertisingSetCuePoints");
             advertisingConfigCuePoints = cuePoints;
             sendCuePointsUpdateEvent();
         }
@@ -864,12 +867,14 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     @Override
     public void advertisingSetAdInfo(PKAdvertisingAdInfo pkAdvertisingAdInfo) {
+        log.d("advertisingSetAdInfo");
         this.pkAdvertisingAdInfo = pkAdvertisingAdInfo;
     }
 
     @Override
     public void advertisingPreparePlayer() {
         if (isAdvertisingConfigured) {
+            log.d("advertisingPreparePlayer");
             isAdvertisingConfigLoading = false;
             displayContent();
             getPlayerEngine().play();
@@ -878,6 +883,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
     private boolean isAdvertisingConfigLoading() {
         if (isAdvertisingConfigured) {
+            log.d("isAdvertisingConfigLoading");
             return isAdvertisingConfigLoading;
         }
         return false;
@@ -1268,11 +1274,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
 
                             IMAPlugin.this.displayContent();
                             if (IMAPlugin.this.getPlayerEngine() != null) {
-                                if (isAdvertisingConfigLoading()) {
-                                    displayAd();
-                                } else {
-                                    IMAPlugin.this.getPlayerEngine().play();
-                                }
+                                handlePlayback(IMAPlugin.this.getPlayerEngine());
                             }
                         }
                         messageBus.removeListener(this);
@@ -1415,7 +1417,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     }
                 }
 
-                if (isContentEndedBeforeMidroll && isAdvertisingConfigured) {
+                if (isAdvertisingConfigured && isContentEndedBeforeMidroll) {
                     isAdDisplayed = false;
                     isAdvertisingConfigLoading = false;
                 }
@@ -1448,11 +1450,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                                 preparePlayer(false);
                             }
                             if (getPlayerEngine() != null) {
-                                if (isAdvertisingConfigLoading()) {
-                                    displayAd();
-                                } else {
-                                    getPlayerEngine().play();
-                                }
+                                handlePlayback(getPlayerEngine());
                             }
                         }
                     }
@@ -1462,19 +1460,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     log.d("Content prepared.. lastPlaybackPlayerState = " + lastPlaybackPlayerState + ", time = " + position + "/" + duration);
                     if (duration < 0) {
                         preparePlayer(false);
-                        if (isAdvertisingConfigLoading()) {
-                            displayAd();
-                        } else {
-                            getPlayerEngine().play();
-                        }
+                        handlePlayback(getPlayerEngine());
                     } else if (lastPlaybackPlayerState != PlayerEvent.Type.ENDED && position <= duration) {
                         if (adInfo == null || (adInfo.getAdPositionType() != AdPositionType.POST_ROLL)) {
                             log.d("Content prepared.. Play called.");
-                            if (isAdvertisingConfigLoading()) {
-                                displayAd();
-                            } else {
-                                getPlayerEngine().play();
-                            }
+                            handlePlayback(getPlayerEngine());
                         }
                     }
                 }
@@ -1541,12 +1531,14 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     preparePlayer(false);
                 }
 
-                Handler handler = new Handler();
-                handler.postDelayed(() -> {
-                    log.d("AD CUEPOINTS CHANGED TRIGGERED WITH DELAY");
-                    sendCuePointsUpdateEvent();
+                if (adTagCuePoints == null) {
+                    Handler handler = new Handler();
+                    handler.postDelayed(() -> {
+                        log.d("AD CUEPOINTS CHANGED TRIGGERED WITH DELAY");
+                        sendCuePointsUpdateEvent();
 
-                }, IMAConfig.DEFAULT_CUE_POINTS_CHANGED_DELAY);
+                    }, IMAConfig.DEFAULT_CUE_POINTS_CHANGED_DELAY);
+                }
 
                 break;
             case PAUSED:
@@ -1662,6 +1654,18 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 break;
             default:
                 break;
+        }
+    }
+
+    /**
+     * If AdvertisingConfig is loading then show the adView
+     * else play the content player
+     */
+    private void handlePlayback(PlayerEngine playerEngine) {
+        if (isAdvertisingConfigLoading()) {
+            displayAd();
+        } else {
+            playerEngine.play();
         }
     }
 
