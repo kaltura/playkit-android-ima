@@ -948,7 +948,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         log.d("isAdError: " + isAdError);
         return isAdError;
     }
-
     
     @Override
     public long getDuration() {
