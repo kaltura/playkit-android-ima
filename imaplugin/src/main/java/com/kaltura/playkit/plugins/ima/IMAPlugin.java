@@ -949,6 +949,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         return isAdError;
     }
 
+    
     @Override
     public long getDuration() {
         VideoAdPlayer videoAdPlayer = videoPlayerWithAdPlayback != null ? videoPlayerWithAdPlayback.getVideoAdPlayer() : null;
