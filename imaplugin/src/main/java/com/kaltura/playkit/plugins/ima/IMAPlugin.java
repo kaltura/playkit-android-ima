@@ -869,6 +869,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             sendCuePointsUpdateEvent();
         }
     }
+    
 
     @Override
     public void advertisingSetAdInfo(PKAdvertisingAdInfo pkAdvertisingAdInfo) {
