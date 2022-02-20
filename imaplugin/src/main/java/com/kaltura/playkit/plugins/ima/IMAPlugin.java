@@ -848,6 +848,11 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     }
 
     @Override
+    public boolean isAdvertisingConfigured() {
+        return isAdvertisingConfigured;
+    }
+
+    @Override
     public void setAdvertisingConfig(boolean isConfigured, @NonNull AdType adType, IMAEventsListener imaEventsListener) {
         log.d("setAdvertisingConfig");
         resetAdvertisingConfig();
