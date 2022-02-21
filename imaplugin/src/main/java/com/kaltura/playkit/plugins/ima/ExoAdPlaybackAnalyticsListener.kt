@@ -16,7 +16,7 @@ class ExoAdPlaybackAnalyticsListener(trackSelector: DefaultTrackSelector): Event
     @Nullable
     private var videoFormatChangedListener: VideoFormatChangedListener? = null
 
-    fun setListener(@Nullable videoFormatChangedListener: VideoFormatChangedListener) {
+    fun setListener(@Nullable videoFormatChangedListener: VideoFormatChangedListener?) {
         this.videoFormatChangedListener = videoFormatChangedListener
     }
 
