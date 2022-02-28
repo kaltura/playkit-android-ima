@@ -966,7 +966,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         //log.d("getDuration: " + duration);
         return duration;
     }
-    
 
     @Override
     public long getCurrentPosition() {
