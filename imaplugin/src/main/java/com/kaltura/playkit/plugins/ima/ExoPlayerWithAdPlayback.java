@@ -19,24 +19,20 @@ import com.google.ads.interactivemedia.v3.api.player.VideoAdPlayer;
 import com.google.ads.interactivemedia.v3.api.player.VideoProgressUpdate;
 import com.kaltura.android.exoplayer2.C;
 import com.kaltura.android.exoplayer2.DefaultRenderersFactory;
+import com.kaltura.android.exoplayer2.ExoPlayer;
 import com.kaltura.android.exoplayer2.Format;
 import com.kaltura.android.exoplayer2.MediaItem;
 import com.kaltura.android.exoplayer2.PlaybackException;
 import com.kaltura.android.exoplayer2.PlaybackParameters;
 import com.kaltura.android.exoplayer2.Player;
-import com.kaltura.android.exoplayer2.SimpleExoPlayer;
 import com.kaltura.android.exoplayer2.Timeline;
-import com.kaltura.android.exoplayer2.source.TrackGroupArray;
 import com.kaltura.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.kaltura.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.kaltura.android.exoplayer2.trackselection.ExoTrackSelection;
-import com.kaltura.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.kaltura.android.exoplayer2.ui.PlayerView;
 import com.kaltura.android.exoplayer2.upstream.DataSource;
-import com.kaltura.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.kaltura.android.exoplayer2.upstream.DefaultDataSource;
 import com.kaltura.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.kaltura.android.exoplayer2.upstream.HttpDataSource;
-import com.kaltura.android.exoplayer2.util.EventLogger;
 import com.kaltura.android.exoplayer2.util.Log;
 import com.kaltura.android.exoplayer2.util.Util;
 import com.kaltura.playkit.PKLog;
@@ -50,14 +46,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.kaltura.android.exoplayer2.C.SELECTION_REASON_ADAPTIVE;
-import static com.kaltura.android.exoplayer2.C.SELECTION_REASON_INITIAL;
 import static com.kaltura.android.exoplayer2.util.Log.LOG_LEVEL_OFF;
 
 /**
  * Video adPlayer that can play content video and ads.
  */
-public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Listener {
+public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Listener, ExoAdPlaybackAnalyticsListener.VideoFormatChangedListener {
     private static final PKLog log = PKLog.get("ExoPlayerWithAdPlayback");
     private static final int AD_PROGRESS_UPDATE_INTERVAL_MS = 100;
 
@@ -68,9 +62,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
     }
 
     private DefaultTrackSelector trackSelector;
-    private EventLogger eventLogger;
+    private ExoAdPlaybackAnalyticsListener eventLogger;
     private DefaultRenderersFactory renderersFactory;
-    private SimpleExoPlayer adPlayer;
+    private ExoPlayer adPlayer;
     private PlayerState lastPlayerState;
 
     private DataSource.Factory mediaDataSourceFactory;
@@ -342,10 +336,12 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
     }
 
     @NonNull
-    private EventLogger getEventLogger() {
+    private ExoAdPlaybackAnalyticsListener getEventLogger() {
         if (eventLogger == null) {
-            eventLogger = new EventLogger(getTrackSelector());
+            eventLogger = new ExoAdPlaybackAnalyticsListener(getTrackSelector());
+            eventLogger.setListener(this);
         }
+
         return eventLogger;
     }
 
@@ -377,20 +373,10 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
     }
 
     @Override
-    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-        log.d("onLoadingChanged");
-        if (trackSelections != null && trackSelections.length > 0) {
-            ExoTrackSelection trackSelection = null;
-            if (trackSelections.get(Consts.TRACK_TYPE_VIDEO) instanceof ExoTrackSelection) {
-                trackSelection = (ExoTrackSelection) trackSelections.get(Consts.TRACK_TYPE_VIDEO);
-            }
-            if (trackSelection != null) {
-                log.d("onLoadingChanged trackSelection.getSelectionReason() = " + trackSelection.getSelectionReason());
-                if (trackSelection.getSelectionReason() == SELECTION_REASON_INITIAL || trackSelection.getSelectionReason() == SELECTION_REASON_ADAPTIVE) {
-                    Format trackFormat = trackSelection.getFormat(trackSelection.getSelectedIndex());
-                    onAdPlayBackListener.adPlaybackInfoUpdated(trackFormat.width, trackFormat.height, trackFormat.bitrate);
-                }
-            }
+    public void videoFormatChanged(Format trackFormat) {
+        log.d("videoFormatChanged " + trackFormat);
+        if (trackFormat != null) {
+            onAdPlayBackListener.adPlaybackInfoUpdated(trackFormat.width, trackFormat.height, trackFormat.bitrate);
         }
     }
 
@@ -671,7 +657,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
             Log.setLogStackTraces(false);
         }
 
-        adPlayer = new SimpleExoPlayer.Builder(mContext, getRenderersFactory())
+        adPlayer = new ExoPlayer.Builder(mContext, getRenderersFactory())
                 .setTrackSelector(getTrackSelector()).build();
         adPlayer.addAnalyticsListener(getEventLogger());
         if (adVideoPlayerView != null) {  // FEM-2600
@@ -680,12 +666,18 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
     }
 
     private MediaItem buildMediaItem(Uri uri) {
+        MediaItem.ClippingConfiguration clippingConfiguration = new MediaItem.ClippingConfiguration
+                .Builder()
+                .setStartPositionMs(0L)
+                .setEndPositionMs(C.TIME_END_OF_SOURCE)
+                .build();
+
         MediaItem.Builder builder =
                 new MediaItem.Builder()
                         .setUri(uri)
-                        .setSubtitles(Collections.emptyList())
-                        .setClipStartPositionMs(0L)
-                        .setClipEndPositionMs(C.TIME_END_OF_SOURCE);
+                        .setSubtitleConfigurations(Collections.emptyList())
+                        .setClippingConfiguration(clippingConfiguration);
+
         switch (Util.inferContentType(uri)) {
             case C.TYPE_DASH:
                 builder.setMimeType(PKMediaFormat.dash.mimeType);
@@ -738,6 +730,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
         if (adPlayer != null) {
             adPlayer.clearVideoSurface();
             adPlayer.release();
+            eventLogger.setListener(null);
             adPlayer = null;
             if (adVideoPlayerView != null) {
                 adVideoPlayerView.setPlayer(null);
@@ -751,8 +744,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
     }
 
     private DataSource.Factory buildDataSourceFactory() {
-        return new DefaultDataSourceFactory(getContext(),
-                buildHttpDataSourceFactory());
+        return new DefaultDataSource.Factory(getContext(), buildHttpDataSourceFactory());
     }
 
     private HttpDataSource.Factory buildHttpDataSourceFactory() {
