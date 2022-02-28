@@ -32,7 +32,7 @@ android {
 dependencies {
 
     // TODO: when playkit without plugins is released, replace this.
-    implementation 'com.kaltura:playkit-android:dev-SNAPSHOT'
+    implementation 'com.kaltura.playkit:playkit:4.21.0'
     //implementation project(":playkit")
 
     // Kotlin Config
