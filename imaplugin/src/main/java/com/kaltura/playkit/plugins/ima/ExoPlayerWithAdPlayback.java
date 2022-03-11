@@ -28,7 +28,7 @@ import com.kaltura.android.exoplayer2.Player;
 import com.kaltura.android.exoplayer2.Timeline;
 import com.kaltura.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.kaltura.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.kaltura.android.exoplayer2.ui.PlayerView;
+import com.kaltura.android.exoplayer2.ui.StyledPlayerView;
 import com.kaltura.android.exoplayer2.upstream.DataSource;
 import com.kaltura.android.exoplayer2.upstream.DefaultDataSource;
 import com.kaltura.android.exoplayer2.upstream.DefaultHttpDataSource;
@@ -76,7 +76,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
     private boolean debugEnabled;
 
     // The wrapped video adPlayerView.
-    private PlayerView adVideoPlayerView;
+    private StyledPlayerView adVideoPlayerView;
 
     // The SDK will render ad playback UI elements into this ViewGroup.
     private ViewGroup adUiContainer;
@@ -139,8 +139,8 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
         init();
     }
 
-    private PlayerView createAdPlayerView() {
-        adVideoPlayerView = new PlayerView(getContext());
+    private StyledPlayerView createAdPlayerView() {
+        adVideoPlayerView = new StyledPlayerView(getContext());
         adVideoPlayerView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         int id = 123456789;
         adVideoPlayerView.setId(id);
@@ -152,7 +152,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
         return adUiContainer;
     }
 
-    public PlayerView getAdPlayerView() {
+    public StyledPlayerView getAdPlayerView() {
         return adVideoPlayerView;
     }
 
