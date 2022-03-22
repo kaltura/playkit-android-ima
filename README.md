@@ -17,11 +17,11 @@ For Client Side Ads, App should use IMAPlugin and for DAI, IMADAIPlugin should b
 
 For IMA and IMADAI, there is single dependency.
 
-Add IMA plugin dependency to `build.gradle`. In android we keep all plugins aligned with same verison.
+Add IMA plugin dependency to `build.gradle`. In android, we keep all plugins aligned with same verison.
 
 `implementation 'com.kaltura.playkit:imaplugin:x.x.x'`
 
-**You can find latest version here:**
+**You can find the latest version here:**
 
 [Latest Release](https://github.com/kaltura/playkit-android-ima/releases)
 
