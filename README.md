@@ -238,7 +238,7 @@ With Ad Layout config app can create its own AdBreak timeline using your VAST ta
 
 This feature is only supported in [Kaltura-Player](https://github.com/kaltura/kaltura-player-android#kaltura-player-for-android).
 
->[See the migration guide to Kaltura-Player](https://kaltura.github.io/playkit/guide/android/migration/KalturaPlayer.html)
+>[See the migration guide to Kaltura-Player, if you are using Playkit](https://kaltura.github.io/playkit/guide/android/migration/KalturaPlayer.html)
 
 For more details about AdLayout, please check [here](https://kaltura.github.io/playkit/guide/android/core/advertising-layout.html).
 
