@@ -100,7 +100,7 @@ In case, if App don't want to play the Ad for the next media then App can pass e
 
 ### IMA and IMADAI Config features
 
-> NOTE: Few features are not there in IMADAI config.
+> NOTE: Few features are not configurable for IMADAI config.
 
 ##### `setAdTagUrl(String adTagUrl)`
 
