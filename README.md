@@ -9,7 +9,7 @@ IMA (Interactive Media Ads) provides an easy way of integrating the multimedia A
 
 Benefit of using our plugin with our Player is that you don't need to handle Content and Ad playback separately. It is very easy to integrate with in a very few lines on code where App needs to pass Ad url in our `IMAConfig` and our plugin will handle Ad playback. Switching between Content and Ad playback will be taken care by plugin.
  
-It gives more out of the box features like Advertising Layout, Client Side Ad playback, Server Side Ad insertion or Dynamic Ad Interstion (DAI) and easy to use API mechanism. 
+It gives more out of the box features like Advertising Layout, Client Side Ad playback, Server Side Ad insertion or Dynamic Ad Insertion (DAI) and easy to use API mechanism. 
 
 For Client Side Ads, App should use IMAPlugin and for DAI, IMADAIPlugin should be used.
 
@@ -17,7 +17,7 @@ For Client Side Ads, App should use IMAPlugin and for DAI, IMADAIPlugin should b
 
 For IMA and IMADAI, there is single dependency.
 
-Add IMA plugin dependency to `build.gradle`. In android, we keep all plugins aligned with same verison.
+Add IMA plugin dependency to `build.gradle`. In android, we keep all plugins aligned with same version.
 
 `implementation 'com.kaltura.playkit:imaplugin:x.x.x'`
 
@@ -154,7 +154,7 @@ Set whether to focus on the skip button when the skippable ad can be skipped on 
 
 ##### `setVideoMimeTypes(List<String> videoMimeTypes)`
 
-Select the MIME TYPE that IMA will play instead of letting it select it by itself. Default selected MIME TYPE by plugi is "MP4". If null or empty list is set then it will be selected automatically. If MIME TYPE is sent it will try playing one of the given MIME TYPE in the list i.e "video/mp4", "video/webm", "video/3gpp", "application/x-mpegURL", "application/dash+xml".
+Select the MIME TYPE that IMA will play instead of letting it select it by itself. Default selected MIME TYPE by plugin is "MP4". If null or empty list is set then it will be selected automatically. If MIME TYPE is sent it will try playing one of the given MIME TYPE in the list i.e "video/mp4", "video/webm", "video/3gpp", "application/x-mpegURL", "application/dash+xml".
 
 This only refers to the mime types of videos to be selected for linear ads.
 
@@ -210,7 +210,7 @@ Then after getting it's layout Id. App can using the following API,
 
 `setCompanionAdConfig(ViewGroup companionAdView, Integer companionAdWidth, Integer companionAdHeight)`
 
-Height and Width of the companion Ad can be passed to the API along with te ViewGroup.
+Height and Width of the companion Ad can be passed to the API along with the ViewGroup.
 
 In order to clear the Companion Ad for the next media, App should not send anything with the new `IMAConfig` object.
 
@@ -248,7 +248,7 @@ For more details about AdLayout, please check [here](https://kaltura.github.io/p
 
 This feature is hooked with `PlayerSettings`. `PlayerSettings` talks about more of the content playback rather than Ad playback.
 
-But if App is using this API then if App goes to background and comes to forground then Ad will autoplay. Default is `true`. In order to reverse the defined behaviour, App can use this API. 
+But if App is using this API then if App goes to background and comes to foreground then Ad will autoplay. Default is `true`. In order to reverse the defined behavior, App can use this API. 
 
 ### [IMA Sample Ad Tags](https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/tags)
 
