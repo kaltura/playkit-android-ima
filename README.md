@@ -260,3 +260,5 @@ But if App is using this API then if App goes to background and comes to forgrou
 ### Samples:
 
 [Kaltura Player IMA Sample](https://github.com/kaltura/kaltura-player-android-samples/tree/develop/AdvancedSamples/IMASample)
+
+[Kaltura Player IMADAI Sample](https://github.com/kaltura/kaltura-player-android-samples/tree/develop/AdvancedSamples/IMADAISample)
