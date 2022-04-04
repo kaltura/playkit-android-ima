@@ -52,6 +52,7 @@ public class IMADAIConfig {
     private boolean enableDebugMode;
     private boolean alwaysStartWithPreroll;
     private boolean enableFocusSkipButton;
+    private boolean enableCustomTabs;
     private int adLoadTimeOut; // in sec
     private int maxRedirects;
     private String playerType;
@@ -90,6 +91,7 @@ public class IMADAIConfig {
         this.enableDebugMode                  = false;
         this.alwaysStartWithPreroll           = false;
         this.enableFocusSkipButton            = true;
+        this.enableCustomTabs                 = false;
         this.playerType                       = AD_PLAYER_TYPE;
         this.playerVersion                    = AD_PLAYER_VERSION;
         this.sessionId                        = null;
@@ -232,6 +234,15 @@ public class IMADAIConfig {
         return this;
     }
 
+    /**
+     * Default is `false`.
+     * Notifies the IMA whether to launch the click-through URL using Custom Tabs feature.
+     */
+    public IMADAIConfig setEnableCustomTabs(boolean enableCustomTabs) {
+        this.enableCustomTabs = enableCustomTabs;
+        return this;
+    }
+
     public IMADAIConfig setPlayerType(String playerType) {
         this.playerType = playerType;
         return this;
@@ -333,6 +344,10 @@ public class IMADAIConfig {
 
     public boolean isEnableFocusSkipButton() {
         return enableFocusSkipButton;
+    }
+
+    public boolean isEnableCustomTabs() {
+        return enableCustomTabs;
     }
 
     public String getPlayerType() {

@@ -152,6 +152,13 @@ Default is `false`. If App has given `startPosition` to the content player which
 
 Set whether to focus on the skip button when the skippable ad can be skipped on Android TV. Default is `true`. This is a no-op on non-Android TV devices.
 
+##### `setEnableCustomTabs(boolean enableCustomTabs)`
+
+Notifies the IMA whether to launch the click-through URL using Custom Tabs feature. Default is `false`. 
+One simple example is 'Learn More' button on Ad. User can click on it. So if this feature is enables then URL will open in custom tab and performace
+wise which is faster than Chrome or Custom WebView.
+More information about Chrome Custom Tabs can be found [here](https://android-developers.googleblog.com/2015/09/chrome-custom-tabs-smooth-transition.html)
+
 ##### `setVideoMimeTypes(List<String> videoMimeTypes)`
 
 Select the MIME TYPE that IMA will play instead of letting it select it by itself. Default selected MIME TYPE by plugin is "MP4". If null or empty list is set then it will be selected automatically. If MIME TYPE is sent it will try playing one of the given MIME TYPE in the list i.e "video/mp4", "video/webm", "video/3gpp", "application/x-mpegURL", "application/dash+xml".
