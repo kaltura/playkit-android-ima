@@ -25,7 +25,7 @@ Add IMA plugin dependency to `build.gradle`. In android, we keep all plugins ali
 
 [Latest Release](https://github.com/kaltura/playkit-android-ima/releases)
 
-> Important Note: Starting from version IMAPlugin 4.23.0 (IMA SDK 3.25.1), includes the `com.google.android.gms.permission.AD_ID` permission in the SDK's manifest that is automatically merged into the app manifest by Android build tools. 
+> IMPORTANT NOTE: Starting from version IMAPlugin 4.23.0 (IMA SDK 3.25.1), includes the `com.google.android.gms.permission.AD_ID` permission in the SDK's manifest that is automatically merged into the app manifest by Android build tools. 
 > To learn more about the AD_ID permission declaration, including how to disable it, refer to this [Play Console Help article](https://support.google.com/googleplay/android-developer/answer/6048248).
 
 ##### Create IMA Plugin Config:
@@ -221,7 +221,7 @@ Then after getting it's layout Id. App can using the following API,
 `setCompanionAdConfig(ViewGroup companionAdView, Integer companionAdWidth, Integer companionAdHeight)`
 
 Height and Width of the companion Ad can be passed to the API along with the ViewGroup.
-> Note: `CompanionAdSlot.FLUID_SIZE` can be passed for `companionAdWidth` and `companionAdHeight`. 
+> NOTE: `CompanionAdSlot.FLUID_SIZE` can be passed for `companionAdWidth` and `companionAdHeight`. 
 > Fluid companion ads have no fixed size, but rather adapt to fit the creative content they display.
 
 In order to clear the Companion Ad for the next media, App should not send anything with the new `IMAConfig` object.
