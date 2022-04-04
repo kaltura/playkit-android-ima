@@ -110,15 +110,15 @@ Pass the VMAP or VAST Ad tag URL for the Ad Playback.
 
 Pass the VAST or VMAP Ad response instead of making a request via an ad tag URL.
 
-#####`setLanguage(String language)` 
+##### `setLanguage(String language)` 
 
 Allows you to specify the language to be used to localize ads and the Ad player UI controls. The supported codes can be found in the [locale codes](https://developers.google.com/interactive-media-ads/docs/sdks/android/client-side/localization?hl=en#locale-codes) and are closely related to the two-letter ISO 639-1 language codes. If invalid or unsupported, the language will default to "en" for English.
 
-#####`setAdTagType(AdTagType adTagType)` 
+##### `setAdTagType(AdTagType adTagType)` 
 
 Default is `AdTagType.VAST` and support for `AdTagType.VMAP` as well. `AdTagType.VPAID` Ads are not supported on Android. Check the Support guide [here](https://developers.google.com/interactive-media-ads/docs/sdks/android/client-side/compatibility).
 
-#####`setEnableBackgroundPlayback(boolean enableBackgroundPlayback)` 
+##### `setEnableBackgroundPlayback(boolean enableBackgroundPlayback)` 
 
 This feature is Noop (No operation). Default is `false`.
 
