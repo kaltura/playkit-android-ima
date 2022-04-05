@@ -273,18 +273,54 @@ But if App is using this API then if App goes to background and comes to foregro
    
    App can call `player.pause()` simply. There is no special handling required for Ad playback. SDK handles the flow of Ad and Content playback internally.
 
-> What if App wants to show a Ad progress bar during the Ad playback ?
+> What if app wants to show a Ad progress bar during the Ad playback ?
    
    App can get `AdController` using the player instance `val adController = player?.getController(AdController::class.java)`.
    `AdController` has APIs to get the duration and current position. Please check the sample implementation [here](https://github.com/kaltura/kaltura-player-android-samples/blob/4da67739589a46f49f41c5a94297b363ce00cc37/AdvancedSamples/IMASample/app/src/main/java/com/kaltura/playkit/samples/imasample/PlaybackControlsView.kt#L100)
 
-> How to show Loader when Ad buffers in slow networks ?
+> How to show loader when Ad buffers in slow networks ?
    
    App can listen to `AdEvent.adBufferStart` and `AdEvent.adBufferEnd` to show and hide loader.
    
-> How to know that Content is paused for the Ad playback and Content is resumed after the Ad completion?
+> How to know that content is paused for the Ad playback and content is resumed after the Ad completion?
    
    App can listen to `AdEvent.contentResumeRequested` and `AdEvent.contentPauseRequested`.
+
+> How to find the reason behind Ad failure ?
+  
+  App can listen to `AdEvent.error`. `event` payload has `PKError` object which contains the exception and the severity of the error.
+
+> Can app use IMA and IMADAI plugin together for one media?
+
+  For the time, No. We recommend to use the plugins standalone.
+
+> Can app play preroll using IMADAI plugin ?
+
+  For the time, No. App can not give a single preroll Ad to `IMADAIConfig` and then let the DAI media to playback. 
+  Ads configured with in DAI streams can be played. 
+
+> How to unregister the plugin ?
+
+  There is no API to unregister the plugin. In case, if app doesn't want to configure any Ad then pass `null` or empty AdTag in the configuration.
+
+> How to check the Google IMASDK version used by plugin ?
+ 
+  Google IMASDK version can be found [here](https://github.com/kaltura/playkit-android-ima/blob/2296409aafc8982d4d0684a8fa05b7c9d2c1b476/imaplugin/build.gradle#L43).
+  You can change the Tag in Github repo as per your Kaltura-Player/Player version.
+
+> Can I use different version IMA plugin than Kaltura-Player/Playkit version ?
+
+  No. Because we sync the changes across the repositories hence recommendation is to use the same plugin version as Kaltura-Player/Playkit.
+
+> Why should we use Kaltura IMA plugin ?
+
+  Our plugin is developed by keeping in mind to let the App developers write minimum lines of Player of Ad playback code.
+  Within few lines of code, developers can setup the content and Ad playback. Developers should not worry about the video switching from Ad to Content playback or vice-versa.
+  Our plugin is doing all the heavy lifting internally.
+
+> Proguard configuration
+
+  Configuration can be found [here](https://kaltura.github.io/playkit/guide/android/core/proguard.html)
 
 ### [IMA Sample Ad Tags](https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/tags)
 
