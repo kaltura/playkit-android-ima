@@ -264,25 +264,25 @@ But if App is using this API then if App goes to background and comes to foregro
 
 ### FAQ
 
-1. Does app need to handle background/foreground when Ad is playing back ?
+> Does app need to handle background/foreground when Ad is playing back ?
    
    App needs to call `player.onApplicationPaused()` while going in background and `player.onApplicationResumed();` when comes to foreground.
    Please make sure that player instance is not `null`.
    
-2. How to pause the Ad playback ?
+> How to pause the Ad playback ?
    
    App can call `player.pause()` simply. There is no special handling required for Ad playback. SDK handles the flow of Ad and Content playback internally.
 
-3. What if App wants to show a Ad progress bar during the Ad playback ?
+> What if App wants to show a Ad progress bar during the Ad playback ?
    
    App can get `AdController` using the player instance `val adController = player?.getController(AdController::class.java)`.
    `AdController` has APIs to get the duration and current position. Please check the sample implementation [here](https://github.com/kaltura/kaltura-player-android-samples/blob/4da67739589a46f49f41c5a94297b363ce00cc37/AdvancedSamples/IMASample/app/src/main/java/com/kaltura/playkit/samples/imasample/PlaybackControlsView.kt#L100)
 
-4. How to show Loader when Ad buffers in slow networks ?
+> How to show Loader when Ad buffers in slow networks ?
    
    App can listen to `AdEvent.adBufferStart` and `AdEvent.adBufferEnd` to show and hide loader.
    
-5. How to know that Content is paused for the Ad playback and Content is resumed after the Ad completion?
+> How to know that Content is paused for the Ad playback and Content is resumed after the Ad completion?
    
    App can listen to `AdEvent.contentResumeRequested` and `AdEvent.contentPauseRequested`.
 
