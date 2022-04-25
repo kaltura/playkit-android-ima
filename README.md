@@ -158,7 +158,7 @@ Set whether to focus on the skip button when the skippable ad can be skipped on 
 ##### `setEnableCustomTabs(boolean enableCustomTabs)`
 
 Notifies the IMA whether to launch the click-through URL using Custom Tabs feature. Default is `false`. 
-One simple example is 'Learn More' button on Ad. User can click on it. So if this feature is enables then URL will open in custom tab and performace
+One simple example is 'Learn More' button on Ad. User can click on it. So if this feature is enables then URL will open in custom tab and performance
 wise which is faster than Chrome or Custom WebView.
 More information about Chrome Custom Tabs can be found [here](https://android-developers.googleblog.com/2015/09/chrome-custom-tabs-smooth-transition.html)
 
