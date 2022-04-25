@@ -378,7 +378,14 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     private AdsRenderingSettings getRenderingSettings() {
 
         renderingSettings = ImaSdkFactory.getInstance().createAdsRenderingSettings();
+
+        if (adConfig == null) {
+            return renderingSettings;
+        }
+
+        renderingSettings.setEnableCustomTabs(adConfig.isEnableCustomTabs());
         renderingSettings.setFocusSkipButtonWhenAvailable(adConfig.isEnableFocusSkipButton());
+
         if (playbackStartPosition != null && playbackStartPosition > 0) {
             renderingSettings.setPlayAdsAfterTime(playbackStartPosition);
         }

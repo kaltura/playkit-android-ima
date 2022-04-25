@@ -25,6 +25,9 @@ Add IMA plugin dependency to `build.gradle`. In android, we keep all plugins ali
 
 [Latest Release](https://github.com/kaltura/playkit-android-ima/releases)
 
+> IMPORTANT NOTE: Starting from version IMAPlugin 4.23.0 (IMA SDK 3.25.1), includes the `com.google.android.gms.permission.AD_ID` permission in the SDK's manifest that is automatically merged into the app manifest by Android build tools. 
+> To learn more about the AD_ID permission declaration, including how to disable it, refer to this [Play Console Help article](https://support.google.com/googleplay/android-developer/answer/6048248).
+
 ##### Create IMA Plugin Config:
 
 ```kotlin
@@ -110,15 +113,15 @@ Pass the VMAP or VAST Ad tag URL for the Ad Playback.
 
 Pass the VAST or VMAP Ad response instead of making a request via an ad tag URL.
 
-#####`setLanguage(String language)` 
+##### `setLanguage(String language)` 
 
 Allows you to specify the language to be used to localize ads and the Ad player UI controls. The supported codes can be found in the [locale codes](https://developers.google.com/interactive-media-ads/docs/sdks/android/client-side/localization?hl=en#locale-codes) and are closely related to the two-letter ISO 639-1 language codes. If invalid or unsupported, the language will default to "en" for English.
 
-#####`setAdTagType(AdTagType adTagType)` 
+##### `setAdTagType(AdTagType adTagType)` 
 
 Default is `AdTagType.VAST` and support for `AdTagType.VMAP` as well. `AdTagType.VPAID` Ads are not supported on Android. Check the Support guide [here](https://developers.google.com/interactive-media-ads/docs/sdks/android/client-side/compatibility).
 
-#####`setEnableBackgroundPlayback(boolean enableBackgroundPlayback)` 
+##### `setEnableBackgroundPlayback(boolean enableBackgroundPlayback)` 
 
 This feature is Noop (No operation). Default is `false`.
 
@@ -151,6 +154,13 @@ Default is `false`. If App has given `startPosition` to the content player which
 ##### `setEnableFocusSkipButton(boolean enableFocusSkipButton)`
 
 Set whether to focus on the skip button when the skippable ad can be skipped on Android TV. Default is `true`. This is a no-op on non-Android TV devices.
+
+##### `setEnableCustomTabs(boolean enableCustomTabs)`
+
+Notifies the IMA whether to launch the click-through URL using Custom Tabs feature. Default is `false`. 
+One simple example is 'Learn More' button on Ad. User can click on it. So if this feature is enables then URL will open in custom tab and performance
+wise which is faster than Chrome or Custom WebView.
+More information about Chrome Custom Tabs can be found [here](https://android-developers.googleblog.com/2015/09/chrome-custom-tabs-smooth-transition.html)
 
 ##### `setVideoMimeTypes(List<String> videoMimeTypes)`
 
@@ -211,6 +221,8 @@ Then after getting it's layout Id. App can using the following API,
 `setCompanionAdConfig(ViewGroup companionAdView, Integer companionAdWidth, Integer companionAdHeight)`
 
 Height and Width of the companion Ad can be passed to the API along with the ViewGroup.
+> NOTE: `CompanionAdSlot.FLUID_SIZE` can be passed for `companionAdWidth` and `companionAdHeight`. 
+> Fluid companion ads have no fixed size, but rather adapt to fit the creative content they display.
 
 In order to clear the Companion Ad for the next media, App should not send anything with the new `IMAConfig` object.
 
@@ -249,6 +261,66 @@ For more details about AdLayout, please check [here](https://kaltura.github.io/p
 This feature is hooked with `PlayerSettings`. `PlayerSettings` talks about more of the content playback rather than Ad playback.
 
 But if App is using this API then if App goes to background and comes to foreground then Ad will autoplay. Default is `true`. In order to reverse the defined behavior, App can use this API. 
+
+### FAQ
+
+> Does app need to handle background/foreground when Ad is playing back ?
+   
+   App needs to call `player.onApplicationPaused()` while going in background and `player.onApplicationResumed();` when comes to foreground.
+   Please make sure that player instance is not `null`.
+   
+> How to pause the Ad playback ?
+   
+   App can call `player.pause()` simply. There is no special handling required for Ad playback. SDK handles the flow of Ad and Content playback internally.
+
+> What if app wants to show a Ad progress bar during the Ad playback ?
+   
+   App can get `AdController` using the player instance `val adController = player?.getController(AdController::class.java)`.
+   `AdController` has APIs to get the duration and current position. Please check the sample implementation [here](https://github.com/kaltura/kaltura-player-android-samples/blob/4da67739589a46f49f41c5a94297b363ce00cc37/AdvancedSamples/IMASample/app/src/main/java/com/kaltura/playkit/samples/imasample/PlaybackControlsView.kt#L100)
+
+> How to show loader when Ad buffers in slow networks ?
+   
+   App can listen to `AdEvent.adBufferStart` and `AdEvent.adBufferEnd` to show and hide loader.
+   
+> How to know that content is paused for the Ad playback and content is resumed after the Ad completion?
+   
+   App can listen to `AdEvent.contentResumeRequested` and `AdEvent.contentPauseRequested`.
+
+> How to find the reason behind Ad failure ?
+  
+  App can listen to `AdEvent.error`. `event` payload has `PKError` object which contains the exception and the severity of the error.
+
+> Can app use IMA and IMADAI plugin together for one media?
+
+  For the time, No. We recommend to use the plugins standalone.
+
+> Can app play preroll using IMADAI plugin ?
+
+  For the time, No. App can not give a single preroll Ad to `IMADAIConfig` and then let the DAI media to playback. 
+  Ads configured with in DAI streams can be played. 
+
+> How to unregister the plugin ?
+
+  There is no API to unregister the plugin. In case, if app doesn't want to configure any Ad then pass `null` or empty AdTag in the configuration.
+
+> How to check the Google IMASDK version used by plugin ?
+ 
+  Google IMASDK version can be found [here](https://github.com/kaltura/playkit-android-ima/blob/2296409aafc8982d4d0684a8fa05b7c9d2c1b476/imaplugin/build.gradle#L43).
+  You can change the Tag in Github repo as per your Kaltura-Player/Player version.
+
+> Can I use different version IMA plugin than Kaltura-Player/Playkit version ?
+
+  No. Because we sync the changes across the repositories hence recommendation is to use the same plugin version as Kaltura-Player/Playkit.
+
+> Why should we use Kaltura IMA plugin ?
+
+  Our plugin is developed by keeping in mind to let the App developers write minimum lines of Player of Ad playback code.
+  Within few lines of code, developers can setup the content and Ad playback. Developers should not worry about the video switching from Ad to Content playback or vice-versa.
+  Our plugin is doing all the heavy lifting internally.
+
+> Proguard configuration
+
+  Configuration can be found [here](https://kaltura.github.io/playkit/guide/android/core/proguard.html)
 
 ### [IMA Sample Ad Tags](https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/tags)
 

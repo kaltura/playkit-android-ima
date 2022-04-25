@@ -69,6 +69,7 @@ public class IMAConfig {
     private boolean enableDebugMode;
     private boolean alwaysStartWithPreroll;
     private boolean enableFocusSkipButton;
+    private boolean enableCustomTabs;
     private int adLoadTimeOut; // in sec
     private int maxRedirects;
     private float contentDuration; // FEC-10734
@@ -94,6 +95,7 @@ public class IMAConfig {
         this.enableDebugMode                        = false;
         this.alwaysStartWithPreroll                 = false;
         this.enableFocusSkipButton                  = true;
+        this.enableCustomTabs                       = false;
         this.videoMimeTypes.add(PKMediaFormat.mp4.mimeType);
         this.adTagUrl                               = null;         //=> must be set via setter
         this.adTagResponse                          = null;
@@ -255,8 +257,10 @@ public class IMAConfig {
         return alwaysStartWithPreroll;
     }
 
-    // Set whether to focus on the skip button when the skippable ad can be skipped on Android TV. Default true
-    // This is a no-op on non-Android TV devices.
+    /**
+     * Set whether to focus on the skip button when the skippable ad can be skipped on Android TV. Default true
+     * This is a no-op on non-Android TV devices.
+     */
     public IMAConfig setEnableFocusSkipButton(boolean enableFocusSkipButton) {
         this.enableFocusSkipButton = enableFocusSkipButton;
         return this;
@@ -264,6 +268,19 @@ public class IMAConfig {
 
     public boolean isEnableFocusSkipButton() {
         return enableFocusSkipButton;
+    }
+
+    /**
+     * Default is `false`.
+     * Notifies the IMA whether to launch the click-through URL using Custom Tabs feature.
+     */
+    public IMAConfig setEnableCustomTabs(boolean enableCustomTabs) {
+        this.enableCustomTabs = enableCustomTabs;
+        return this;
+    }
+
+    public boolean isEnableCustomTabs() {
+        return enableCustomTabs;
     }
 
     public IMAConfig enableDebugMode(boolean enableDebugMode) {
