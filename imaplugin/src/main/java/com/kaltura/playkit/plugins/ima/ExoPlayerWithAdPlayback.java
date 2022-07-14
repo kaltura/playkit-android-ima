@@ -39,6 +39,7 @@ import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PKMediaFormat;
 import com.kaltura.playkit.PlayerState;
 import com.kaltura.playkit.player.MediaSupport;
+import com.kaltura.playkit.player.PKAspectRatioResizeMode;
 import com.kaltura.playkit.plugins.ads.AdCuePoints;
 import com.kaltura.playkit.utils.Consts;
 
@@ -114,6 +115,8 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
         void adFirstPlayStarted();
 
         void adPlaybackInfoUpdated(int width, int height, int bitrate);
+
+        void onSurfaceAspectRatioChanged(PKAspectRatioResizeMode resizeMode);
     }
 
     public ExoPlayerWithAdPlayback(Context context, AttributeSet attrs, int defStyle) {
@@ -375,7 +378,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
     @Override
     public void videoFormatChanged(Format trackFormat) {
         log.d("videoFormatChanged " + trackFormat);
-        if (trackFormat != null) {
+        if (trackFormat != null && onAdPlayBackListener != null) {
             onAdPlayBackListener.adPlaybackInfoUpdated(trackFormat.width, trackFormat.height, trackFormat.bitrate);
         }
     }
@@ -610,6 +613,20 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
             return;
         }
         adPlayer.setVolume(volume);
+    }
+
+    public void setSurfaceAspectRatioResizeMode(PKAspectRatioResizeMode resizeMode, boolean isUpdateResizeMode) {
+        if (resizeMode == null) {
+            return;
+        }
+        if (adVideoPlayerView != null && onAdPlayBackListener != null) {
+            log.d("Ad surfaceAspectRatioResizeMode: " + resizeMode.name());
+            adVideoPlayerView.setResizeMode(PKAspectRatioResizeMode.getExoPlayerAspectRatioResizeMode(resizeMode));
+            // Don't take this condition outside because we don't want to send this event if listener is null
+            if (isUpdateResizeMode) {
+                onAdPlayBackListener.onSurfaceAspectRatioChanged(resizeMode);
+            }
+        }
     }
 
     private void initializePlayer(String adUrl, boolean adShouldAutoPlay) {
