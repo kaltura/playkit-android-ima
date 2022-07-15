@@ -115,8 +115,6 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
         void adFirstPlayStarted();
 
         void adPlaybackInfoUpdated(int width, int height, int bitrate);
-
-        void onSurfaceAspectRatioChanged(PKAspectRatioResizeMode resizeMode);
     }
 
     public ExoPlayerWithAdPlayback(Context context, AttributeSet attrs, int defStyle) {
@@ -619,13 +617,9 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
         if (resizeMode == null) {
             return;
         }
-        if (adVideoPlayerView != null && onAdPlayBackListener != null) {
+        if (adVideoPlayerView != null) {
             log.d("Ad surfaceAspectRatioResizeMode: " + resizeMode.name());
             adVideoPlayerView.setResizeMode(PKAspectRatioResizeMode.getExoPlayerAspectRatioResizeMode(resizeMode));
-            // Don't take this condition outside because we don't want to send this event if listener is null
-            if (isUpdateResizeMode) {
-                onAdPlayBackListener.onSurfaceAspectRatioChanged(resizeMode);
-            }
         }
     }
 

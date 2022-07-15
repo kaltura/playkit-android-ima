@@ -1838,14 +1838,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         messageBus.post(new AdEvent.AdPlaybackInfoUpdated(width, height, bitrate));
     }
 
-    @Override
-    public void onSurfaceAspectRatioChanged(PKAspectRatioResizeMode resizeMode) {
-        log.d("AD onSurfaceAspectRatioChanged");
-        if (resizeMode != null) {
-            messageBus.post(new AdEvent.AdSurfaceAspectRatioResizeModeChanged(resizeMode));
-        }
-    }
-
     private Map<com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType, AdEvent.Type> buildAdsEventMap() {
         adEventsMap = new HashMap<>();
         adEventsMap.put(com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.ALL_ADS_COMPLETED, AdEvent.Type.ALL_ADS_COMPLETED);
