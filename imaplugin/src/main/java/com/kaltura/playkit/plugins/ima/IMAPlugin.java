@@ -686,7 +686,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                     player.getSettings() != null &&
                     player.getSettings() instanceof PlayerSettings &&
                     ((PlayerSettings)player.getSettings()).getAspectRatioResizeMode() != null) {
-                videoPlayerWithAdPlayback.setSurfaceAspectRatioResizeMode(((PlayerSettings)player.getSettings()).getAspectRatioResizeMode(), false);
+                videoPlayerWithAdPlayback.setSurfaceAspectRatioResizeMode(((PlayerSettings)player.getSettings()).getAspectRatioResizeMode());
             }
         }
 
@@ -830,7 +830,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     @Override
     public void updateSurfaceAspectRatioResizeMode(PKAspectRatioResizeMode resizeMode) {
         if (videoPlayerWithAdPlayback != null && resizeMode != null) {
-            videoPlayerWithAdPlayback.setSurfaceAspectRatioResizeMode(resizeMode, true);
+            videoPlayerWithAdPlayback.setSurfaceAspectRatioResizeMode(resizeMode);
         }
     }
 

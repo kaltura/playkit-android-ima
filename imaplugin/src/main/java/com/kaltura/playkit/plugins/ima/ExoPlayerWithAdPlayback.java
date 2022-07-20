@@ -613,7 +613,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
         adPlayer.setVolume(volume);
     }
 
-    public void setSurfaceAspectRatioResizeMode(PKAspectRatioResizeMode resizeMode, boolean isUpdateResizeMode) {
+    public void setSurfaceAspectRatioResizeMode(PKAspectRatioResizeMode resizeMode) {
         if (resizeMode == null) {
             return;
         }
