@@ -57,6 +57,7 @@ import com.kaltura.playkit.ads.PKAdInfo;
 import com.kaltura.playkit.ads.PKAdPluginType;
 import com.kaltura.playkit.ads.PKAdProviderListener;
 import com.kaltura.playkit.ads.PKAdvertisingAdInfo;
+import com.kaltura.playkit.player.PKAspectRatioResizeMode;
 import com.kaltura.playkit.player.PlayerEngine;
 import com.kaltura.playkit.player.PlayerSettings;
 import com.kaltura.playkit.plugin.ima.BuildConfig;
@@ -681,6 +682,12 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         }
         if (videoPlayerWithAdPlayback != null) {
             request.setContentProgressProvider(videoPlayerWithAdPlayback.getContentProgressProvider());
+            if (player != null &&
+                    player.getSettings() != null &&
+                    player.getSettings() instanceof PlayerSettings &&
+                    ((PlayerSettings)player.getSettings()).getAspectRatioResizeMode() != null) {
+                videoPlayerWithAdPlayback.setSurfaceAspectRatioResizeMode(((PlayerSettings)player.getSettings()).getAspectRatioResizeMode());
+            }
         }
 
         if (adConfig != null) {
@@ -817,6 +824,13 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     public void setVolume(float volume) {
         if (videoPlayerWithAdPlayback != null) {
             videoPlayerWithAdPlayback.setVolume(volume);
+        }
+    }
+
+    @Override
+    public void updateSurfaceAspectRatioResizeMode(PKAspectRatioResizeMode resizeMode) {
+        if (videoPlayerWithAdPlayback != null && resizeMode != null) {
+            videoPlayerWithAdPlayback.setSurfaceAspectRatioResizeMode(resizeMode);
         }
     }
 
