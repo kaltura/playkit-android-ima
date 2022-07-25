@@ -290,7 +290,6 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
         requestAdsOnUpdateMedia(adConfig.getAdTagUrl());
     }
 
-    
     private AdDisplayContainer createAdDisplayContainer() {
         if (adCompanionViewGroup != null) {
             adCompanionViewGroup.removeAllViews();
