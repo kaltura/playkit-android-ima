@@ -7,7 +7,7 @@ import com.kaltura.android.exoplayer2.decoder.DecoderReuseEvaluation
 import com.kaltura.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.kaltura.android.exoplayer2.util.EventLogger
 
-class ExoAdPlaybackAnalyticsListener(trackSelector: DefaultTrackSelector): EventLogger(trackSelector) {
+class ExoAdPlaybackAnalyticsListener: EventLogger() {
 
     interface VideoFormatChangedListener {
         fun videoFormatChanged(format: Format)

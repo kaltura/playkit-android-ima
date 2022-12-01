@@ -1132,7 +1132,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
                 (adPodTimeOffset < 0) ? -1 : adPodTimeOffset);
         adInfo.setStreamId(streamId);
 
-        log.v("AdInfo: " + adInfo.toString());
+        log.v("AdInfo: " + adInfo);
         return adInfo;
     }
 
@@ -1728,7 +1728,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
             for (Long cuePoint : adTagCuePoints.getAdCuePoints()) {
                 cuePointBuilder.append(cuePoint).append("|");
             }
-            log.d("sendCuePointsUpdate cuePoints = " + cuePointBuilder.toString());
+            log.d("sendCuePointsUpdate cuePoints = " + cuePointBuilder);
         }
     }
 
