@@ -947,7 +947,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 }
                 cuePointIndex++;
             }
-            log.d("buildCuePointsList pluginCuePoints = " + cuePointBuilder.toString());
+            log.d("buildCuePointsList pluginCuePoints = " + cuePointBuilder);
         }
         return cuePointsList;
     }
@@ -1000,7 +1000,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
                 isAdInfoPostRoll(adPodTimeOffset) ? -1 : adPodTimeOffset);
         adInfo.setStreamId(streamId);
 
-        log.v("AdInfo: " + adInfo.toString());
+        log.v("AdInfo: " + adInfo);
         return adInfo;
 
     }

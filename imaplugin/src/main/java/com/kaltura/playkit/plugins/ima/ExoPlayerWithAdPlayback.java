@@ -339,7 +339,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
     @NonNull
     private ExoAdPlaybackAnalyticsListener getEventLogger() {
         if (eventLogger == null) {
-            eventLogger = new ExoAdPlaybackAnalyticsListener(getTrackSelector());
+            eventLogger = new ExoAdPlaybackAnalyticsListener();
             eventLogger.setListener(this);
         }
 
@@ -350,7 +350,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
     private DefaultTrackSelector getTrackSelector() {
         if (trackSelector == null) {
             trackSelector = new DefaultTrackSelector(mContext, new AdaptiveTrackSelection.Factory());
-            DefaultTrackSelector.ParametersBuilder builder = new DefaultTrackSelector.ParametersBuilder(mContext);
+            DefaultTrackSelector.Parameters.Builder builder = new DefaultTrackSelector.Parameters.Builder(mContext);
             trackSelector.setParameters(builder.build());
         }
         return trackSelector;
@@ -690,13 +690,13 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
                         .setClippingConfiguration(clippingConfiguration);
 
         switch (Util.inferContentType(uri)) {
-            case C.TYPE_DASH:
+            case C.CONTENT_TYPE_DASH:
                 builder.setMimeType(PKMediaFormat.dash.mimeType);
                 break;
-            case C.TYPE_HLS:
+            case C.CONTENT_TYPE_HLS:
                 builder.setMimeType(PKMediaFormat.hls.mimeType);
                 break;
-            case C.TYPE_OTHER:
+            case C.CONTENT_TYPE_OTHER:
                 builder.setMimeType(PKMediaFormat.mp4.mimeType);
                 break;
             default:
