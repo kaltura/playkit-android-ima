@@ -39,6 +39,7 @@ import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PKMediaFormat;
 import com.kaltura.playkit.PlayerState;
 import com.kaltura.playkit.player.MediaSupport;
+import com.kaltura.playkit.player.PKAspectRatioResizeMode;
 import com.kaltura.playkit.plugins.ads.AdCuePoints;
 import com.kaltura.playkit.utils.Consts;
 
@@ -338,7 +339,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
     @NonNull
     private ExoAdPlaybackAnalyticsListener getEventLogger() {
         if (eventLogger == null) {
-            eventLogger = new ExoAdPlaybackAnalyticsListener(getTrackSelector());
+            eventLogger = new ExoAdPlaybackAnalyticsListener();
             eventLogger.setListener(this);
         }
 
@@ -349,7 +350,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
     private DefaultTrackSelector getTrackSelector() {
         if (trackSelector == null) {
             trackSelector = new DefaultTrackSelector(mContext, new AdaptiveTrackSelection.Factory());
-            DefaultTrackSelector.ParametersBuilder builder = new DefaultTrackSelector.ParametersBuilder(mContext);
+            DefaultTrackSelector.Parameters.Builder builder = new DefaultTrackSelector.Parameters.Builder(mContext);
             trackSelector.setParameters(builder.build());
         }
         return trackSelector;
@@ -375,7 +376,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
     @Override
     public void videoFormatChanged(Format trackFormat) {
         log.d("videoFormatChanged " + trackFormat);
-        if (trackFormat != null) {
+        if (trackFormat != null && onAdPlayBackListener != null) {
             onAdPlayBackListener.adPlaybackInfoUpdated(trackFormat.width, trackFormat.height, trackFormat.bitrate);
         }
     }
@@ -612,6 +613,16 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
         adPlayer.setVolume(volume);
     }
 
+    public void setSurfaceAspectRatioResizeMode(PKAspectRatioResizeMode resizeMode) {
+        if (resizeMode == null) {
+            return;
+        }
+        if (adVideoPlayerView != null) {
+            log.d("Ad surfaceAspectRatioResizeMode: " + resizeMode.name());
+            adVideoPlayerView.setResizeMode(PKAspectRatioResizeMode.getExoPlayerAspectRatioResizeMode(resizeMode));
+        }
+    }
+
     private void initializePlayer(String adUrl, boolean adShouldAutoPlay) {
         log.d("ExoPlayerWithAdPlayback initializePlayer");
         if (TextUtils.isEmpty(adUrl)) {
@@ -679,13 +690,13 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
                         .setClippingConfiguration(clippingConfiguration);
 
         switch (Util.inferContentType(uri)) {
-            case C.TYPE_DASH:
+            case C.CONTENT_TYPE_DASH:
                 builder.setMimeType(PKMediaFormat.dash.mimeType);
                 break;
-            case C.TYPE_HLS:
+            case C.CONTENT_TYPE_HLS:
                 builder.setMimeType(PKMediaFormat.hls.mimeType);
                 break;
-            case C.TYPE_OTHER:
+            case C.CONTENT_TYPE_OTHER:
                 builder.setMimeType(PKMediaFormat.mp4.mimeType);
                 break;
             default:
