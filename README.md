@@ -111,7 +111,7 @@ Pass the VMAP or VAST Ad tag URL for the Ad Playback.
 
 ##### `setAdTagResponse(String adTagResponse)`
 
-Pass the VAST or VMAP Ad response instead of making a request via an ad tag URL.
+Pass the VAST or VMAP Ad response instead of making a request via an Ad tag URL.
 
 ##### `setLanguage(String language)` 
 
@@ -133,11 +133,11 @@ Maximum recommended bitrate. The value is in "kbit/s". IMA SDK will pick media w
 
 Both are `true` by default. 
 
-Sets the ad UI elements to be rendered by the IMA SDK. If both are false we remove the support int ad count down in ad.
+Sets the Ad UI elements to be rendered by the IMA SDK. If both are `false`, we remove the support int Ad count down in Ad.
 
 Ad attribution `true` is required for a countdown timer to be displayed and set if Ad countdown will be shown or not.
 
-All values in the list are instances of UiElement. Some elements may be required to be displayed, or unable to be displayed for a given ad (for instance, the ad UI may be customizable for DFP direct sold ads, but not for AdSense ads). In these cases, some modifications to the uiElements list may have no effect for specific ads.
+All values in the list are instances of UiElement. Some elements may be required to be displayed, or unable to be displayed for a given Ad (for instance, the Ad UI may be customizable for DFP direct sold ads, but not for AdSense ads). In these cases, some modifications to the uiElements list may have no effect for specific ads.
 
 ##### `setAdLoadTimeOut(int adLoadTimeOut)`
 
@@ -153,7 +153,7 @@ Default is `false`. If App has given `startPosition` to the content player which
 
 ##### `setEnableFocusSkipButton(boolean enableFocusSkipButton)`
 
-Set whether to focus on the skip button when the skippable ad can be skipped on Android TV. Default is `true`. This is a no-op on non-Android TV devices.
+Set whether to focus on the skip button when the skippable Ad can be skipped on Android TV. Default is `true`. This is a no-op on non-Android TV devices.
 
 ##### `setEnableCustomTabs(boolean enableCustomTabs)`
 
@@ -190,6 +190,160 @@ postroll will be preloaded.
 ##### `setSessionId(String sessionId)`
 
 Session ID is a temporary random ID. It is used exclusively for frequency capping. A session ID must be a UUID, or an empty string if app doesn't want the SDK to use capping (Useful for changeMedia).
+
+### AdEvents
+
+Following are the AdEvents for IMA and IMADAI plugin. App can listen to any `AdEvent` as following,
+
+```kotlin
+player?.addListener(this, AdEvent.loaded) { event ->
+    log.d("AD LOADED")
+}
+```
+
+##### `loaded` 
+
+Fired when the VAST response has been received. Sends the `AdInfo` payload to the App.
+
+##### `started`
+
+Fired when an Ad starts playing. Sends the `AdInfo` payload to the App.
+
+##### `paused`
+
+Fired when an Ad is paused. Sends the `AdInfo` payload to the App.
+
+##### `resumed`
+
+Fired when an Ad is resumed. Sends the `AdInfo` payload to the App.
+
+##### `skipped`
+
+Fired when an Ad was skipped. Sends the `AdInfo` payload to the App.
+
+##### `cuepointsChanged`
+
+Fired when VOD stream cuepoints have changed. Sends the `AdCuePoints` payload to App. App can extract the cuepoints list from `AdCuePoints` object.
+
+##### `playHeadChanged`
+
+Sends the Ad current position payload.
+
+##### `adRequested`
+
+Sends the `adTagUrl` and `isAutoPlay` payload.
+
+##### `adBufferStart`
+
+Sends the Ad position when the Ad buffer starts.
+
+##### `adBufferEnd`
+
+Sends the Ad position when the Ad buffer ends.
+
+##### `adProgress`
+
+Sends the Ad current position payload.
+
+##### `adPlaybackInfoUpdated`
+
+Whenever there is a video bitrate change for Ad, this event is fired with `width`, `height` and `bitrate` payload.
+
+##### `adClickedEvent`
+
+Fired when An Ad is clicked. Sends the clickThruUrl in payload.
+
+##### `error`
+
+Send `PKError` payload when the Ad fails. `PKError` contains the severity, error message etc.
+
+##### `daiSourceSelected`
+
+Only for DAI Ads. Called when the Ad source is selected. Sends `sourceURL` in the payload.
+
+##### `adFirstPlay`
+
+Fired when the Ad is started the playback.
+
+##### `adDisplayedAfterContentPause`
+
+> Not in use.
+
+##### `firstQuartile`
+
+Fired when the Ad playhead crosses first quartile.
+
+##### `midpoint`
+
+Fired when the Ad playhead crosses midpoint.
+
+##### `thirdQuartile`
+
+Fired when the Ad playhead crosses third quartile.
+
+##### `completed`
+
+Fired when an Ad completes playing.
+
+##### `skippableStateChanged`
+
+Fired when an Ad changes its skippable state.
+
+##### `tapped`
+
+Fired when a non-clickthrough portion of a video Ad is clicked.
+
+##### `iconFallbackImageClosed`
+
+This event only fires for Connected TV devices. The user has closed the icon fallback image dialog. This may be a good time to resume Ad playback if the user is ready to continue playing the Ad.
+
+##### `iconTapped`
+
+The user has tapped an Ad icon. On Android mobile apps, the SDK will navigate to the landing page. On Connected TV devices, the SDK will present a modal dialog containing the VAST icon fallback image. 
+
+##### `adBreakReady`
+
+Fired when an Ad break is ready from VMAP or Ad rule ads.
+
+##### `adBreakStarted`
+
+Fired when an Ad break in a stream starts. Communicated to the publisher via player APIs.
+
+##### `adBreakFetchError`
+
+Fired when an Ad break will not play back any ads.
+
+##### `adBreakIgnored`
+
+Fired when an Ad break is not played with in the timeout range. DEFAULT_AD_LOAD_TIMEOUT is 8 seconds.
+
+##### `contentPauseRequested`
+
+Fired when content should be paused. This usually happens right before an Ad is about to hide the content.
+
+##### `contentResumeRequested`
+
+Fired when content should be resumed. This usually happens when an Ad finishes or collapses.
+
+##### `allAdsCompleted`
+
+Fired when the ads manager is done playing all the valid ads in the Ads response, or when the response doesn't return any valid Ads.
+
+##### `adLoadTimeoutTimerStarted`
+
+> Not in use.
+
+##### `adWaterFalling`
+
+> Only for AdLayout
+
+Fired when an Ad request failed and the player is trying to request the fallback.
+
+##### `adWaterFallingFailed`
+
+> Only for AdLayout
+
+Fired when the all fallback requests failed.
 
 ### Setup Companion Ads
 
