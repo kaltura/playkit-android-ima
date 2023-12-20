@@ -21,7 +21,7 @@ import com.google.ads.interactivemedia.v3.api.player.VideoProgressUpdate;
 import com.google.ads.interactivemedia.v3.api.player.VideoStreamPlayer;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.kaltura.android.exoplayer2.C;
+import com.kaltura.androidx.media3.common.C;
 import com.kaltura.playkit.MessageBus;
 import com.kaltura.playkit.PKDrmParams;
 import com.kaltura.playkit.PKError;
