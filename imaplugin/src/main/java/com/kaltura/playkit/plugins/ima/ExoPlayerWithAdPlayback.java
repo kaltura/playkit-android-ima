@@ -17,24 +17,24 @@ import com.google.ads.interactivemedia.v3.api.player.AdMediaInfo;
 import com.google.ads.interactivemedia.v3.api.player.ContentProgressProvider;
 import com.google.ads.interactivemedia.v3.api.player.VideoAdPlayer;
 import com.google.ads.interactivemedia.v3.api.player.VideoProgressUpdate;
-import com.kaltura.android.exoplayer2.C;
-import com.kaltura.android.exoplayer2.DefaultRenderersFactory;
-import com.kaltura.android.exoplayer2.ExoPlayer;
-import com.kaltura.android.exoplayer2.Format;
-import com.kaltura.android.exoplayer2.MediaItem;
-import com.kaltura.android.exoplayer2.PlaybackException;
-import com.kaltura.android.exoplayer2.PlaybackParameters;
-import com.kaltura.android.exoplayer2.Player;
-import com.kaltura.android.exoplayer2.Timeline;
-import com.kaltura.android.exoplayer2.trackselection.AdaptiveTrackSelection;
-import com.kaltura.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.kaltura.android.exoplayer2.ui.StyledPlayerView;
-import com.kaltura.android.exoplayer2.upstream.DataSource;
-import com.kaltura.android.exoplayer2.upstream.DefaultDataSource;
-import com.kaltura.android.exoplayer2.upstream.DefaultHttpDataSource;
-import com.kaltura.android.exoplayer2.upstream.HttpDataSource;
-import com.kaltura.android.exoplayer2.util.Log;
-import com.kaltura.android.exoplayer2.util.Util;
+import com.kaltura.androidx.media3.common.C;
+import com.kaltura.androidx.media3.exoplayer.DefaultRenderersFactory;
+import com.kaltura.androidx.media3.exoplayer.ExoPlayer;
+import com.kaltura.androidx.media3.common.Format;
+import com.kaltura.androidx.media3.common.MediaItem;
+import com.kaltura.androidx.media3.common.PlaybackException;
+import com.kaltura.androidx.media3.common.PlaybackParameters;
+import com.kaltura.androidx.media3.common.Player;
+import com.kaltura.androidx.media3.common.Timeline;
+import com.kaltura.androidx.media3.exoplayer.trackselection.AdaptiveTrackSelection;
+import com.kaltura.androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
+import com.kaltura.androidx.media3.ui.PlayerView;
+import com.kaltura.androidx.media3.datasource.DataSource;
+import com.kaltura.androidx.media3.datasource.DefaultDataSource;
+import com.kaltura.androidx.media3.datasource.DefaultHttpDataSource;
+import com.kaltura.androidx.media3.datasource.HttpDataSource;
+import com.kaltura.androidx.media3.common.util.Log;
+import com.kaltura.androidx.media3.common.util.Util;
 import com.kaltura.playkit.PKLog;
 import com.kaltura.playkit.PKMediaFormat;
 import com.kaltura.playkit.PlayerState;
@@ -47,7 +47,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.kaltura.android.exoplayer2.util.Log.LOG_LEVEL_OFF;
+import static com.kaltura.androidx.media3.common.util.Log.LOG_LEVEL_OFF;
 
 /**
  * Video adPlayer that can play content video and ads.
@@ -77,7 +77,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
     private boolean debugEnabled;
 
     // The wrapped video adPlayerView.
-    private StyledPlayerView adVideoPlayerView;
+    private PlayerView adVideoPlayerView;
 
     // The SDK will render ad playback UI elements into this ViewGroup.
     private ViewGroup adUiContainer;
@@ -140,8 +140,8 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
         init();
     }
 
-    private StyledPlayerView createAdPlayerView() {
-        adVideoPlayerView = new StyledPlayerView(getContext());
+    private PlayerView createAdPlayerView() {
+        adVideoPlayerView = new PlayerView(getContext());
         adVideoPlayerView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         int id = 123456789;
         adVideoPlayerView.setId(id);
@@ -153,7 +153,7 @@ public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Li
         return adUiContainer;
     }
 
-    public StyledPlayerView getAdPlayerView() {
+    public PlayerView getAdPlayerView() {
         return adVideoPlayerView;
     }
 

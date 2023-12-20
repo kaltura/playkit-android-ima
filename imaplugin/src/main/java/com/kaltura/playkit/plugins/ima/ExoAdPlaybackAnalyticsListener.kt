@@ -1,11 +1,11 @@
 package com.kaltura.playkit.plugins.ima
 
 import androidx.annotation.Nullable
-import com.kaltura.android.exoplayer2.Format
-import com.kaltura.android.exoplayer2.analytics.AnalyticsListener
-import com.kaltura.android.exoplayer2.decoder.DecoderReuseEvaluation
-import com.kaltura.android.exoplayer2.trackselection.DefaultTrackSelector
-import com.kaltura.android.exoplayer2.util.EventLogger
+import com.kaltura.androidx.media3.common.Format
+import com.kaltura.androidx.media3.exoplayer.analytics.AnalyticsListener
+import com.kaltura.androidx.media3.exoplayer.DecoderReuseEvaluation
+import com.kaltura.androidx.media3.exoplayer.trackselection.DefaultTrackSelector
+import com.kaltura.androidx.media3.exoplayer.util.EventLogger
 
 class ExoAdPlaybackAnalyticsListener: EventLogger() {
 
