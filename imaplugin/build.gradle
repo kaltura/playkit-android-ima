@@ -41,7 +41,7 @@ android {
 dependencies {
 
     // TODO: when playkit without plugins is released, replace this.
-    implementation 'com.kaltura:playkit-android:dev-SNAPSHOT'
+    implementation 'com.kaltura:playkit-android:KUX-1761-SNAPSHOT'
     //implementation project(":playkit")
 
     // Kotlin Config
@@ -49,7 +49,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     //Ads library.
-    api 'com.google.ads.interactivemedia.v3:interactivemedia:3.35.0'
+    api 'com.google.ads.interactivemedia.v3:interactivemedia:3.35.1'
     
     testImplementation 'junit:junit:4.13.2'
     implementation 'androidx.annotation:annotation:1.3.0'
