@@ -22,6 +22,7 @@ import com.google.ads.interactivemedia.v3.api.player.VideoStreamPlayer;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.kaltura.androidx.media3.common.C;
+import com.kaltura.androidx.media3.common.util.UnstableApi;
 import com.kaltura.playkit.MessageBus;
 import com.kaltura.playkit.PKDrmParams;
 import com.kaltura.playkit.PKError;
@@ -66,6 +67,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+@UnstableApi
 public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactivemedia.v3.api.AdEvent.AdEventListener, AdErrorEvent.AdErrorListener, AdsProvider {
     private static final PKLog log = PKLog.get("IMADAIPlugin");
     private static final int KB_MULTIPLIER = 1024;

@@ -18,6 +18,7 @@ import com.google.ads.interactivemedia.v3.api.player.ContentProgressProvider;
 import com.google.ads.interactivemedia.v3.api.player.VideoAdPlayer;
 import com.google.ads.interactivemedia.v3.api.player.VideoProgressUpdate;
 import com.kaltura.androidx.media3.common.C;
+import com.kaltura.androidx.media3.common.util.UnstableApi;
 import com.kaltura.androidx.media3.exoplayer.DefaultRenderersFactory;
 import com.kaltura.androidx.media3.exoplayer.ExoPlayer;
 import com.kaltura.androidx.media3.common.Format;
@@ -49,7 +50,7 @@ import java.util.List;
 
 import static com.kaltura.androidx.media3.common.util.Log.LOG_LEVEL_OFF;
 
-/**
+@UnstableApi /**
  * Video adPlayer that can play content video and ads.
  */
 public class ExoPlayerWithAdPlayback extends RelativeLayout implements Player.Listener, ExoAdPlaybackAnalyticsListener.VideoFormatChangedListener {
