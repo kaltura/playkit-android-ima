@@ -37,6 +37,7 @@ import com.google.ads.interactivemedia.v3.api.ImaSdkSettings;
 import com.google.ads.interactivemedia.v3.api.player.VideoAdPlayer;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.kaltura.androidx.media3.common.util.UnstableApi;
 import com.kaltura.playkit.MessageBus;
 import com.kaltura.playkit.PKError;
 import com.kaltura.playkit.PKErrorCategory;
@@ -77,6 +78,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@UnstableApi
 /**
  * Created by gilad.nadav on 17/11/2016.
  */
