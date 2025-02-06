@@ -1,5 +1,6 @@
 package com.kaltura.playkit.plugins.imadai;
 
+import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
 import android.view.View;
@@ -138,7 +139,7 @@ public class IMADAIPlugin extends PKPlugin implements com.google.ads.interactive
     };
 
     @Override
-    protected void onLoad(final Player player, Object config, MessageBus messageBus, Context context) {
+    protected void onLoad(final Player player, Object config, MessageBus messageBus, Context context, Activity playerActivity) {
         log.d("onLoad");
         this.context = context;
         this.player = player;
