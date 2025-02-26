@@ -12,6 +12,7 @@
 
 package com.kaltura.playkit.plugins.ima;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -177,7 +178,7 @@ public class IMAPlugin extends PKPlugin implements AdsProvider, com.google.ads.i
     };
 
     @Override
-    protected void onLoad(final Player player, Object config, final MessageBus messageBus, Context context) {
+    protected void onLoad(final Player player, Object config, final MessageBus messageBus, Context context, Activity playerActivity) {
         log.d("onLoad");
         this.player = player;
 

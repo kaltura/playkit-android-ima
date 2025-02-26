@@ -41,7 +41,7 @@ android {
 dependencies {
 
     // TODO: when playkit without plugins is released, replace this.
-    implementation 'com.kaltura:playkit-android:KUX-1761-SNAPSHOT'
+    implementation 'com.kaltura:playkit-android:dev-SNAPSHOT'
     //implementation project(":playkit")
 
     // Kotlin Config
